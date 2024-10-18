@@ -1,17 +1,13 @@
-<p align="center">
-
-  <!-- ![Cardie Logo](repo/images/logo_light.png#gh-dark-mode-only)
-  ![Cardie Logo](repo/images/logo_dark.png#gh-light-mode-only) -->
+<div align="center">
 
   ![Open Scouting logo](repo/images/icon.png)
 
-</p>
-
-<div align="center">
   <h1>Open Scouting</h1>
 
-  An open source application for easier scouting at First Robotics competitions
+  **An open source application for easier scouting at First Robotics competitions**
 </div>
+
+---
 
 
 ## Features
