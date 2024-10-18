@@ -1,6 +1,18 @@
-# 3484 Scouting
+<p align="center">
 
-An open source application for easier scouting at First Robotics competitions
+  <!-- ![Cardie Logo](repo/images/logo_light.png#gh-dark-mode-only)
+  ![Cardie Logo](repo/images/logo_dark.png#gh-light-mode-only) -->
+
+  ![Open Scouting logo](repo/images/icon.png)
+
+</p>
+
+<div align="center">
+  <h1>Open Scouting</h1>
+
+  An open source application for easier scouting at First Robotics competitions
+</div>
+
 
 ## Features
 - Save data offline in case of poor connection in the stands
