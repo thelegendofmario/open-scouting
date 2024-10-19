@@ -4,7 +4,7 @@
   "description": "An open source application for easier scouting at First Robotics competitions",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build:css": "npx tailwindcss -i ./scouting/static/main/src/styles.css -o ./scouting/static/main/styles.css --watch"
   },
   "keywords": [],
   "author": "",
