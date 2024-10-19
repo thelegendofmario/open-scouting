@@ -44,6 +44,8 @@ ALLOWED_HOSTS = env("DJANGO_ALLOWED_HOSTS")
 
 ADMIN_PATH = env("ADMIN_PATH")
 
+TBA_API_KEY = env("TBA_API_KEY")
+
 
 # Application definition
 

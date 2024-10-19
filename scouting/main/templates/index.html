@@ -46,9 +46,57 @@
                 }
             </script>
 
-            <div x-show="page == 2" x-transition>
-                <p class="text-center text-white font-sans text-xl"><i class="ph-bold ph-calendar-blank"></i> Select event</p>
+            <div x-data="events()" x-show="page == 2" x-transition>
+                <p class="text-center text-white font-sans text-2xl"><i class="ph-bold ph-calendar-blank"></i> Select event</p>
+                <div class="flex flex-row mt-2">
+                    <input class="bg-slate-700 border-2 border-slate-700 text-white rounded-lg" type="checkbox">
+                    <p class="text-white ml-2" x-ref="show_past_events">Show past events</p>
+                    <!-- TODO: Be able to see data from previous years -->
+                </div>
+
+                <div class="h-[50vh] overflow-y-auto bg-slate-700 border-slate-600 border-1 mx-2 p-2 rounded-md">
+                    <template x-for="(event, index) in events" :key="index">
+                        <div class="p-2 bg-slate-700 border-slate-600 border-1 m-1 rounded-md">
+                            <p class="text-white font-sans" x-text="event.name"></p>
+                            <div class="flex flex-row">
+                                <p class="text-white font-sans font-bold text-sm" x-text="event.event_type_string"></p><p class="text-white font-sans text-sm"> - </p>
+                                <p class="text-white font-sans text-sm" x-text="event.city"></p><p class="text-white font-sans text-sm">, </p>
+                                <p class="text-white font-sans text-sm" x-text="event.country"></p>
+                            </div>
+                            <div class="flex flex-row">
+                                <p class="text-white font-sans font-thin">Ends </p>
+                                <p class="text-white font-sans font-thin" x-text="event.end_date"></p>
+                            </div>
+                        </div>
+                    </template>
+                </div>
             </div>
+
+            <script>
+                function events() {
+                    return {
+                        events: [],
+                        TBA_API_KEY: "{{ TBA_API_KEY }}",
+
+                        async get_events() {
+                            // TODO: Get current year
+                            var response = await fetch("https://www.thebluealliance.com/api/v3/events/2024", {
+                            method: "GET",
+                            headers: {
+                                "X-TBA-Auth-Key": this.TBA_API_KEY
+                                }
+                            });
+                    
+                            let data = await response.json();
+                            this.events = data;
+                        },
+
+                        init() {
+                            this.get_events();
+                        }
+                    }
+                }
+            </script>
         </div>
 
         <script>
