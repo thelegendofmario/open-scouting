@@ -7,8 +7,6 @@
   **An open source application for easier scouting at First Robotics competitions**
 </div>
 
----
-
 
 ## Features
 - Save data offline in case of poor connection in the stands
