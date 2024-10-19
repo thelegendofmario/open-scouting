@@ -40,6 +40,11 @@ pip install -r requirements.txt
 pip install -r requirements-dev.txt
 ```
 
+Install the required `npm` libraries
+```bash
+npm install
+```
+
 Copy the `.env.example` file to a new file called `.env`.
 ```bash
 cp .env-template .env
@@ -53,9 +58,14 @@ python manage.py makemigrations
 python manage.py migrate
 ```
 
-Now just run the server using the following command, or run the `Start server` task in your Visual Studio Code
+Now run the server using the following command, or run the `Start server` task in your Visual Studio Code
 ```bash
 python manage.py runserver
+```
+
+Additionally, you should start the Tailwind CSS builder with the following command, or use the `Build CSS` task in Visual Studio Code
+```bash
+npm run build:css
 ```
 
 ### Additional steps for Production installation

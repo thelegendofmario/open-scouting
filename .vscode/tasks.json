@@ -54,6 +54,19 @@
           "panel": "new"
         },
         "problemMatcher": []
+      },
+      {
+        "label": "Build CSS",
+        "type": "shell",
+        "command": "npm run build:css",
+        "presentation": {
+          "reveal": "always",
+          "panel": "new"
+        },
+        "runOptions": {
+          "runOn": "folderOpen"
+        },
+        "problemMatcher": []
       }
     ]
   }
