@@ -2,21 +2,23 @@
 {% load static %}
 {% block head_title %}3484 Scouting{% endblock %}
 
-{% block head_scripts %}
-{% endblock %}
+{% block head_scripts %}{% endblock %}
 
-{% block stylesheets %}
-{% endblock %}
+{% block stylesheets %}{% endblock %}
 
 {% block body %}
     <div class="flex h-screen justify-center items-center flex-col w-screen">
-        <img class="w-full md:w-1/2 xl:w-2/6 px-10" src="{% static '/main/images/logo_light.png' %}">
+        <img class="w-full md:w-1/2 xl:w-2/6 px-10"
+             src="{% static '/main/images/logo_light.png' %}">
         <p class="font-sans dark:text-white mt-2 text-black text-center mb-8">An open source application for easier scouting at First Robotics competitions</p>
 
-        <button class="border-solid border-2 border-slate-600 bg-slate-700/80 active:bg-slate-600/85 hover:bg-slate-800/80 text-white border-radius rounded-xl py-2 px-8 transition backdrop-blur-lg my-2">Sign In</button>
-        <button class="border-solid border-2 border-slate-600 bg-slate-700/80 active:bg-slate-600/85 hover:bg-slate-800/80 text-white border-radius rounded-xl py-2 px-8 transition backdrop-blur-lg my-2">Continue without account</button>
+        <button class="border-solid border-2 border-slate-600 bg-slate-700/80 active:bg-slate-600/85 hover:bg-slate-800/80 text-white border-radius rounded-xl py-2 px-8 transition backdrop-blur-lg my-2">
+            Sign In
+        </button>
+        <button class="border-solid border-2 border-slate-600 bg-slate-700/80 active:bg-slate-600/85 hover:bg-slate-800/80 text-white border-radius rounded-xl py-2 px-8 transition backdrop-blur-lg my-2">
+            Continue without account
+        </button>
     </div>
 {% endblock %}
 
-{% block scripts %}
-{% endblock %}
+{% block scripts %}{% endblock %}

@@ -2,21 +2,27 @@
 <!DOCTYPE html>
 <html>
     <head>
-        {% block head_scripts %}{% endblock head_scripts %}
+        {% block head_scripts %}
+        {% endblock head_scripts %}
 
         <script src="https://unpkg.com/@phosphor-icons/web"></script>
         <script src="https://cdn.tailwindcss.com"></script>
 
-        {% block stylesheets %}{% endblock stylesheets %}
+        {% block stylesheets %}
+        {% endblock stylesheets %}
 
-        <link rel="shortcut icon" type="image/png" href="{% static '/main/images/favicon.ico' %}" />
+        <link rel="shortcut icon"
+              type="image/png"
+              href="{% static '/main/images/favicon.ico' %}" />
 
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>{% block head_title %}{% endblock %}</title>
+        <title>
+            {% block head_title %}{% endblock %}
+        </title>
     </head>
     <body class="bg-gradient-to-br from-rose-100 to-blue-100 dark:bg-gradient-to-br dark:from-slate-800 dark:to-slate-900">
         {% block body %}{% endblock %}
-        
+
         {% block scripts %}{% endblock %}
     </body>
 </html>

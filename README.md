@@ -18,3 +18,9 @@
 - Have a system for quickly setting up all the required data entries for a new season
   - Have fields to quickly set up and provide to the user when scouting, e.g. "text", "boolean", "data" ect.
 - Allow other teams to use it and contribute data to the server
+## Development
+### djlint
+This project uses `djlint` to lint the templates. You can run this using the following command
+```bash
+djlint cardie --reformat
+```
