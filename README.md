@@ -24,7 +24,7 @@ Follow these steps to get the server running locally for contributing or develop
 
 First, clone this repository using the following command
 ```bash
-git clone https://github.com/nfoert/3484_Scouting
+git clone https://github.com/nfoert/open-scouting
 ```
 
 Then, navigate to that directory and create a new python virtual environment
