@@ -12,12 +12,53 @@
              src="{% static '/main/images/logo_light.png' %}">
         <p class="font-sans dark:text-white mt-2 text-black text-center mb-8">An open source application for easier scouting at First Robotics competitions</p>
 
-        <button class="ui_button">
-            Sign In
-        </button>
-        <button class="ui_button">
-            Continue without account
-        </button>
+        <div x-data="index()">
+            <div class="flex flex-col" x-data="authentication_box()" x-show="page == 1" x-transition>
+                <button class="ui_button" disabled>
+                    <i class="ph-bold ph-user-circle"></i> Sign In
+                </button>
+                <button class="ui_button" @click="open = !open">
+                    <i class="ph-bold ph-user-circle-dashed"></i> Continue without account
+                </button>
+    
+                <div class="flex flex-col justify-center items-center" x-show="open" x-collapse>
+                    <input class="ui_input" type="text" placeholder="Temporary user name" @input="check()" x-ref="username">
+                    <input class="ui_input" type="text" placeholder="Your team number" @input="check()" x-ref="team_number">
+                    <button class="ui_button" x-ref="next" @click="page = 2" disabled><i class="ph-bold ph-arrow-circle-right"></i> Next</button>
+                </div>
+            </div>
+
+            <script>
+                function authentication_box() {
+                    return {
+                        open: false,
+
+                        check() {
+                            if (this.$refs.username.value && this.$refs.team_number.value) {
+                                this.$refs.next.disabled = false;
+                            } else {
+                                this.$refs.next.disabled = true;
+                            }
+                        },
+
+                        init() {}
+                    };
+                }
+            </script>
+
+            <div x-show="page == 2" x-transition>
+                <p class="text-center text-white font-sans text-xl"><i class="ph-bold ph-calendar-blank"></i> Select event</p>
+            </div>
+        </div>
+
+        <script>
+            function index() {
+                return {
+                    page: 2
+                }
+            }
+        </script>
+        
     </div>
 {% endblock %}
 
