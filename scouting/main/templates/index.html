@@ -54,7 +54,7 @@
                     <!-- TODO: Be able to see data from previous years -->
                 </div>
 
-                <input class="ui_input" placeholder="Search for an event..." x-ref="event_search" @input="update_filters()">>
+                <input class="ui_input" placeholder="Search for an event..." x-ref="event_search" @input="update_filters()">
 
                 <div class="h-[50vh] overflow-y-auto bg-slate-700 border-slate-600 border-1 mx-2 p-2 rounded-md">
                     <template x-for="(event, index) in filtered_events" :key="index">
@@ -73,11 +73,13 @@
                                 </div>
                             </div>
                             <div class="flex flex-col">
-                                <button class="ui_button_icon"><i class="ph-bold ph-check-circle"></i></button>
+                                <button class="ui_button_icon" @click="select_event(event.name, event.first_event_code)"><i class="ph-bold ph-check-circle"></i></button>
                             </div>
                             
                         </div>
                     </template>
+
+                    <p class="text-white text-center text-lg" x-show="no_events" x-transition><i class="ph-bold ph-smiley-sad"></i> No events found</p>
                 </div>
             </div>
 
@@ -86,6 +88,7 @@
                     return {
                         events: [],
                         filtered_events: [],
+                        no_events: true,
 
                         async get_events() {
                             var response = await fetch("https://www.thebluealliance.com/api/v3/status", {
@@ -126,8 +129,6 @@
                             let search = this.$refs.event_search.value.toLowerCase();
 
                             if (search != "") {
-                                console.log(search)
-
                                 this.filtered_events = this.filtered_events.filter(event => {
                                     let name = event.name ? event.name.toLowerCase() : '';
                                     let city = event.city ? event.city.toLowerCase() : '';
@@ -141,9 +142,18 @@
                                         location_name.includes(search)
                                     );
                                 });
-
-                                console.log(this.filtered_events)
                             }
+
+                            if (this.filtered_events.length == 0) {
+                                this.no_events = true;
+                            } else {
+                                this.no_events = false;
+                            }
+                        },
+
+                        select_event(event_name, event_code) {
+                            console.log(event_name, event_code);
+                            this.page = 3;
                         },
 
                         init() {
@@ -152,12 +162,23 @@
                     }
                 }
             </script>
+
+            <div class="flex flex-col justify-center items-center" x-show="page == 3" x-data="{ contribute_open: false }" x-transition>
+                <button class="ui_button" @click="contribute_open = !contribute_open"><i class="ph-bold ph-pencil-simple-line"></i> Contribute Data</button>
+                <div class="flex flex-col justify-center items-center mb-6" x-show="contribute_open" x-collapse>
+                    <button class="ui_button" disabled><i class="ph-bold ph-link"></i> Create a session</button>
+                    <p class="text-white opacity-80 text-sm text-center">Create a session with one scout as the host to allow some more information to be autofilled and managed by the head scout</p>
+                    <button class="ui_button"><i class="ph-bold ph-pencil"></i> Contribute separately</button>
+                    <p class="text-white opacity-80 text-sm text-center">Contribute data without a session</p>
+                </div>
+                <button class="ui_button"><i class="ph-bold ph-database"></i> View All Data</button>
+            </div>
         </div>
 
         <script>
             function index() {
                 return {
-                    page: 2
+                    page: 1
                 }
             }
         </script>
