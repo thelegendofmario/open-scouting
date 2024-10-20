@@ -85,3 +85,12 @@ This project uses `djlint` to lint the templates. You can run this using the fol
 ```bash
 djlint cardie --reformat
 ```
+
+## To-Do
+- [ ] Basic features
+  - [ ] Index page operation selection
+  - [ ] Contribute data separately
+  - [ ] View all data for event
+- [ ] Create custom events (if they're missing from TBA)
+- [ ] Create an account (for more verified scouting)
+- [ ] Contribute in sessions
