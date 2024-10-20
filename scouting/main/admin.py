@@ -1,5 +1,4 @@
 from django.contrib import admin
-from main.models import SeasonFields, Data
+from main.models import Data
 
-admin.site.register(SeasonFields)
 admin.site.register(Data)
