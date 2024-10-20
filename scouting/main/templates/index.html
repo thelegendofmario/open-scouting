@@ -8,9 +8,74 @@
 
 {% block body %}
     <div class="flex h-screen justify-center items-center flex-col w-screen">
-        <img class="w-full md:w-1/2 xl:w-2/6 px-10"
-             src="{% static '/main/images/logo_light.png' %}">
-        <p class="font-sans dark:text-white mt-2 text-black text-center mb-8">An open source application for easier scouting at First Robotics competitions</p>
+        <div x-data="header()">
+            <div class="flex flex-col justify-center items-center" x-show="basic" x-transition>
+                <img class="w-full md:w-1/2 xl:w-2/6 px-10"
+                    src="{% static '/main/images/logo_light.png' %}">
+                <p class="font-sans dark:text-white mt-2 text-black text-center mb-8">An open source application for easier scouting at First Robotics competitions</p>
+            </div>
+            <div class="flex flex-row bg-slate-800 border-slate-700 border-2 rounded-lg w-full px-6 justify-center items-center py-4 mt-6" x-show="!basic" x-transition>
+                <img class="w-16 h-16 aspect-square m-2" src="{% static '/main/images/icon_rounded.png' %}">
+
+                <button class="ui_button_icon" @click="start_over()"><i class="ph-bold ph-arrow-clockwise"></i></button>
+
+                <div class="flex flex-col">
+                    <div class="flex flex-row items-center">
+                        <i class="ph-bold ph-user-circle-dashed text-white font-sans px-1"></i>
+                        <p class=" text-white font-sans text-md font-bold px-1" x-text="username"></p>
+                        <p class=" text-white font-mono text-sm px-1 opacity-70" x-text="team_number"></p>
+                    </div>
+
+                    <div class="flex flex-row items-center">
+                        <i class="ph-bold ph-calendar-blank text-white font-sans px-1"></i>
+                        <p class=" text-white font-sans text-md font-bold px-1" x-text="event_name"></p>
+                        <p class=" text-white font-mono text-sm px-1 opacity-70" x-text="event_code"></p>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+        
+        <script>
+            function header() {
+                return {
+                    basic: true,
+                    username: "",
+                    team_number: "",
+                    event_name: "",
+                    event_code: "",
+
+                    start_over() {
+                        window.dispatchEvent(new CustomEvent('start_over'));
+                        this.basic = true;
+                        this.username = "";
+                        this.team_number = "";
+                        this.event_name = "";
+                        this.event_code = "";
+                    },
+
+                    init() {
+                        window.addEventListener('header_username', (event) => {
+                            event.stopImmediatePropagation();
+                            const { username, team_number } = event.detail;
+                            this.username = username;
+                            this.team_number = team_number;
+
+                            this.basic = false;
+                        });
+
+                        window.addEventListener('header_event', (event) => {
+                            event.stopImmediatePropagation();
+                            const { event_name, event_code } = event.detail;
+
+                            this.event_name = event_name;
+                            this.event_code = event_code;
+                            console.log(event_code)
+                        });
+                    }
+                }
+            }
+        </script>
 
         <div x-data="index()">
             <div class="flex flex-col" x-data="authentication_box()" x-show="page == 1" x-transition>
@@ -24,7 +89,7 @@
                 <div class="flex flex-col justify-center items-center" x-show="open" x-collapse>
                     <input class="ui_input" type="text" placeholder="Temporary user name" @input="check()" x-ref="username">
                     <input class="ui_input" type="text" placeholder="Your team number" @input="check()" x-ref="team_number">
-                    <button class="ui_button" x-ref="next" @click="page = 2" disabled><i class="ph-bold ph-arrow-circle-right"></i> Next</button>
+                    <button class="ui_button" x-ref="next" @click="submit()" disabled><i class="ph-bold ph-arrow-circle-right"></i> Next</button>
                 </div>
             </div>
 
@@ -39,6 +104,16 @@
                             } else {
                                 this.$refs.next.disabled = true;
                             }
+                        },
+
+                        submit() {
+                            username = this.$refs.username.value
+                            team_number = this.$refs.team_number.value
+
+                            window.dispatchEvent(new CustomEvent('header_username', {
+                                detail: { username, team_number }
+                            }));
+                            this.page = 2;
                         },
 
                         init() {}
@@ -73,7 +148,7 @@
                                 </div>
                             </div>
                             <div class="flex flex-col">
-                                <button class="ui_button_icon" @click="select_event(event.name, event.first_event_code)"><i class="ph-bold ph-check-circle"></i></button>
+                                <button class="ui_button_icon" @click="select_event(event.name, event.event_code)"><i class="ph-bold ph-check-circle"></i></button>
                             </div>
                             
                         </div>
@@ -152,7 +227,10 @@
                         },
 
                         select_event(event_name, event_code) {
-                            console.log(event_name, event_code);
+                            console.log(event_code)
+                            window.dispatchEvent(new CustomEvent('header_event', {
+                                detail: { event_name, event_code }
+                            }));
                             this.page = 3;
                         },
 
@@ -164,6 +242,7 @@
             </script>
 
             <div class="flex flex-col justify-center items-center" x-show="page == 3" x-data="{ contribute_open: false }" x-transition>
+                <p class="text-center text-white font-sans text-2xl mb-4 mt-6"><i class="ph-bold ph-sliders-horizontal"></i> Choose an Operation</p>
                 <button class="ui_button" @click="contribute_open = !contribute_open"><i class="ph-bold ph-pencil-simple-line"></i> Contribute Data</button>
                 <div class="flex flex-col justify-center items-center mb-6" x-show="contribute_open" x-collapse>
                     <button class="ui_button" disabled><i class="ph-bold ph-link"></i> Create a session</button>
@@ -178,7 +257,13 @@
         <script>
             function index() {
                 return {
-                    page: 1
+                    page: 1,
+
+                    init() {
+                        window.addEventListener('start_over', (event) => {
+                            this.page = 1
+                        });
+                    }
                 }
             }
         </script>
