@@ -70,7 +70,6 @@
 
                             this.event_name = event_name;
                             this.event_code = event_code;
-                            console.log(event_code)
                         });
                     }
                 }
@@ -227,7 +226,6 @@
                         },
 
                         select_event(event_name, event_code) {
-                            console.log(event_code)
                             window.dispatchEvent(new CustomEvent('header_event', {
                                 detail: { event_name, event_code }
                             }));
@@ -247,7 +245,7 @@
                 <div class="flex flex-col justify-center items-center mb-6" x-show="contribute_open" x-collapse>
                     <button class="ui_button" disabled><i class="ph-bold ph-link"></i> Create a session</button>
                     <p class="text-white opacity-80 text-sm text-center">Create a session with one scout as the host to allow some more information to be autofilled and managed by the head scout</p>
-                    <button class="ui_button"><i class="ph-bold ph-pencil"></i> Contribute separately</button>
+                    <button class="ui_button" @click="contribute_separately()"><i class="ph-bold ph-pencil"></i> Contribute separately</button>
                     <p class="text-white opacity-80 text-sm text-center">Contribute data without a session</p>
                 </div>
                 <button class="ui_button"><i class="ph-bold ph-database"></i> View All Data</button>
@@ -258,6 +256,10 @@
             function index() {
                 return {
                     page: 1,
+
+                    contribute_separately() {
+                        window.location.href = "{{ SERVER_IP }}/contribute"
+                    },
 
                     init() {
                         window.addEventListener('start_over', (event) => {

@@ -4,6 +4,7 @@ from . import season_fields
 
 def index(request):
     context = {
+        "SERVER_IP": settings.SERVER_IP,
         "TBA_API_KEY": settings.TBA_API_KEY
     }
 
@@ -11,6 +12,7 @@ def index(request):
 
 def contribute(request):
     context = {
+        "SERVER_IP": settings.SERVER_IP,
         "TBA_API_KEY": settings.TBA_API_KEY,
         "season_fields": season_fields.crescendo
     }
