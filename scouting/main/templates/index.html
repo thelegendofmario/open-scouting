@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
-{% block head_title %}3484 Scouting{% endblock %}
+{% block head_title %}Open Scouting{% endblock %}
 
 {% block head_scripts %}{% endblock %}
 
@@ -46,27 +46,36 @@
                 }
             </script>
 
-            <div x-data="events()" x-show="page == 2" x-transition>
+            <div class="flex flex-col justify-center items-center" x-data="events()" x-show="page == 2" x-transition>
                 <p class="text-center text-white font-sans text-2xl"><i class="ph-bold ph-calendar-blank"></i> Select event</p>
                 <div class="flex flex-row mt-2">
-                    <input class="bg-slate-700 border-2 border-slate-700 text-white rounded-lg" type="checkbox">
-                    <p class="text-white ml-2" x-ref="show_past_events">Show past events</p>
+                    <input class="bg-slate-700 border-2 border-slate-700 text-white rounded-lg" type="checkbox" x-ref="show_past_events" @input="update_filters()">
+                    <p class="text-white ml-2">Show past events</p>
                     <!-- TODO: Be able to see data from previous years -->
                 </div>
 
+                <input class="ui_input" placeholder="Search for an event..." x-ref="event_search" @input="update_filters()">>
+
                 <div class="h-[50vh] overflow-y-auto bg-slate-700 border-slate-600 border-1 mx-2 p-2 rounded-md">
-                    <template x-for="(event, index) in events" :key="index">
-                        <div class="p-2 bg-slate-700 border-slate-600 border-1 m-1 rounded-md">
-                            <p class="text-white font-sans" x-text="event.name"></p>
-                            <div class="flex flex-row">
-                                <p class="text-white font-sans font-bold text-sm" x-text="event.event_type_string"></p><p class="text-white font-sans text-sm"> - </p>
-                                <p class="text-white font-sans text-sm" x-text="event.city"></p><p class="text-white font-sans text-sm">, </p>
-                                <p class="text-white font-sans text-sm" x-text="event.country"></p>
+                    <template x-for="(event, index) in filtered_events" :key="index">
+                        <div class="p-2 bg-slate-800 border-2 border-slate-700 m-1 rounded-lg flex flex-row justify-between">
+                            <div class="flex flex-col">
+                                <p class="text-white font-sans" x-text="event.name"></p>
+                                <div class="flex flex-row">
+                                    <p class="text-white font-sans font-bold text-sm" x-text="event.event_type_string"></p><p class="text-white font-sans text-sm mx-1">-</p>
+                                    <p class="text-white font-sans text-sm" x-text="event.city"></p><p class="text-white font-sans text-sm mr-1">,</p>
+                                    <p class="text-white font-sans text-sm" x-text="event.country"></p>
+                                </div>
+                                <div class="flex flex-row">
+                                    <p class="text-white font-sans font-light" x-text="event.start_date"></p>
+                                    <p class="text-white font-sans font-light mx-1">-</p>
+                                    <p class="text-white font-sans font-light" x-text="event.end_date"></p>
+                                </div>
                             </div>
-                            <div class="flex flex-row">
-                                <p class="text-white font-sans font-thin">Ends </p>
-                                <p class="text-white font-sans font-thin" x-text="event.end_date"></p>
+                            <div class="flex flex-col">
+                                <button class="ui_button">Select</button>
                             </div>
+                            
                         </div>
                     </template>
                 </div>
@@ -76,19 +85,65 @@
                 function events() {
                     return {
                         events: [],
-                        TBA_API_KEY: "{{ TBA_API_KEY }}",
+                        filtered_events: [],
 
                         async get_events() {
-                            // TODO: Get current year
-                            var response = await fetch("https://www.thebluealliance.com/api/v3/events/2024", {
+                            var response = await fetch("https://www.thebluealliance.com/api/v3/status", {
                             method: "GET",
                             headers: {
-                                "X-TBA-Auth-Key": this.TBA_API_KEY
+                                "X-TBA-Auth-Key": "{{ TBA_API_KEY }}"
                                 }
                             });
-                    
-                            let data = await response.json();
-                            this.events = data;
+
+                            response.json().then(async (text) => {
+                                var response = await fetch(`https://www.thebluealliance.com/api/v3/events/${text.current_season}`, {
+                                method: "GET",
+                                headers: {
+                                    "X-TBA-Auth-Key": "{{ TBA_API_KEY }}"
+                                    }
+                                });
+                        
+                                let data = await response.json();
+                                this.events = data;
+                                this.update_filters();
+                            });
+
+                            
+                        },
+
+                        update_filters() {
+                            if (this.$refs.show_past_events.checked == false) {
+                                let today = new Date();
+
+                                this.filtered_events = this.events.filter(event => {
+                                    let eventDate = new Date(event.end_date);
+                                    return eventDate >= today;
+                                });
+                            } else {
+                                this.filtered_events = this.events;
+                            }
+
+                            let search = this.$refs.event_search.value.toLowerCase();
+
+                            if (search != "") {
+                                console.log(search)
+
+                                this.filtered_events = this.filtered_events.filter(event => {
+                                    let name = event.name ? event.name.toLowerCase() : '';
+                                    let city = event.city ? event.city.toLowerCase() : '';
+                                    let country = event.country ? event.country.toLowerCase() : '';
+                                    let location_name = event.location_name ? event.location_name.toLowerCase() : '';
+
+                                    return (
+                                        name.includes(search) ||
+                                        city.includes(search) ||
+                                        country.includes(search) ||
+                                        location_name.includes(search)
+                                    );
+                                });
+
+                                console.log(this.filtered_events)
+                            }
                         },
 
                         init() {
