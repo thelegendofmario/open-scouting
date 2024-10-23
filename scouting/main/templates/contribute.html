@@ -7,7 +7,134 @@
 {% block stylesheets %}{% endblock %}
 
 {% block body %}
-    <h1>Contribute</h1>
+    <div class="flex flex-row h-full w-full">
+        <div class="w-full md:w-3/4 lg:w-2/3 mx-8 align-middle justify-center" x-data="field_manager()"></div>
+
+        <script>
+            function field_manager() {
+                return {
+                    field_data: '{{ season_fields|safe }}',
+
+                    create_field(field) {
+                        let label = document.createElement('label');
+                        label.innerText = field.name;
+                        label.classList = "text-white mb-2 text-sm text-sans";
+
+                        let field_container = document.createElement('div');
+                        field_container.classList = "flex flex-col mb-4 border-l-2 pl-2 border-slate-700 justify-left";
+
+                        let field_element;
+
+                        if (field.type === 'integer') {
+                            field_element = document.createElement('input');
+                            field_element.type = 'number';
+                            field_element.setAttribute('name', field.simple_name);
+                            field_element.setAttribute('x-ref', field.simple_name);
+                            field_element.classList = "text-white bg-slate-700 rounded px-2 py-1 mb-2 w-full";
+
+                        } else if (field.type === 'boolean') {
+                            field_element = document.createElement('input');
+                            field_element.type = 'checkbox';
+                            field_element.setAttribute('name', field.simple_name);
+                            field_element.setAttribute('x-ref', field.simple_name);
+                            field_element.classList = "text-white bg-slate-700 rounded px-2 py-1 mb-2 w-full";
+
+                        } else if (field.type === 'choice') {
+                            field_element = document.createElement('select');
+                            field_element.setAttribute('name', field.simple_name);
+                            field_element.setAttribute('x-ref', field.simple_name);
+                            field_element.classList = "text-white bg-slate-700 rounded px-2 py-1 mb-2 w-full";
+
+                            // Add choices as options
+                            field.choices.forEach(choice => {
+                                let option = document.createElement('option');
+                                option.value = choice;
+                                option.text = choice;
+                                field_element.appendChild(option);
+                            });
+
+                        } else if (field.type === 'multiple_choice') {
+                            field_element = document.createElement('select');
+                            field_element.setAttribute('name', field.simple_name);
+                            field_element.setAttribute('x-ref', field.simple_name);
+                            field_element.setAttribute('multiple', 'multiple');
+                            field_element.classList = "text-white bg-slate-700 rounded px-2 py-1 mb-2 w-full";
+
+                            // Add multiple choices as options
+                            field.choices.forEach(choice => {
+                                let option = document.createElement('option');
+                                option.value = choice;
+                                option.text = choice;
+                                field_element.appendChild(option);
+                            });
+                        }
+
+                        console.log(field_element)
+
+                        field_container.appendChild(label);
+                        field_container.appendChild(field_element);
+
+                        return field_container;
+                    },
+
+                    // Function to create a section or subsection
+                    create_section(section, isSubsection = false) {
+                        // Create the section or subsection title
+                        let section_text = document.createElement("p");
+                        section_text.innerHTML = `<i class="ph-bold ph-arrow-bend-down-right"></i> ${section.section}`;
+                        section_text.classList = "text-white text-md text-sans";
+                        if (isSubsection) {
+                            section_text.classList.add("ml-4");  // Add indent for subsections
+                        }
+
+                        // Create section container
+                        let section_element = document.createElement("div");
+                        section_element.setAttribute("x-ref", section.simple_name ? section.simple_name : 'no_simple_name');
+                        section_element.classList = "bg-slate-800 border-2 border-slate-700 rounded-lg mb-4 px-8 py-4 flex flex-col";
+                        if (isSubsection) {
+                            section_element.classList.add("ml-4");  // Add indent for subsections
+                        }
+
+                        // Append section title
+                        section_element.appendChild(section_text);
+
+                        return section_element;
+                    },
+
+                    parse_json(data, section) {
+                        data.forEach(parent => {
+                            if (section) { // Create all sub fields inside
+                                if (parent.fields) { // If the item is a section
+                                    let section_element = this.create_section(parent);
+                                    section.appendChild(section_element);
+                                    this.parse_json(parent.fields, section_element);
+
+                                } else { // If the item is a field
+                                    section.appendChild(this.create_field(parent));
+                                }
+
+                            } else {
+                                if (parent.fields) { // If the item is a section
+                                    let section_element = this.create_section(parent);
+                                    this.$root.appendChild(section_element);
+                                    this.parse_json(parent.fields, section_element);
+
+                                } else { // If the item is a field
+                                    this.$root.appendChild(this.create_field(parent));
+                                }
+                            }
+                            
+                        });
+                    },
+
+                    init() {
+                        this.parse_json(JSON.parse(this.field_data));
+                    }
+                }
+            }
+        </script>
+
+    </div>
 {% endblock %}
 
 {% block scripts %}{% endblock %}

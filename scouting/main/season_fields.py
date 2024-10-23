@@ -1,6 +1,7 @@
 crescendo = [
     {
         "section": "Main",
+        "simple_name": "main",
         "fields": [
             {
                 "name": "Team Number",
@@ -18,6 +19,7 @@ crescendo = [
     },
     {
         "section": "Auton",
+        "simple_name": "auton",
         "fields": [
             {
                 "name": "Speaker Shot",
@@ -37,9 +39,11 @@ crescendo = [
     },
     {
         "section": "Teleop",
+        "simple_name": "teleop",
         "fields": [
             {
                 "section": "Speaker",
+                "simple_name": "teleop_speaker",
                 "fields": [
                     {
                         "name": "Speaker Shot",
@@ -59,6 +63,7 @@ crescendo = [
             },
             {
                 "section": "Amp",
+                "simple_name": "teleop_amp",
                 "fields": [
                     {
                         "name": "Amp Shots",
@@ -80,11 +85,12 @@ crescendo = [
     },
     {
         "section": "Extra Information",
+        "simple_name": "extra_information",
         "fields": [
             {
                 "name": "Left Starting Zone",
                 "simple_name": "left_starting_zone",
-                "type": "choice",
+                "type": "boolean",
                 "required": "false",
             },
             {
@@ -97,31 +103,31 @@ crescendo = [
             {
                 "name": "Floor Pickup",
                 "simple_name": "floor_pickup",
-                "type": "choice",
+                "type": "boolean",
                 "required": "false",
             },
             {
                 "name": "Climb",
                 "simple_name": "climb",
-                "type": "choice",
+                "type": "boolean",
                 "required": "false",
             },
             {
                 "name": "Scored Trap",
                 "simple_name": "scored_trap",
-                "type": "choice",
+                "type": "boolean",
                 "required": "false",
             },
             {
                 "name": "Feeder Station Pickup",
                 "simple_name": "feeder_station_pickup",
-                "type": "choice",
+                "type": "boolean",
                 "required": "false",
             },
             {
                 "name": "Moved During Auto",
                 "simple_name": "moved_during_auto",
-                "type": "choice",
+                "type": "boolean",
                 "required": "false",
             },
         ]
