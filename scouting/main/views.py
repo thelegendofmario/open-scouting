@@ -16,7 +16,9 @@ def contribute(request):
     context = {
         "SERVER_IP": settings.SERVER_IP,
         "TBA_API_KEY": settings.TBA_API_KEY,
-        "season_fields": json.dumps(season_fields.crescendo)
+        "season_fields": json.dumps(season_fields.crescendo),
+        "event": "unknown",
+        "username": "unknown"
     }
 
     return render(request, "contribute.html", context)

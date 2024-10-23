@@ -7,8 +7,23 @@
 {% block stylesheets %}{% endblock %}
 
 {% block body %}
-    <div class="flex flex-row h-full w-full">
-        <div class="w-full md:w-3/4 lg:w-2/3 mx-8 align-middle justify-center" x-data="field_manager()"></div>
+    <div class="flex flex-col h-full w-screen items-center justify-center">
+
+        <div class="flex flex-row w-full md:w-3/4 lg:w-2/3 mx-8 my-4 py-2 bg-slate-800 border-2 border-slate-700 rounded-lg mb-4 items-center justify-center">
+            <img class="w-16 h-16 aspect-square m-2" src="{% static '/main/images/icon_rounded.png' %}">
+
+            <div class="flex flex-col">
+                <p class="text-white text-sans text-2xl">Contribute</p>
+                <div class="flex flex-row">
+                    <p class="text-white text-sans text-sm mx-1">Contributing data to event</p>
+                    <p class="text-white text-sans font-bold text-sm mx-1">{{ event }}</p>
+                    <p class="text-white text-sans text-sm mx-1">as</p>
+                    <p class="text-white text-sans font-bold text-sm mx-1">{{ username }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="w-full md:w-3/4 lg:w-2/3 mx-8" x-data="field_manager()"></div>align-middle
 
         <script>
             function field_manager() {
@@ -21,7 +36,7 @@
                         label.classList = "text-white mb-2 text-sm text-sans";
 
                         let field_container = document.createElement('div');
-                        field_container.classList = "flex flex-col mb-4 border-l-2 pl-2 border-slate-700 justify-left";
+                        field_container.classList = "flex flex-col mb-4 py-2 my-2 border-l-2 pl-2 border-slate-700 justify-left";
 
                         let field_element;
 
@@ -30,20 +45,20 @@
                             field_element.type = 'number';
                             field_element.setAttribute('name', field.simple_name);
                             field_element.setAttribute('x-ref', field.simple_name);
-                            field_element.classList = "text-white bg-slate-700 rounded px-2 py-1 mb-2 w-full";
+                            field_element.classList = "text-white bg-slate-700 rounded px-2 py-1 mb-2";
 
                         } else if (field.type === 'boolean') {
                             field_element = document.createElement('input');
                             field_element.type = 'checkbox';
                             field_element.setAttribute('name', field.simple_name);
                             field_element.setAttribute('x-ref', field.simple_name);
-                            field_element.classList = "text-white bg-slate-700 rounded px-2 py-1 mb-2 w-full";
+                            field_element.classList = "text-white bg-slate-700 rounded px-2 py-1 mb-2";
 
                         } else if (field.type === 'choice') {
                             field_element = document.createElement('select');
                             field_element.setAttribute('name', field.simple_name);
                             field_element.setAttribute('x-ref', field.simple_name);
-                            field_element.classList = "text-white bg-slate-700 rounded px-2 py-1 mb-2 w-full";
+                            field_element.classList = "text-white bg-slate-700 rounded px-2 py-1 mb-2";
 
                             // Add choices as options
                             field.choices.forEach(choice => {
@@ -58,7 +73,7 @@
                             field_element.setAttribute('name', field.simple_name);
                             field_element.setAttribute('x-ref', field.simple_name);
                             field_element.setAttribute('multiple', 'multiple');
-                            field_element.classList = "text-white bg-slate-700 rounded px-2 py-1 mb-2 w-full";
+                            field_element.classList = "text-white bg-slate-700 rounded px-2 py-1 mb-2";
 
                             // Add multiple choices as options
                             field.choices.forEach(choice => {
@@ -69,33 +84,21 @@
                             });
                         }
 
-                        console.log(field_element)
-
                         field_container.appendChild(label);
                         field_container.appendChild(field_element);
 
                         return field_container;
                     },
 
-                    // Function to create a section or subsection
-                    create_section(section, isSubsection = false) {
-                        // Create the section or subsection title
+                    create_section(section) {
                         let section_text = document.createElement("p");
                         section_text.innerHTML = `<i class="ph-bold ph-arrow-bend-down-right"></i> ${section.section}`;
-                        section_text.classList = "text-white text-md text-sans";
-                        if (isSubsection) {
-                            section_text.classList.add("ml-4");  // Add indent for subsections
-                        }
+                        section_text.classList = "text-white text-md text-sans mb-2";
 
-                        // Create section container
                         let section_element = document.createElement("div");
                         section_element.setAttribute("x-ref", section.simple_name ? section.simple_name : 'no_simple_name');
                         section_element.classList = "bg-slate-800 border-2 border-slate-700 rounded-lg mb-4 px-8 py-4 flex flex-col";
-                        if (isSubsection) {
-                            section_element.classList.add("ml-4");  // Add indent for subsections
-                        }
 
-                        // Append section title
                         section_element.appendChild(section_text);
 
                         return section_element;
