@@ -31,8 +31,15 @@
                     field_data: '{{ season_fields|safe }}',
 
                     create_field(field) {
+                        let label_text;
+                        if (field.required == "true") {
+                            label_text = `${field.name}*`;
+                        } else {
+                            label_text = `${field.name}`;
+                        }
+
                         let label = document.createElement('label');
-                        label.innerText = field.name;
+                        label.innerText = label_text;
                         label.classList = "text-white mb-2 text-sm text-sans";
 
                         let field_container = document.createElement('div');
