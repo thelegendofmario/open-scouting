@@ -88,8 +88,10 @@ djlint cardie --reformat
 
 ## To-Do
 - [ ] Basic features
-  - [ ] Index page operation selection
+  - [x] Index page operation selection
   - [ ] Contribute data separately
+    - [x] Display all fields for the data
+    - [ ] Submit data to the server
   - [ ] View all data for event
 - [ ] Create custom events (if they're missing from TBA)
 - [ ] Create an account (for more verified scouting)
