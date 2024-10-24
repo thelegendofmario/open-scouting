@@ -71,6 +71,20 @@
                             this.event_name = event_name;
                             this.event_code = event_code;
                         });
+
+                        window.addEventListener('get_header_data', (event) => {
+                            event.stopImmediatePropagation();
+                            const { load_page } = event.detail;
+
+                            let username = this.username;
+                            let event_name = this.event_name;
+                            let event_code = this.event_code;
+                            let load_page_var = load_page;
+
+                            window.dispatchEvent(new CustomEvent('header_data', {
+                                detail: { username, event_name, event_code, load_page }
+                            }));
+                        });
                     }
                 }
             }
@@ -245,7 +259,7 @@
                 <div class="flex flex-col justify-center items-center mb-6" x-show="contribute_open" x-collapse>
                     <button class="ui_button" disabled><i class="ph-bold ph-link"></i> Create a session</button>
                     <p class="text-white opacity-80 text-sm text-center">Create a session with one scout as the host to allow some more information to be autofilled and managed by the head scout</p>
-                    <button class="ui_button" @click="contribute_separately()"><i class="ph-bold ph-pencil"></i> Contribute separately</button>
+                    <button class="ui_button" @click="get_header_data('contribute_separately')"><i class="ph-bold ph-pencil"></i> Contribute separately</button>
                     <p class="text-white opacity-80 text-sm text-center">Contribute data without a session</p>
                 </div>
                 <button class="ui_button"><i class="ph-bold ph-database"></i> View All Data</button>
@@ -257,13 +271,39 @@
                 return {
                     page: 1,
 
-                    contribute_separately() {
-                        window.location.href = "{{ SERVER_IP }}/contribute"
+                    get_header_data(load_page) {
+                        console.log(load_page)
+                        window.dispatchEvent(new CustomEvent('get_header_data', {
+                            detail: { load_page }
+                        }));
+                    },
+
+                    load_page(page) {
+                        console.log(page)
+                        
+                        if (page == "session") {
+                            console.log("This feature is coming soon");
+                        } else if (page == "contribute_separately") {
+                            window.location.href = `{{ SERVER_IP }}/contribute?username=${this.username}&event_name=${this.event_name}&event_code=${this.event_code}&`;
+                        } else if (page == "view_data") {
+                            console.log("This feature is coming soon");
+                        }
                     },
 
                     init() {
                         window.addEventListener('start_over', (event) => {
                             this.page = 1
+                        });
+
+                        window.addEventListener('header_data', (event) => {
+                            console.log("recieved header_data")
+                            event.stopImmediatePropagation();
+                            const { username, event_name, event_code, load_page } = event.detail;
+
+                            this.username = username;
+                            this.event_name = event_name;
+                            this.event_code = event_code;
+                            this.load_page(load_page);
                         });
                     }
                 }
