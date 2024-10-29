@@ -8,6 +8,7 @@ class Data(models.Model):
     event = models.CharField(max_length=999)
     event_code = models.CharField(max_length=99)
     data = models.JSONField(default=dict, blank=True)
+    created = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"Data from {self.event} in {str(self.year)}"

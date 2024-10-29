@@ -1,6 +1,7 @@
 from django.shortcuts import render, HttpResponse
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
+from django.utils import timezone
 
 from main.models import Data
 from . import season_fields
@@ -35,7 +36,7 @@ def contribute(request):
 def submit(request):
     if request.method == "POST":
         # TODO: Support year selection
-        data = Data(year=2024, event=request.headers["event_name"], event_code=request.headers["event_code"], data=json.loads(request.headers["data"]))
+        data = Data(year=2024, event=request.headers["event_name"], event_code=request.headers["event_code"], data=json.loads(request.headers["data"]), created=timezone.now())
         data.save()
         return HttpResponse(request, "Success")
     else:
