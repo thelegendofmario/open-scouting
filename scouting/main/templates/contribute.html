@@ -155,7 +155,7 @@
     </div>
 
     <div x-data="submit_manager()">
-        <button class="ui_button" @click="create_json_data()">Submit</button>
+        <button class="ui_button" @click="submit_button()">Submit</button>
 
         <div x-show="missing_required_fields" x-transition>
             <p class="text-sans text-red-700 font-bold">Please fill out all of the required fields</p>
@@ -182,7 +182,13 @@
                         }
                     }
 
-                    this.missing_required_fields = missing_field_found
+                    this.missing_required_fields = missing_field_found;
+
+                    if (missing_field_found) {
+                        return false;
+                    } else {
+                        return true;
+                    }
                 },
 
                 create_json_data() {
@@ -211,6 +217,27 @@
                     }
 
                     return data;
+                },
+
+                async submit_button() {
+                    if (this.check_fields()) {
+                        var response = await fetch("{{ SERVER_IP }}/submit", {
+                            method: "POST",
+                            headers: {
+                                    "data": JSON.stringify(this.create_json_data()),
+                                    "event-name": "{{ event_name }}",
+                                    "event-code": "{{ event_code }}"
+                                }
+                            });
+
+                            response.text().then(async (text) => {
+                                const url = new URL(window.location.href);
+
+                                url.searchParams.set("submitted", true);
+
+                                window.location.href = url.toString();
+                            });
+                    }
                 },
 
                 init() {

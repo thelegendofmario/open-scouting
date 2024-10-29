@@ -1,5 +1,8 @@
 from django.shortcuts import render, HttpResponse
 from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
+
+from main.models import Data
 from . import season_fields
 
 import json
@@ -27,3 +30,13 @@ def contribute(request):
     }
 
     return render(request, "contribute.html", context)
+
+@csrf_exempt
+def submit(request):
+    if request.method == "POST":
+        # TODO: Support year selection
+        data = Data(year=2024, event=request.headers["event_name"], event_code=request.headers["event_code"], data=json.loads(request.headers["data"]))
+        data.save()
+        return HttpResponse(request, "Success")
+    else:
+        return HttpResponse(request, "Request is not a POST request!", status=501)
