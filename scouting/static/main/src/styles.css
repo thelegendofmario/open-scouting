@@ -13,3 +13,7 @@
 .ui_input {
     @apply border-solid border-2 border-slate-600 bg-slate-700/80 enabled:active:bg-slate-600/85 hover:bg-slate-800/80 text-white rounded-xl py-2 px-6 transition backdrop-blur-lg my-1 w-5/6;
 }
+
+.field_missing {
+    @apply !border-red-700 !border-2 !border-dashed;
+}

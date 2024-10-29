@@ -23,7 +23,7 @@
             </div>
         </div>
 
-        <div class="w-full md:w-3/4 lg:w-2/3 mx-8" x-data="field_manager()"></div>align-middle
+        <div class="w-full md:w-3/4 lg:w-2/3 mx-8" x-data="field_manager()"></div>
 
         <script>
             function field_manager() {
@@ -32,7 +32,7 @@
 
                     create_field(field) {
                         let label_text;
-                        if (field.required == "true") {
+                        if (field.required == true) {
                             label_text = `${field.name}*`;
                         } else {
                             label_text = `${field.name}`;
@@ -91,6 +91,12 @@
                             });
                         }
 
+                        if (field.required) {
+                            field_element.setAttribute("scouting_required", true);
+                        } else {
+                            field_element.setAttribute("scouting_required", false);
+                        }
+
                         field_container.appendChild(label);
                         field_container.appendChild(field_element);
 
@@ -145,6 +151,44 @@
         </script>
 
     </div>
+
+    <div x-data="submit_manager()">
+        <button class="ui_button" @click="check_fields()">Submit</button>
+
+        <div x-show="missing_required_fields" x-transition>
+            <p class="text-sans text-red-700 font-bold">Please fill out all of the required fields</p>
+            <p class="text-sans text-red-700 opacity-85">They have been marked with a dotted border</p>
+        </div>
+    </div>
+
+    <script>
+        function submit_manager() {
+            return {
+                missing_required_fields: false,
+
+                check_fields() {
+                    let all_fields = document.querySelectorAll("input");
+                    let missing_field_found = false;
+
+                    for (const field of all_fields) {
+                        if (field.getAttribute("scouting_required") == "true" && field.value == "") {
+                            field.classList.add("field_missing");
+                            missing_field_found = true;
+
+                        } else {
+                            field.classList.remove("field_missing");
+                        }
+                    }
+
+                    this.missing_required_fields = missing_field_found
+                },
+
+                init() {
+                    this.check_fields();
+                }
+            }
+        }
+    </script>
 {% endblock %}
 
 {% block scripts %}{% endblock %}
