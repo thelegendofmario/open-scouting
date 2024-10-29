@@ -97,6 +97,8 @@
                             field_element.setAttribute("scouting_required", false);
                         }
 
+                        field_element.setAttribute("scouting_type", field.type)
+
                         field_container.appendChild(label);
                         field_container.appendChild(field_element);
 
@@ -153,7 +155,7 @@
     </div>
 
     <div x-data="submit_manager()">
-        <button class="ui_button" @click="check_fields()">Submit</button>
+        <button class="ui_button" @click="create_json_data()">Submit</button>
 
         <div x-show="missing_required_fields" x-transition>
             <p class="text-sans text-red-700 font-bold">Please fill out all of the required fields</p>
@@ -181,6 +183,34 @@
                     }
 
                     this.missing_required_fields = missing_field_found
+                },
+
+                create_json_data() {
+                    let data = []
+
+                    let all_fields = document.querySelectorAll("input");
+
+                    for (const field of all_fields) {
+                        let value;
+                        if (field.value) {
+                            if (field.getAttribute("scouting_type") == "integer" || field.getAttribute("scouting_type") == "choice" || field.getAttribute("scouting_type") == "multiple_choice") {
+                                value = field.value;
+
+                            } else if (field.getAttribute("scouting_type") == "boolean") {
+                                value = field.checked;
+                            }
+
+                            let data_field = {
+                                "name": field.getAttribute("x-ref"),
+                                "type": field.getAttribute("scouting_type"),
+                                "value": value
+                            }
+
+                            data.push(data_field);
+                        }
+                    }
+
+                    return data;
                 },
 
                 init() {
