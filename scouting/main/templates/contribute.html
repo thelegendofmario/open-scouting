@@ -23,6 +23,31 @@
             </div>
         </div>
 
+        <div class="lex flex-row w-full md:w-3/4 lg:w-2/3 mx-8 mb-4 py-2 bg-green-800 border-2 border-green-700 bg-opacity-80 rounded-lg border-opacity-80 items-center justify-center" x-data="submitted_check()">
+            <div x-show="show" x-transition>
+                <p class="text-white text-sans text-center"><i class="ph-bold ph-check-circle"></i> The data has been successfully submitted</p>
+            </div>
+        </div>
+
+        <script>
+            function submitted_check() {
+                return {
+                    show: false,
+
+                    init() {
+                        try {
+                            this.show = JSON.parse(
+                                new URL(window.location.href).searchParams.get("submitted").toLowerCase()
+                            );
+                        } catch {
+                            this.show = false;
+                        }
+                    }
+                }
+            }
+
+        </script>
+
         <div class="w-full md:w-3/4 lg:w-2/3 mx-8" x-data="field_manager()"></div>
 
         <script>
