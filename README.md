@@ -7,6 +7,18 @@
   **An open source application for easier scouting at First Robotics competitions**
 </div>
 
+<div align="center">
+
+  ![Open Scouting screenshot on mobile](repo/images/mobile.png)
+
+</div>
+
+<p align="center">
+  <a href="https://skillicons.dev">
+    <img src="https://skillicons.dev/icons?i=django,python,html,css,js,tailwind" />
+  </a>
+</p>
+
 
 ## Features
 - Save data offline in case of poor connection in the stands
