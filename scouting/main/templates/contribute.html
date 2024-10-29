@@ -177,100 +177,97 @@
             }
         </script>
 
-    </div>
+        <div class="flex flex-col md:flex-row w-full md:w-3/4 lg:w-2/3 mx-8 my-4 py-2 bg-slate-800 border-2 border-slate-700 rounded-lg mb-4 items-center justify-center" x-data="submit_manager()">
+            <button class="ui_button mr-4" @click="submit_button()"><i class="ph-bold ph-check-circle"></i> Submit</button>
 
-    <div x-data="submit_manager()">
-        <button class="ui_button" @click="submit_button()">Submit</button>
-
-        <div x-show="missing_required_fields" x-transition>
-            <p class="text-sans text-red-700 font-bold">Please fill out all of the required fields</p>
-            <p class="text-sans text-red-700 opacity-85">They have been marked with a dotted border</p>
+            <div x-show="missing_required_fields" x-transition>
+                <p class="text-sans text-red-700 font-bold text-center">Please fill out all of the required fields</p>
+            </div>
         </div>
-    </div>
 
-    <script>
-        function submit_manager() {
-            return {
-                missing_required_fields: false,
+        <script>
+            function submit_manager() {
+                return {
+                    missing_required_fields: false,
 
-                check_fields() {
-                    let all_fields = document.querySelectorAll("input");
-                    let missing_field_found = false;
+                    check_fields() {
+                        let all_fields = document.querySelectorAll("input");
+                        let missing_field_found = false;
 
-                    for (const field of all_fields) {
-                        if (field.getAttribute("scouting_required") == "true" && field.value == "") {
-                            field.classList.add("field_missing");
-                            missing_field_found = true;
+                        for (const field of all_fields) {
+                            if (field.getAttribute("scouting_required") == "true" && field.value == "") {
+                                field.classList.add("field_missing");
+                                missing_field_found = true;
 
+                            } else {
+                                field.classList.remove("field_missing");
+                            }
+                        }
+
+                        this.missing_required_fields = missing_field_found;
+
+                        if (missing_field_found) {
+                            return false;
                         } else {
-                            field.classList.remove("field_missing");
+                            return true;
                         }
-                    }
+                    },
 
-                    this.missing_required_fields = missing_field_found;
+                    create_json_data() {
+                        let data = []
 
-                    if (missing_field_found) {
-                        return false;
-                    } else {
-                        return true;
-                    }
-                },
+                        let all_fields = document.querySelectorAll("input");
 
-                create_json_data() {
-                    let data = []
+                        for (const field of all_fields) {
+                            let value;
+                            if (field.value) {
+                                if (field.getAttribute("scouting_type") == "integer" || field.getAttribute("scouting_type") == "choice" || field.getAttribute("scouting_type") == "multiple_choice") {
+                                    value = field.value;
 
-                    let all_fields = document.querySelectorAll("input");
-
-                    for (const field of all_fields) {
-                        let value;
-                        if (field.value) {
-                            if (field.getAttribute("scouting_type") == "integer" || field.getAttribute("scouting_type") == "choice" || field.getAttribute("scouting_type") == "multiple_choice") {
-                                value = field.value;
-
-                            } else if (field.getAttribute("scouting_type") == "boolean") {
-                                value = field.checked;
-                            }
-
-                            let data_field = {
-                                "name": field.getAttribute("x-ref"),
-                                "type": field.getAttribute("scouting_type"),
-                                "value": value
-                            }
-
-                            data.push(data_field);
-                        }
-                    }
-
-                    return data;
-                },
-
-                async submit_button() {
-                    if (this.check_fields()) {
-                        var response = await fetch("{{ SERVER_IP }}/submit", {
-                            method: "POST",
-                            headers: {
-                                    "data": JSON.stringify(this.create_json_data()),
-                                    "event-name": "{{ event_name }}",
-                                    "event-code": "{{ event_code }}"
+                                } else if (field.getAttribute("scouting_type") == "boolean") {
+                                    value = field.checked;
                                 }
-                            });
 
-                            response.text().then(async (text) => {
-                                const url = new URL(window.location.href);
+                                let data_field = {
+                                    "name": field.getAttribute("x-ref"),
+                                    "type": field.getAttribute("scouting_type"),
+                                    "value": value
+                                }
 
-                                url.searchParams.set("submitted", true);
+                                data.push(data_field);
+                            }
+                        }
 
-                                window.location.href = url.toString();
-                            });
-                    }
-                },
+                        return data;
+                    },
 
-                init() {
-                    this.check_fields();
+                    async submit_button() {
+                        if (this.check_fields()) {
+                            var response = await fetch("{{ SERVER_IP }}/submit", {
+                                method: "POST",
+                                headers: {
+                                        "data": JSON.stringify(this.create_json_data()),
+                                        "event-name": "{{ event_name }}",
+                                        "event-code": "{{ event_code }}"
+                                    }
+                                });
+
+                                response.text().then(async (text) => {
+                                    const url = new URL(window.location.href);
+
+                                    url.searchParams.set("submitted", true);
+
+                                    window.location.href = url.toString();
+                                });
+                        }
+                    },
+
+                    init() {}
                 }
             }
-        }
-    </script>
+        </script>
+
+    </div>
 {% endblock %}
 
 {% block scripts %}{% endblock %}
