@@ -216,16 +216,37 @@
                     create_json_data() {
                         let data = []
 
-                        let all_fields = document.querySelectorAll("input");
+                        let all_inputs = document.querySelectorAll("input");
+                        let all_selects = document.querySelectorAll("select");
 
-                        for (const field of all_fields) {
+                        for (const field of all_inputs) {
                             let value;
+                            console.log("Looking at " + field);
+                            console.log("value is " + field.value)
                             if (field.value) {
-                                if (field.getAttribute("scouting_type") == "integer" || field.getAttribute("scouting_type") == "choice" || field.getAttribute("scouting_type") == "multiple_choice") {
+                                if (field.getAttribute("scouting_type") == "integer") {
                                     value = field.value;
 
                                 } else if (field.getAttribute("scouting_type") == "boolean") {
                                     value = field.checked;
+                                }
+
+                                let data_field = {
+                                    "name": field.getAttribute("x-ref"),
+                                    "type": field.getAttribute("scouting_type"),
+                                    "value": value
+                                }
+
+                                data.push(data_field);
+                            }
+                        }
+
+                        for (const field of all_selects) {
+                            let value;
+                            if (field.value) {
+                                if (field.getAttribute("scouting_type") == "choice" || field.getAttribute("scouting_type") == "multiple_choice") {
+                                    value = field.value;
+
                                 }
 
                                 let data_field = {
