@@ -32,6 +32,24 @@ def contribute(request):
 
     return render(request, "contribute.html", context)
 
+def data(request):
+    request.session["username"] = request.GET.get("username", "unknown")
+    request.session["event_name"] = request.GET.get("event_name", "unknown")
+    request.session["event_code"] = request.GET.get("event_code", "unknown")
+
+    data = Data.objects.filter(year=2024, event=request.headers["event_name"], event_code=request.headers["event_code"])
+
+    context = {
+        "SERVER_IP": settings.SERVER_IP,
+        "TBA_API_KEY": settings.TBA_API_KEY,
+        "username": request.GET.get("username", "unknown"),
+        "event_name": request.GET.get("event_name", "unknown"),
+        "event_code": request.GET.get("event_code", "unknown"),
+        "data": data
+    }
+
+    return render(request, "data.html", context)
+
 @csrf_exempt
 def submit(request):
     if request.method == "POST":

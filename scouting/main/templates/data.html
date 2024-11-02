@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load static %}
+{% block head_title %}Open Scouting{% endblock %}
+
+{% block head_scripts %}{% endblock %}
+
+{% block stylesheets %}{% endblock %}
+
+{% block body %}
+<div class="flex flex-col h-full w-screen items-center justify-center">
+
+    <div class="flex flex-row w-full md:w-3/4 lg:w-2/3 mx-8 my-4 py-2 bg-slate-800 border-2 border-slate-700 rounded-lg mb-4 items-center justify-center">
+        <img class="w-16 h-16 aspect-square m-2" src="{% static '/main/images/icon_rounded.png' %}">
+
+        <div class="flex flex-col">
+            <p class="text-white text-sans text-2xl">Event Data</p>
+            <div class="flex flex-row">
+                <p class="text-white text-sans text-sm mx-1">Viewing data for event</p>
+                <p class="text-white text-sans font-bold text-sm mx-1">{{ event_name }}</p>
+                <p class="text-white text-sans text-sm mx-1">as</p>
+                <p class="text-white text-sans font-bold text-sm mx-1">{{ username }}</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}{% endblock %}

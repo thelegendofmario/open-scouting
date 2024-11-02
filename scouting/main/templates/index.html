@@ -262,7 +262,7 @@
                     <button class="ui_button" @click="get_header_data('contribute_separately')"><i class="ph-bold ph-pencil"></i> Contribute separately</button>
                     <p class="text-white opacity-80 text-sm text-center">Contribute data without a session</p>
                 </div>
-                <button class="ui_button"><i class="ph-bold ph-database"></i> View All Data</button>
+                <button class="ui_button" @click="get_header_data('view_data')"><i class="ph-bold ph-database"></i> View All Data</button>
             </div>
         </div>
 
@@ -286,7 +286,7 @@
                         } else if (page == "contribute_separately") {
                             window.location.href = `{{ SERVER_IP }}/contribute?username=${this.username}&event_name=${this.event_name}&event_code=${this.event_code}&`;
                         } else if (page == "view_data") {
-                            console.log("This feature is coming soon");
+                            window.location.href = `{{ SERVER_IP }}/data?username=${this.username}&event_name=${this.event_name}&event_code=${this.event_code}&`;
                         }
                     },
 
