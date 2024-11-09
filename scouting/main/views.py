@@ -1,4 +1,5 @@
 from django.shortcuts import render, HttpResponse
+from django.http import JsonResponse
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
@@ -37,15 +38,12 @@ def data(request):
     request.session["event_name"] = request.GET.get("event_name", "unknown")
     request.session["event_code"] = request.GET.get("event_code", "unknown")
 
-    data = Data.objects.filter(year=2024, event=request.headers["event_name"], event_code=request.headers["event_code"])
-
     context = {
         "SERVER_IP": settings.SERVER_IP,
         "TBA_API_KEY": settings.TBA_API_KEY,
         "username": request.GET.get("username", "unknown"),
         "event_name": request.GET.get("event_name", "unknown"),
-        "event_code": request.GET.get("event_code", "unknown"),
-        "data": data
+        "event_code": request.GET.get("event_code", "unknown")
     }
 
     return render(request, "data.html", context)
@@ -59,3 +57,29 @@ def submit(request):
         return HttpResponse(request, "Success")
     else:
         return HttpResponse(request, "Request is not a POST request!", status=501)
+
+@csrf_exempt
+def get_data(request):
+    if request.method == "POST":
+
+        data = Data.objects.filter(year=2024, event=request.session["event_name"], event_code=request.session["event_code"])
+
+        data_json = []
+        for item in data:
+            item_data = {
+                "created": item.created.isoformat(),
+                "data": item.data
+            }
+            data_json.append(item_data)
+
+        all_names = []
+        for entry in data:
+            print(entry.data)
+            for item in entry.data:
+                if item['name'] not in all_names:
+                    all_names.append(item['name'])
+
+        return JsonResponse({"data": data_json, "data_headers": list(all_names)}, safe=False)
+    else:
+        return HttpResponse("Request is not a POST request!", status=501)
+

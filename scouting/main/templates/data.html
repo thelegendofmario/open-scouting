@@ -7,7 +7,7 @@
 {% block stylesheets %}{% endblock %}
 
 {% block body %}
-<div class="flex flex-col h-full w-screen items-center justify-center">
+<div class="flex flex-col h-full min-h-screen w-screen overflow-hidden items-center justify-center">
 
     <div class="flex flex-row w-full md:w-3/4 lg:w-2/3 mx-8 my-4 py-2 bg-slate-800 border-2 border-slate-700 rounded-lg mb-4 items-center justify-center">
         <img class="w-16 h-16 aspect-square m-2" src="{% static '/main/images/icon_rounded.png' %}">
@@ -21,8 +21,63 @@
                 <p class="text-white text-sans font-bold text-sm mx-1">{{ username }}</p>
             </div>
         </div>
+
     </div>
 
+    <div class="rounded-xl border-slate-600 border-1 bg-slate-800 bg-clip-padding overflow-x-scroll" x-data="dataTable()" x-init="init()">
+        <table class="min-w-full border-2 border-slate-600">
+            <thead>
+                <tr class="px-2">
+                    <template x-for="header in headers" :key="header">
+                        <th class="text-white font-bold font-sans px-4 py-2 text-left hover:bg-slate-700 bg-slate-800 transition-colors capitalize border-l-1 border-r-1 border-slate-700" x-text="generate_header_text(header)"></th>
+                    </template>
+                </tr>
+            </thead>
+            <tbody>
+                <template x-for="entry in entries">
+                    <tr class="px-2 hover:bg-slate-700 bg-slate-800 transition-colors rounded-md border-slate-600 border-2">
+                        <template x-for="header in headers">
+                            <td class="px-4 py-2 text-white font-sans border-l-1 border-r-1 border-slate-700" x-text="entry.data.find(field => field.name === header)?.value || ''"></td>
+                        </template>
+                    </tr>
+                </template>
+            </tbody>
+        </table>
+    </div>
+    
+    <script>
+        function dataTable() {
+            return {
+                headers: [],
+                entries: {},
+                SERVER_IP: "{{ SERVER_IP }}",
+
+                generate_header_text(header_text) {
+                    return header_text.replaceAll("_", " ");
+                },
+
+                init() {
+                    console.log("table started")
+                    
+                    fetch(
+                        `${this.SERVER_IP}/get_data`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json().then(json => {
+                        this.headers = json.data_headers;
+                        this.entries = json.data;
+
+                        console.log(this.entries);
+                    }))
+                    .then(data => console.log(data))
+                    .catch(error => console.error(error));
+                }
+            }
+        }
+    </script>
 </div>
 {% endblock %}
 

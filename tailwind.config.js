@@ -4,7 +4,11 @@ module.exports = {
     "./scouting/main/templates/*.html"
   ],
   theme: {
-    extend: {},
+    extend: {
+      borderWidth: {
+        "1": "1px",
+      }
+    },
   },
   plugins: [],
 }
