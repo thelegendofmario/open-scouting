@@ -108,5 +108,5 @@ djlint cardie --reformat
 - [ ] Create sessions for scouting
 - [ ] If the event isn't on TBA, then make it so users can add custom events
 - [ ] Be able to view events from previous years
-- [ ] Light mode style support
+- [x] Light mode style support
 - [ ] Expand data in the table and show who submitted it and when it was submitted
