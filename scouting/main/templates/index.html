@@ -10,26 +10,28 @@
     <div class="flex h-screen justify-center items-center flex-col w-screen">
         <div x-data="header()">
             <div class="flex flex-col justify-center items-center" x-show="basic" x-transition>
-                <img class="w-full md:w-1/2 xl:w-2/6 px-10"
+                <img class="w-full md:w-1/2 xl:w-2/6 px-10 hidden dark:block"
                     src="{% static '/main/images/logo_light.png' %}">
+                <img class="w-full md:w-1/2 xl:w-2/6 px-10 dark:hidden block"
+                    src="{% static '/main/images/logo_dark.png' %}">
                 <p class="font-sans dark:text-white mt-2 text-black text-center mb-8">An open source application for easier scouting at First Robotics competitions</p>
             </div>
-            <div class="flex flex-row bg-slate-800 border-slate-700 border-2 rounded-lg w-full px-6 justify-center items-center py-4 mt-6" x-show="!basic" x-transition>
+            <div class="flex flex-row dark:bg-slate-800 dark:border-slate-700 bg-slate-200 border-slate-300 border-2 rounded-lg w-full px-6 justify-center items-center py-4 mt-6" x-show="!basic" x-transition>
                 <img class="w-16 h-16 aspect-square m-2" src="{% static '/main/images/icon_rounded.png' %}">
 
                 <button class="ui_button_icon" @click="start_over()"><i class="ph-bold ph-arrow-clockwise"></i></button>
 
                 <div class="flex flex-col">
                     <div class="flex flex-row items-center">
-                        <i class="ph-bold ph-user-circle-dashed text-white font-sans px-1"></i>
-                        <p class=" text-white font-sans text-md font-bold px-1" x-text="username"></p>
-                        <p class=" text-white font-mono text-sm px-1 opacity-70" x-text="team_number"></p>
+                        <i class="ph-bold ph-user-circle-dashed dark:text-white text-black font-sans px-1"></i>
+                        <p class=" dark:text-white text-black font-sans text-md font-bold px-1" x-text="username"></p>
+                        <p class=" dark:text-white text-black font-mono text-sm px-1 opacity-70" x-text="team_number"></p>
                     </div>
 
                     <div class="flex flex-row items-center">
-                        <i class="ph-bold ph-calendar-blank text-white font-sans px-1"></i>
-                        <p class=" text-white font-sans text-md font-bold px-1" x-text="event_name"></p>
-                        <p class=" text-white font-mono text-sm px-1 opacity-70" x-text="event_code"></p>
+                        <i class="ph-bold ph-calendar-blank dark:text-white text-black font-sans px-1"></i>
+                        <p class=" dark:text-white text-black font-sans text-md font-bold px-1" x-text="event_name"></p>
+                        <p class=" dark:text-white text-black font-mono text-sm px-1 opacity-70" x-text="event_code"></p>
                     </div>
                 </div>
             </div>
@@ -135,29 +137,29 @@
             </script>
 
             <div class="flex flex-col justify-center items-center" x-data="events()" x-show="page == 2" x-transition>
-                <p class="text-center text-white font-sans text-2xl"><i class="ph-bold ph-calendar-blank"></i> Select event</p>
+                <p class="text-center dark:text-white text-black font-sans text-2xl"><i class="ph-bold ph-calendar-blank"></i> Select event</p>
                 <div class="flex flex-row mt-2">
-                    <input class="bg-slate-700 border-2 border-slate-700 text-white rounded-lg" type="checkbox" x-ref="show_past_events" @input="update_filters()">
-                    <p class="text-white ml-2">Show past events</p>
+                    <input class="bg-slate-700 border-2 border-slate-700 dark:text-white text-black rounded-lg" type="checkbox" x-ref="show_past_events" @input="update_filters()">
+                    <p class="dark:text-white text-black ml-2">Show past events</p>
                     <!-- TODO: Be able to see data from previous years -->
                 </div>
 
                 <input class="ui_input" placeholder="Search for an event..." x-ref="event_search" @input="update_filters()">
 
-                <div class="h-[50vh] overflow-y-auto bg-slate-700 border-slate-600 border-1 mx-2 p-2 rounded-md">
+                <div class="h-[50vh] overflow-y-auto dark:bg-slate-700 bg-slate-200 dark:border-slate-600 border-slate-300 border-1 mx-2 p-2 rounded-md">
                     <template x-for="(event, index) in filtered_events" :key="index">
-                        <div class="p-2 bg-slate-800 border-2 border-slate-700 m-1 rounded-lg flex flex-row justify-between">
+                        <div class="p-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-300 border-slate-400 m-1 rounded-lg flex flex-row justify-between">
                             <div class="flex flex-col">
-                                <p class="text-white font-sans" x-text="event.name"></p>
+                                <p class="dark:text-white text-black font-sans" x-text="event.name"></p>
                                 <div class="flex flex-row">
-                                    <p class="text-white font-sans font-bold text-sm" x-text="event.event_type_string"></p><p class="text-white font-sans text-sm mx-1">-</p>
-                                    <p class="text-white font-sans text-sm" x-text="event.city"></p><p class="text-white font-sans text-sm mr-1">,</p>
-                                    <p class="text-white font-sans text-sm" x-text="event.country"></p>
+                                    <p class="dark:text-white text-black font-sans font-bold text-sm" x-text="event.event_type_string"></p><p class="dark:text-white text-black font-sans text-sm mx-1">-</p>
+                                    <p class="dark:text-white text-black font-sans text-sm" x-text="event.city"></p><p class="dark:text-white text-black font-sans text-sm mr-1">,</p>
+                                    <p class="dark:text-white text-black font-sans text-sm" x-text="event.country"></p>
                                 </div>
                                 <div class="flex flex-row">
-                                    <p class="text-white font-sans font-light" x-text="event.start_date"></p>
-                                    <p class="text-white font-sans font-light mx-1">-</p>
-                                    <p class="text-white font-sans font-light" x-text="event.end_date"></p>
+                                    <p class="dark:text-white text-black font-sans font-light" x-text="event.start_date"></p>
+                                    <p class="dark:text-white text-black font-sans font-light mx-1">-</p>
+                                    <p class="dark:text-white text-black font-sans font-light" x-text="event.end_date"></p>
                                 </div>
                             </div>
                             <div class="flex flex-col">
@@ -167,7 +169,7 @@
                         </div>
                     </template>
 
-                    <p class="text-white text-center text-lg" x-show="no_events" x-transition><i class="ph-bold ph-smiley-sad"></i> No events found</p>
+                    <p class="dark:text-white text-black text-center text-lg" x-show="no_events" x-transition><i class="ph-bold ph-smiley-sad"></i> No events found</p>
                 </div>
             </div>
 
@@ -254,13 +256,13 @@
             </script>
 
             <div class="flex flex-col justify-center items-center" x-show="page == 3" x-data="{ contribute_open: false }" x-transition>
-                <p class="text-center text-white font-sans text-2xl mb-4 mt-6"><i class="ph-bold ph-sliders-horizontal"></i> Choose an Operation</p>
+                <p class="text-center dark:text-white text-black font-sans text-2xl mb-4 mt-6"><i class="ph-bold ph-sliders-horizontal"></i> Choose an Operation</p>
                 <button class="ui_button" @click="contribute_open = !contribute_open"><i class="ph-bold ph-pencil-simple-line"></i> Contribute Data</button>
                 <div class="flex flex-col justify-center items-center mb-6" x-show="contribute_open" x-collapse>
                     <button class="ui_button" disabled><i class="ph-bold ph-link"></i> Create a session</button>
-                    <p class="text-white opacity-80 text-sm text-center">Create a session with one scout as the host to allow some more information to be autofilled and managed by the head scout</p>
+                    <p class="dark:text-white text-black opacity-80 text-sm text-center">Create a session with one scout as the host to allow some more information to be autofilled and managed by the head scout</p>
                     <button class="ui_button" @click="get_header_data('contribute_separately')"><i class="ph-bold ph-pencil"></i> Contribute separately</button>
-                    <p class="text-white opacity-80 text-sm text-center">Contribute data without a session</p>
+                    <p class="dark:text-white text-black opacity-80 text-sm text-center">Contribute data without a session</p>
                 </div>
                 <button class="ui_button" @click="get_header_data('view_data')"><i class="ph-bold ph-database"></i> View All Data</button>
             </div>
