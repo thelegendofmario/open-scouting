@@ -99,12 +99,14 @@ djlint cardie --reformat
 ```
 
 ## To-Do
-- [ ] Basic features
+- [x] Basic features
   - [x] Index page operation selection
   - [x] Contribute data separately
     - [x] Display all fields for the data
     - [x] Submit data to the server
-  - [ ] View all data for event
-- [ ] Create custom events (if they're missing from TBA)
-- [ ] Create an account (for more verified scouting)
-- [ ] Contribute in sessions
+  - [x] View all data for event
+- [ ] Create sessions for scouting
+- [ ] If the event isn't on TBA, then make it so users can add custom events
+- [ ] Be able to view events from previous years
+- [ ] Light mode style support
+- [ ] Expand data in the table and show who submitted it and when it was submitted
