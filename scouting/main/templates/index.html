@@ -17,7 +17,7 @@
                 <p class="font-sans dark:text-white mt-2 text-black text-center mb-8">An open source application for easier scouting at First Robotics competitions</p>
             </div>
             <div class="flex flex-row dark:bg-slate-800 dark:border-slate-700 bg-slate-200 border-slate-300 border-2 rounded-lg w-full px-6 justify-center items-center py-4 mt-6" x-show="!basic" x-transition>
-                <img class="w-16 h-16 aspect-square m-2" src="{% static '/main/images/icon_rounded.png' %}">
+                <img class="w-16 h-16 aspect-square m-2 hover:scale-110 transition-all ease-in-out active:scale-95" src="{% static '/main/images/icon_rounded.png' %}" @click="start_over()">
 
                 <button class="ui_button_icon" @click="start_over()"><i class="ph-bold ph-arrow-clockwise"></i></button>
 
