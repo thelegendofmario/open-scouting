@@ -9,23 +9,23 @@
 {% block body %}
     <div class="flex flex-col h-full w-screen items-center justify-center">
 
-        <div class="flex flex-row w-full md:w-3/4 lg:w-2/3 mx-8 my-4 py-2 bg-slate-800 border-2 border-slate-700 rounded-lg mb-4 items-center justify-center">
+        <div class="flex flex-row w-full md:w-3/4 lg:w-2/3 mx-8 my-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 items-center justify-center">
             <img class="w-16 h-16 aspect-square m-2" src="{% static '/main/images/icon_rounded.png' %}">
 
             <div class="flex flex-col">
-                <p class="text-white text-sans text-2xl">Contribute</p>
+                <p class="dark:text-white text-black text-sans text-2xl">Contribute</p>
                 <div class="flex flex-row">
-                    <p class="text-white text-sans text-sm mx-1">Contributing data to event</p>
-                    <p class="text-white text-sans font-bold text-sm mx-1">{{ event_name }}</p>
-                    <p class="text-white text-sans text-sm mx-1">as</p>
-                    <p class="text-white text-sans font-bold text-sm mx-1">{{ username }}</p>
+                    <p class="dark:text-white text-black text-sans text-sm mx-1">Contributing data to event</p>
+                    <p class="dark:text-white text-black text-sans font-bold text-sm mx-1">{{ event_name }}</p>
+                    <p class="dark:text-white text-black text-sans text-sm mx-1">as</p>
+                    <p class="dark:text-white text-black text-sans font-bold text-sm mx-1">{{ username }}</p>
                 </div>
             </div>
         </div>
 
-        <div class="lex flex-row w-full md:w-3/4 lg:w-2/3 mx-8 mb-4 py-2 bg-green-800 border-2 border-green-700 bg-opacity-80 rounded-lg border-opacity-80 items-center justify-center" x-data="submitted_check()"  x-show="show" x-transition>
+        <div class="lex flex-row w-full md:w-3/4 lg:w-2/3 mx-8 mb-4 py-2 dark:bg-green-800 bg-green-400 border-2 dark:border-green-700 border-green-500 bg-opacity-80 rounded-lg border-opacity-80 items-center justify-center" x-data="submitted_check()"  x-show="show" x-transition>
             <div>
-                <p class="text-white text-sans text-center"><i class="ph-bold ph-check-circle"></i> The data has been successfully submitted</p>
+                <p class="dark:text-white text-black text-sans text-center"><i class="ph-bold ph-check-circle"></i> The data has been successfully submitted</p>
             </div>
         </div>
 
@@ -65,10 +65,10 @@
 
                         let label = document.createElement('label');
                         label.innerText = label_text;
-                        label.classList = "text-white mb-2 text-sm text-sans";
+                        label.classList = "dark:text-white text-black mb-2 text-sm text-sans";
 
                         let field_container = document.createElement('div');
-                        field_container.classList = "flex flex-col mb-4 py-2 my-2 border-l-2 pl-2 border-slate-700 justify-left";
+                        field_container.classList = "flex flex-col mb-4 py-2 my-2 border-l-2 pl-2 dark:border-slate-bg-slate-300 700 justify-left";
 
                         let field_element;
 
@@ -77,20 +77,20 @@
                             field_element.type = 'number';
                             field_element.setAttribute('name', field.simple_name);
                             field_element.setAttribute('x-ref', field.simple_name);
-                            field_element.classList = "text-white bg-slate-700 rounded px-2 py-1 mb-2";
+                            field_element.classList = "dark:text-white text-black dark:bg-slate-700 bg-slate-300 rounded px-2 py-1 mb-2";
 
                         } else if (field.type === 'boolean') {
                             field_element = document.createElement('input');
                             field_element.type = 'checkbox';
                             field_element.setAttribute('name', field.simple_name);
                             field_element.setAttribute('x-ref', field.simple_name);
-                            field_element.classList = "text-white bg-slate-700 rounded px-2 py-1 mb-2";
+                            field_element.classList = "dark:text-white text-black dark:bg-slate-700 bg-slate-300 rounded px-2 py-1 mb-2";
 
                         } else if (field.type === 'choice') {
                             field_element = document.createElement('select');
                             field_element.setAttribute('name', field.simple_name);
                             field_element.setAttribute('x-ref', field.simple_name);
-                            field_element.classList = "text-white bg-slate-700 rounded px-2 py-1 mb-2";
+                            field_element.classList = "dark:text-white text-black dark:bg-slate-700 bg-slate-300 rounded px-2 py-1 mb-2";
 
                             // Add choices as options
                             field.choices.forEach(choice => {
@@ -105,7 +105,7 @@
                             field_element.setAttribute('name', field.simple_name);
                             field_element.setAttribute('x-ref', field.simple_name);
                             field_element.setAttribute('multiple', 'multiple');
-                            field_element.classList = "text-white bg-slate-700 rounded px-2 py-1 mb-2";
+                            field_element.classList = "dark:text-white text-black dark:bg-slate-700 bg-slate-300 rounded px-2 py-1 mb-2";
 
                             // Add multiple choices as options
                             field.choices.forEach(choice => {
@@ -133,11 +133,11 @@
                     create_section(section) {
                         let section_text = document.createElement("p");
                         section_text.innerHTML = `<i class="ph-bold ph-arrow-bend-down-right"></i> ${section.section}`;
-                        section_text.classList = "text-white text-md text-sans mb-2";
+                        section_text.classList = "dark:text-white text-black text-md text-sans mb-2";
 
                         let section_element = document.createElement("div");
                         section_element.setAttribute("x-ref", section.simple_name ? section.simple_name : 'no_simple_name');
-                        section_element.classList = "bg-slate-800 border-2 border-slate-700 rounded-lg mb-4 px-8 py-4 flex flex-col";
+                        section_element.classList = "dark:bg-slate-800 bg-slate-200 border-2 dark:border-slate-700 border-slate-300 rounded-lg mb-4 px-8 py-4 flex flex-col";
 
                         section_element.appendChild(section_text);
 
@@ -177,11 +177,11 @@
             }
         </script>
 
-        <div class="flex flex-col md:flex-row w-full md:w-3/4 lg:w-2/3 mx-8 my-4 py-2 bg-slate-800 border-2 border-slate-700 rounded-lg mb-4 items-center justify-center" x-data="submit_manager()">
+        <div class="flex flex-col md:flex-row w-full md:w-3/4 lg:w-2/3 mx-8 my-4 py-2 dark:bg-slate-800 bg-slate-200 border-2 dark:border-slate-700 border-slate-300 rounded-lg mb-4 items-center justify-center" x-data="submit_manager()">
             <button class="ui_button mr-4" @click="submit_button()"><i class="ph-bold ph-check-circle"></i> Submit</button>
 
             <div x-show="missing_required_fields" x-transition>
-                <p class="text-sans text-red-700 font-bold text-center">Please fill out all of the required fields</p>
+                <p class="text-sans dark:text-red-700 text-red-500 font-bold text-center">Please fill out all of the required fields</p>
             </div>
         </div>
 

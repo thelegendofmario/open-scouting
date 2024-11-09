@@ -15,5 +15,5 @@
 }
 
 .field_missing {
-    @apply !border-red-700 !border-2 !border-dashed;
+    @apply dark:!border-red-700 !border-red-500 !border-2 !border-dashed;
 }
