@@ -23,27 +23,30 @@
         </div>
 
     </div>
-
-    <div class="rounded-xl border-slate-600 border-1 bg-slate-800 bg-clip-padding overflow-x-scroll" x-data="dataTable()" x-init="init()">
-        <table class="min-w-full border-2 border-slate-600">
-            <thead>
-                <tr class="px-2">
-                    <template x-for="header in headers" :key="header">
-                        <th class="text-white font-bold font-sans px-4 py-2 text-left hover:bg-slate-700 bg-slate-800 transition-colors capitalize border-l-1 border-r-1 border-slate-700" x-text="generate_header_text(header)"></th>
-                    </template>
-                </tr>
-            </thead>
-            <tbody>
-                <template x-for="entry in entries">
-                    <tr class="px-2 hover:bg-slate-700 bg-slate-800 transition-colors rounded-md border-slate-600 border-2">
-                        <template x-for="header in headers">
-                            <td class="px-4 py-2 text-white font-sans border-l-1 border-r-1 border-slate-700" x-text="entry.data.find(field => field.name === header)?.value || ''"></td>
+    
+    <div class="w-full overflow-x-auto mx-16">
+        <div class="border-slate-600 border-1 bg-slate-800 width-screen" x-data="dataTable()" x-init="init()">
+            <table class="min-w-full border-2 border-slate-600 table-auto">
+                <thead>
+                    <tr class="px-2">
+                        <template x-for="header in headers" :key="header">
+                            <th class="text-white font-bold font-sans px-4 py-2 text-left hover:bg-slate-700 bg-slate-800 transition-colors capitalize border-l-1 border-r-1 border-slate-700 whitespace-nowrap" x-text="generate_header_text(header)"></th>
                         </template>
                     </tr>
-                </template>
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    <template x-for="entry in entries">
+                        <tr class="px-2 hover:bg-slate-700 bg-slate-800 transition-colors rounded-md border-slate-600 border-2">
+                            <template x-for="header in headers">
+                                <td class="px-4 py-2 text-white font-sans border-l-1 border-r-1 border-slate-700" x-text="entry.data.find(field => field.name === header)?.value || ''"></td>
+                            </template>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
     </div>
+    
     
     <script>
         function dataTable() {
@@ -69,8 +72,6 @@
                     .then(response => response.json().then(json => {
                         this.headers = json.data_headers;
                         this.entries = json.data;
-
-                        console.log(this.entries);
                     }))
                     .then(data => console.log(data))
                     .catch(error => console.error(error));

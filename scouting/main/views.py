@@ -74,7 +74,6 @@ def get_data(request):
 
         all_names = []
         for entry in data:
-            print(entry.data)
             for item in entry.data:
                 if item['name'] not in all_names:
                     all_names.append(item['name'])

@@ -591,6 +591,16 @@ video {
   margin-bottom: 1rem;
 }
 
+.mx-4 {
+  margin-left: 1rem;
+  margin-right: 1rem;
+}
+
+.mx-16 {
+  margin-left: 4rem;
+  margin-right: 4rem;
+}
+
 .mb-2 {
   margin-bottom: 0.5rem;
 }
@@ -679,6 +689,10 @@ video {
   min-width: 100%;
 }
 
+.table-auto {
+  table-layout: auto;
+}
+
 .flex-row {
   flex-direction: row;
 }
@@ -703,12 +717,20 @@ video {
   overflow: hidden;
 }
 
+.overflow-x-auto {
+  overflow-x: auto;
+}
+
 .overflow-y-auto {
   overflow-y: auto;
 }
 
 .overflow-x-scroll {
   overflow-x: scroll;
+}
+
+.whitespace-nowrap {
+  white-space: nowrap;
 }
 
 .rounded {
