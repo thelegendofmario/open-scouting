@@ -5,6 +5,9 @@
   <h1>Open Scouting</h1>
 
   **An open source application for easier scouting at First Robotics competitions**
+
+  **[Releases](https://github.com/nfoert/open-scouting/releases) ● [Issues](https://github.com/nfoert/open-scouting/issues)**
+
 </div>
 
 <div align="center">
