@@ -22,3 +22,7 @@ class Event(models.Model):
     name = models.CharField(max_length=999)
     event_code = models.CharField(max_length=99)
     created = models.DateTimeField(null=True, blank=True)
+    custom = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.name} in {str(self.year)}"

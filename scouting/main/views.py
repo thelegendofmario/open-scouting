@@ -4,7 +4,7 @@ from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 
-from main.models import Data
+from main.models import Data, Event
 from . import season_fields
 
 import json
@@ -51,8 +51,16 @@ def data(request):
 @csrf_exempt
 def submit(request):
     if request.method == "POST":
+        
+        events = Event.objects.filter(event_code=request.headers["event_code"])
+        if len(events) == 0:
+            event = Event(year=2024, name=request.headers["event_name"], event_code=request.headers["event_code"], created=timezone.now())
+            event.save()
+        else:
+            event = events[0]
+
         # TODO: Support year selection
-        data = Data(year=2024, event=request.headers["event_name"], event_code=request.headers["event_code"], data=json.loads(request.headers["data"]), created=timezone.now())
+        data = Data(year=2024, event=request.headers["event_name"], event_code=request.headers["event_code"], data=json.loads(request.headers["data"]), created=timezone.now(), event_model=event)
         data.save()
         return HttpResponse(request, "Success")
     else:
