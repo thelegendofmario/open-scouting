@@ -6,7 +6,7 @@
 
   **An open source application for easier scouting at First Robotics competitions**
 
-  **[Releases](https://github.com/nfoert/open-scouting/releases) ● [Issues](https://github.com/nfoert/open-scouting/issues)**
+  **[Releases](https://github.com/nfoert/open-scouting/releases) ● [Issues](https://github.com/nfoert/open-scouting/issues) ● [Development branch](https://github.com/nfoert/open-scouting/tree/development)**
 
 </div>
 
@@ -100,6 +100,15 @@ This project uses `djlint` to lint the templates. You can run this using the fol
 ```bash
 djlint cardie --reformat
 ```
+
+## Contributing
+Contributions are welcome to this project! Please see the [issues](https://github.com/nfoert/open-scouting/issues) page for any current bugs or features that need implemented.
+
+When contributing, please fork this repository (ensure you uncheck the "Copy the `main` branch only check box, this gives you access to the `development` branch with the latest changes)
+
+Next, create a new branch and implement your changes. You can install this project locally for testing by following the steps in [Development Installation](#development-installation). Once you've made your changes, please open a pull request into the `development` branch, and your changes will be reviewed.
+
+Eventually, `development` will be merged into `main` and your changes will be released into production. Thanks for your contribution!
 
 ## To-Do
 - [x] Basic features
