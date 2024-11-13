@@ -170,6 +170,7 @@
                     </template>
 
                     <p class="dark:text-white text-black text-center text-lg" x-show="no_events" x-transition><i class="ph-bold ph-smiley-sad"></i> No events found</p>
+                    <button class="ui_button w-full" @click="create_custom_event()"><i class="ph-bold ph-plus"></i> Create a custom Event</button>
                 </div>
             </div>
 
@@ -248,6 +249,10 @@
                             this.page = 3;
                         },
 
+                        create_custom_event() {
+                            window.dispatchEvent(new CustomEvent('open_create_custom_event'));
+                        },
+
                         init() {
                             this.get_events();
                         }
@@ -274,15 +279,12 @@
                     page: 1,
 
                     get_header_data(load_page) {
-                        console.log(load_page)
                         window.dispatchEvent(new CustomEvent('get_header_data', {
                             detail: { load_page }
                         }));
                     },
 
-                    load_page(page) {
-                        console.log(page)
-                        
+                    load_page(page) {                        
                         if (page == "session") {
                             console.log("This feature is coming soon");
                         } else if (page == "contribute_separately") {
@@ -298,7 +300,6 @@
                         });
 
                         window.addEventListener('header_data', (event) => {
-                            console.log("recieved header_data")
                             event.stopImmediatePropagation();
                             const { username, event_name, event_code, load_page } = event.detail;
 
@@ -347,7 +348,13 @@
                 return {
                     shown: false,
 
-                    init() {}
+                    init() {
+                        window.addEventListener('open_create_custom_event', (event) => {
+                            event.stopImmediatePropagation();
+                            
+                            this.shown = true;
+                        });
+                    },
                 }
             }
         </script>
