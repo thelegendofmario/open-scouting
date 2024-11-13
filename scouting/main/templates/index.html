@@ -313,7 +313,7 @@
         </script>
 
         <!-- Create custom event dialog -->
-        <div class="fixed z-50 h-[80%] bottom-0 md:bottom-auto w-screen md:h-[80%] md:w-[80%] md:mx-4 md:my-8 dark:bg-slate-800/90 dark:border-slate-700 border-slate-300 border-2 md:rounded-2xl rounded-t-xl bg-slate-200 backdrop-blur-md p-4 md:p-8" x-data="create_custom_event()" x-init="init()" x-show="shown" @click.outside="shown = false" x-transition>
+        <div class="fixed z-50 h-[80%] bottom-0 md:bottom-auto w-screen md:h-[80%] md:w-[80%] md:mx-4 md:my-8 dark:bg-slate-800/60 dark:border-slate-700 border-slate-300 border-2 md:rounded-2xl rounded-t-xl bg-slate-200/60 backdrop-blur-md p-4 md:p-8 overflow-y-auto" x-data="create_custom_event()" x-init="init()" x-show="shown" @click.outside="shown = false" x-transition>
             <div class="flex flex-row justify-between">
                 <div class="flex flex-col max-w-sm md:max-w-xl lg:max-w-3xl">
                     <p class="text-black dark:text-white text-sans text-2xl font-bold">Create Custom Event</p>
@@ -321,12 +321,31 @@
                 </div>
                 <button class="dark:text-white text-black text-3xl hover:scale-105 active:scale-95 transition-all dark:bg-slate-700 border-2 bg-slate-200 dark:border-slate-600 border-slate-400 aspect-square rounded-full my-auto p-2 mxr-2" @click="shown = false"><i class="ph-bold ph-x"></i></button>
             </div>
+
+            <div class="flex flex-col items-center mt-4 h-full">
+                <input class="ui_input" placeholder="Name" x-ref="name">
+                <p class="text-black dark:text-white/80 font-sans text-xs text-left mb-2">Enter the name for this event</p>
+
+                <select class="ui_input" placeholder="Year" x-ref="year"></select>
+                <p class="text-black dark:text-white/80 font-sans text-xs text-left mb-2">What year did this event take place?</p>
+
+                <input class="ui_input" type="date" placeholder="Event begins" x-ref="date_begins">
+                <p class="text-black dark:text-white/80 font-sans text-xs text-left mb-2">What day does this event begin?</p>
+
+                <input class="ui_input" type="date" placeholder="Event ends" x-ref="date_ends">
+                <p class="text-black dark:text-white/80 font-sans text-xs text-left mb-2">What day does this event end?</p>
+
+                <input class="ui_input" placeholder="Event location" x-ref="location">
+                <p class="text-black dark:text-white/80 font-sans text-xs text-left mb-2">Where will this event be held?</p>
+
+                <button class="ui_button">Create new Custom Event</button>
+            </div>
         </div>
 
         <script>
             function create_custom_event() {
                 return {
-                    shown: true,
+                    shown: false,
 
                     init() {}
                 }
