@@ -324,22 +324,26 @@
             </div>
 
             <div class="flex flex-col items-center mt-4 h-full">
-                <input class="ui_input" placeholder="Name" x-ref="name">
+                <input class="ui_input" placeholder="Name" x-ref="name" @input="check_fields">
                 <p class="text-black dark:text-white/80 font-sans text-xs text-left mb-2">Enter the name for this event</p>
 
-                <select class="ui_input" placeholder="Year" x-ref="year"></select>
-                <p class="text-black dark:text-white/80 font-sans text-xs text-left mb-2">What year did this event take place?</p>
+                <select class="ui_input" placeholder="Year" x-ref="year" @change="update_date_fields">
+                    <template x-for="year in YEARS" :key="year">
+                        <option x-text="year"></option>
+                    </template>
+                </select>
+                <p class="text-black dark:text-white/80 font-sans text-xs text-left mb-2" @input="check_fields">What year did this event take place?</p>
 
-                <input class="ui_input" type="date" placeholder="Event begins" x-ref="date_begins">
+                <input class="ui_input" type="date" placeholder="Event begins" x-ref="date_begins" @click.outside="check_date_fields()" @input="check_fields">
                 <p class="text-black dark:text-white/80 font-sans text-xs text-left mb-2">What day does this event begin?</p>
 
-                <input class="ui_input" type="date" placeholder="Event ends" x-ref="date_ends">
+                <input class="ui_input" type="date" placeholder="Event ends" x-ref="date_ends" @click.outside="check_date_fields()" @input="check_fields">
                 <p class="text-black dark:text-white/80 font-sans text-xs text-left mb-2">What day does this event end?</p>
 
-                <input class="ui_input" placeholder="Event location" x-ref="location">
+                <input class="ui_input" placeholder="Event location" x-ref="location" @input="check_fields">
                 <p class="text-black dark:text-white/80 font-sans text-xs text-left mb-2">Where will this event be held?</p>
 
-                <button class="ui_button">Create new Custom Event</button>
+                <button class="ui_button" :disabled="!able_to_submit"><i class="ph-bold ph-check"></i> Create new Custom Event</button>
             </div>
         </div>
 
@@ -347,6 +351,48 @@
             function create_custom_event() {
                 return {
                     shown: false,
+                    YEARS: JSON.parse(`{{ YEARS|safe }}`),
+                    selected_year: null,
+                    able_to_submit: false,
+
+                    update_date_fields(e) {
+                        this.selected_year = e.target.value;
+
+                        this.$refs.date_begins.min = `${this.selected_year}-01-01`;
+                        this.$refs.date_begins.max = `${this.selected_year}-12-31`;
+                        this.$refs.date_ends.min = `${this.selected_year}-01-01`;
+                        this.$refs.date_ends.max = `${this.selected_year}-12-31`;
+                    },
+
+                    check_date_fields() {
+                        let date_begins_value = new Date(Date.parse(this.$refs.date_begins.value));
+                        let date_ends_value = new Date(Date.parse(this.$refs.date_ends.value));
+                        let valid = false;
+
+                        if (!this.$refs.date_begins.checkValidity()) {
+                            this.$refs.date_begins.value = `${this.selected_year}-${date_begins_value.getMonth()}-${date_begins_value.getDate()}`;
+                        }
+
+                        if (!this.$refs.date_ends.checkValidity()) {
+                            this.$refs.date_ends.value = `${this.selected_year}-${date_begins_value.getMonth()}-${date_begins_value.getDate()}`;
+                        }
+
+                        this.check_fields();
+                    },
+
+                    check_fields() {
+                        if (this.$refs.date_begins.value == "" || this.$refs.date_ends.value == "" || this.$refs.name.value == "" || this.$refs.location.value == "") {
+                            valid = false;
+                        } else {
+                            valid = true;
+                        }
+
+                        if (valid) {
+                            this.able_to_submit = true;
+                        } else {
+                            this.able_to_submit = false;
+                        }
+                    },
 
                     init() {
                         window.addEventListener('open_create_custom_event', (event) => {
@@ -354,6 +400,12 @@
                             
                             this.shown = true;
                         });
+
+                        this.selected_year = this.YEARS[0]
+                        this.$refs.date_begins.min = `${this.selected_year}-01-01`;
+                        this.$refs.date_begins.max = `${this.selected_year}-12-31`;
+                        this.$refs.date_ends.min = `${this.selected_year}-01-01`;
+                        this.$refs.date_ends.max = `${this.selected_year}-12-31`;
                     },
                 }
             }

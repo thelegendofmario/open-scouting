@@ -9,10 +9,14 @@ from . import season_fields
 
 import json
 
+# TODO: This is a duplicate of a similar array in models.py, I don't know if there's a good way to make these into one array
+YEARS = ["2024", "2025"]
+
 def index(request):
     context = {
         "SERVER_IP": settings.SERVER_IP,
-        "TBA_API_KEY": settings.TBA_API_KEY
+        "TBA_API_KEY": settings.TBA_API_KEY,
+        "YEARS": json.dumps(YEARS)
     }
 
     return render(request, "index.html", context)
