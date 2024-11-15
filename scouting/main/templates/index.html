@@ -29,7 +29,8 @@
                     </div>
 
                     <div class="flex flex-row items-center">
-                        <i class="ph-bold ph-calendar-blank dark:text-white text-black font-sans px-1"></i>
+                        <i class="ph-bold ph-calendar-blank dark:text-white text-black font-sans px-1" x-show="!custom_event"></i>
+                        <i class="ph-bold ph-calendar-star dark:text-white text-black font-sans px-1" x-show="custom_event"></i>
                         <p class=" dark:text-white text-black font-sans text-md font-bold px-1" x-text="event_name"></p>
                         <p class=" dark:text-white text-black font-mono text-sm px-1 opacity-70" x-text="event_code" x-show="!custom_event"></p>
                         <p class=" dark:text-white text-black font-mono text-sm px-1 opacity-70" x-show="custom_event"><i class="ph-bold ph-star"></i> custom</p>

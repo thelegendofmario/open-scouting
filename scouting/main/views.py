@@ -28,6 +28,7 @@ def contribute(request):
     request.session["username"] = request.GET.get("username", "unknown")
     request.session["event_name"] = request.GET.get("event_name", "unknown")
     request.session["event_code"] = request.GET.get("event_code", "unknown")
+    request.session["custom"] = request.GET.get("custom", "unknown")
 
     context = {
         "SERVER_IP": settings.SERVER_IP,
@@ -35,7 +36,8 @@ def contribute(request):
         "season_fields": json.dumps(season_fields.crescendo),
         "username": request.GET.get("username", "unknown"),
         "event_name": request.GET.get("event_name", "unknown"),
-        "event_code": request.GET.get("event_code", "unknown")
+        "event_code": request.GET.get("event_code", "unknown"),
+        "custom": request.GET.get("custom", "unknown")
     }
 
     return render(request, "contribute.html", context)
@@ -44,13 +46,16 @@ def data(request):
     request.session["username"] = request.GET.get("username", "unknown")
     request.session["event_name"] = request.GET.get("event_name", "unknown")
     request.session["event_code"] = request.GET.get("event_code", "unknown")
+    request.session["custom"] = request.GET.get("custom", "unknown")
+
 
     context = {
         "SERVER_IP": settings.SERVER_IP,
         "TBA_API_KEY": settings.TBA_API_KEY,
         "username": request.GET.get("username", "unknown"),
         "event_name": request.GET.get("event_name", "unknown"),
-        "event_code": request.GET.get("event_code", "unknown")
+        "event_code": request.GET.get("event_code", "unknown"),
+        "custom": request.GET.get("custom", "unknown")
     }
 
     return render(request, "data.html", context)
@@ -58,18 +63,26 @@ def data(request):
 @csrf_exempt
 def submit(request):
     if request.method == "POST":
+        if request.headers["custom"] == "true":
+            events = Event.objects.filter(event_name=request.headers["event_name"], event_code=True)
 
-        events = Event.objects.filter(event_code=request.headers["event_code"])
-        if len(events) == 0:
-            event = Event(year=2024, name=request.headers["event_name"], event_code=request.headers["event_code"], created=timezone.now())
-            event.save()
+            # TODO: Support year selection
+            data = Data(year=2024, event=request.headers["event_name"], data=json.loads(request.headers["data"]), created=timezone.now(), event_model=events[0])
+            data.save()
+            return HttpResponse(request, "Success")
+            
         else:
-            event = events[0]
+            events = Event.objects.filter(event_code=request.headers["event_code"])
+            if len(events) == 0:
+                event = Event(year=2024, name=request.headers["event_name"], event_code=request.headers["event_code"], created=timezone.now())
+                event.save()
+            else:
+                event = events[0]
 
-        # TODO: Support year selection
-        data = Data(year=2024, event=request.headers["event_name"], event_code=request.headers["event_code"], data=json.loads(request.headers["data"]), created=timezone.now(), event_model=event)
-        data.save()
-        return HttpResponse(request, "Success")
+            # TODO: Support year selection
+            data = Data(year=2024, event=request.headers["event_name"], event_code=request.headers["event_code"], data=json.loads(request.headers["data"]), created=timezone.now(), event_model=event)
+            data.save()
+            return HttpResponse(request, "Success")
     else:
         return HttpResponse(request, "Request is not a POST request!", status=501)
 
