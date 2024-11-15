@@ -146,40 +146,77 @@
 
                 <input class="ui_input" placeholder="Search for an event..." x-ref="event_search" @input="update_filters()">
 
-                <div class="h-[50vh] overflow-y-auto dark:bg-slate-700 bg-slate-200 dark:border-slate-600 border-slate-300 border-1 mx-2 p-2 rounded-md">
-                    <template x-for="(event, index) in filtered_events" :key="index">
-                        <div class="p-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-300 border-slate-400 m-1 rounded-lg flex flex-row justify-between">
-                            <div class="flex flex-col">
-                                <p class="dark:text-white text-black font-sans" x-text="event.name"></p>
-                                <div class="flex flex-row">
-                                    <p class="dark:text-white text-black font-sans font-bold text-sm" x-text="event.event_type_string"></p><p class="dark:text-white text-black font-sans text-sm mx-1">-</p>
-                                    <p class="dark:text-white text-black font-sans text-sm" x-text="event.city"></p><p class="dark:text-white text-black font-sans text-sm mr-1">,</p>
-                                    <p class="dark:text-white text-black font-sans text-sm" x-text="event.country"></p>
-                                </div>
-                                <div class="flex flex-row">
-                                    <p class="dark:text-white text-black font-sans font-light" x-text="event.start_date"></p>
-                                    <p class="dark:text-white text-black font-sans font-light mx-1">-</p>
-                                    <p class="dark:text-white text-black font-sans font-light" x-text="event.end_date"></p>
-                                </div>
-                            </div>
-                            <div class="flex flex-col">
-                                <button class="ui_button_icon" @click="select_event(event.name, event.event_code)"><i class="ph-bold ph-check-circle"></i></button>
-                            </div>
-                            
-                        </div>
-                    </template>
+                <div>
+                    <button class="dark:bg-slate-700 bg-slate-200 border-2 dark:border-slate-600 border-slate-300 text-black dark:text-white rounded-t-md px-4 py-2 ml-4 disabled:opacity-50 hover:enabled:px-5 active:enabled:px-3 transition-all" :disabled="!show_custom_events" @click="show_custom_events = false"><i class="ph-bold ph-check-circle"></i> TBA Events</button>
+                    <button class="dark:bg-slate-700 bg-slate-200 border-2 dark:border-slate-600 border-slate-300 text-black dark:text-white rounded-t-md px-4 py-2 disabled:opacity-50 hover:enabled:px-5 active:enabled:px-3 transition-all" :disabled="show_custom_events" @click="show_custom_events = true"><i class="ph-bold ph-star"></i> Custom Events</button>
 
-                    <p class="dark:text-white text-black text-center text-lg" x-show="no_events" x-transition><i class="ph-bold ph-smiley-sad"></i> No events found</p>
-                    <button class="ui_button w-full" @click="create_custom_event()"><i class="ph-bold ph-plus"></i> Create a custom Event</button>
+                    <div class="h-[50vh] overflow-y-auto dark:bg-slate-700 bg-slate-200 dark:border-slate-600 border-slate-300 border-1 mx-2 p-2 rounded-md">
+                        <div x-show="!show_custom_events">
+                            <template x-for="(event, index) in filtered_events" :key="index">
+                                <div class="p-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-300 border-slate-400 m-1 rounded-lg flex flex-row justify-between">
+                                    <div class="flex flex-col">
+                                        <p class="dark:text-white text-black font-sans" x-text="event.name"></p>
+                                        <div class="flex flex-row">
+                                            <p class="dark:text-white text-black font-sans font-bold text-sm" x-text="event.event_type_string"></p><p class="dark:text-white text-black font-sans text-sm mx-1">-</p>
+                                            <p class="dark:text-white text-black font-sans text-sm" x-text="event.city"></p><p class="dark:text-white text-black font-sans text-sm mr-1">,</p>
+                                            <p class="dark:text-white text-black font-sans text-sm" x-text="event.country"></p>
+                                        </div>
+                                        <div class="flex flex-row">
+                                            <p class="dark:text-white text-black font-sans font-light" x-text="event.start_date"></p>
+                                            <p class="dark:text-white text-black font-sans font-light mx-1">-</p>
+                                            <p class="dark:text-white text-black font-sans font-light" x-text="event.end_date"></p>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <button class="ui_button_icon" @click="select_event(event.name, event.event_code)"><i class="ph-bold ph-check-circle"></i></button>
+                                    </div>
+                                </div>
+                            </template>
+        
+                            <p class="dark:text-white text-black text-center text-lg" x-show="no_events" x-transition><i class="ph-bold ph-smiley-sad"></i> No events found</p>
+                            <button class="ui_button w-full" @click="create_custom_event()"><i class="ph-bold ph-plus"></i> Create a custom Event</button>
+                        </div>
+
+                        <div x-show="show_custom_events">
+                            <template x-for="(event, index) in custom_filtered_events" :key="index">
+                                <div class="p-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-300 border-slate-400 m-1 rounded-lg flex flex-row justify-between">
+                                    <div class="flex flex-col">
+                                        <p class="dark:text-white text-black font-sans" x-text="event.name"></p>
+                                        <div class="flex flex-row">
+                                            <!-- <p class="dark:text-white text-black font-sans font-bold text-sm" x-text="event.event_type_string"></p><p class="dark:text-white text-black font-sans text-sm mx-1">-</p> -->
+                                            <p class="dark:text-white text-black font-sans font-bold text-sm">Custom Event</p><p class="dark:text-white text-black font-sans text-sm mx-1">-</p>
+                                            <p class="dark:text-white text-black font-sans text-sm" x-text="event.location"></p>
+                                        </div>
+                                        <div class="flex flex-row">
+                                            <p class="dark:text-white text-black font-sans font-light" x-text="event.start_date"></p>
+                                            <p class="dark:text-white text-black font-sans font-light mx-1">-</p>
+                                            <p class="dark:text-white text-black font-sans font-light" x-text="event.end_date"></p>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <!-- <button class="ui_button_icon" @click="select_event(event.name, event.event_code)"><i class="ph-bold ph-check-circle"></i></button> -->
+                                    </div>
+                                </div>
+                            </template>
+        
+                            <p class="dark:text-white text-black text-center text-lg" x-show="no_custom_events" x-transition><i class="ph-bold ph-smiley-sad"></i> No events found</p>
+                            <button class="ui_button w-full" @click="create_custom_event()"><i class="ph-bold ph-plus"></i> Create a custom Event</button>
+                        </div>
+                    </div>
                 </div>
+                
             </div>
 
             <script>
                 function events() {
                     return {
                         events: [],
+                        custom_events: [],
                         filtered_events: [],
+                        custom_filtered_events: [],
                         no_events: true,
+                        no_custom_events: true,
+                        show_custom_events: false,
 
                         async get_events() {
                             var response = await fetch("https://www.thebluealliance.com/api/v3/status", {
@@ -200,9 +237,16 @@
                                 let data = await response.json();
                                 this.events = data;
                                 this.update_filters();
-                            });
 
-                            
+                                var response = await fetch("{{ SERVER_IP }}/get_custom_events", {
+                                    method: "POST",
+                                    headers: {}
+                                });
+                        
+                                let custom_data = JSON.parse(await response.json());
+                                this.custom_events = custom_data;
+                                this.update_filters();
+                            });
                         },
 
                         update_filters() {
@@ -213,8 +257,15 @@
                                     let eventDate = new Date(event.end_date);
                                     return eventDate >= today;
                                 });
+
+                                this.custom_filtered_events = this.custom_events.filter(event => {
+                                    let eventDate = new Date(event.end_date);
+                                    return eventDate >= today;
+                                });
+
                             } else {
                                 this.filtered_events = this.events;
+                                this.custom_filtered_events = this.custom_events;
                             }
 
                             let search = this.$refs.event_search.value.toLowerCase();
@@ -233,12 +284,28 @@
                                         location_name.includes(search)
                                     );
                                 });
+
+                                this.custom_filtered_events = this.custom_filtered_events.filter(event => {
+                                    let name = event.name ? event.name.toLowerCase() : '';
+                                    let location = event.location ? event.location.toLowerCase() : '';
+
+                                    return (
+                                        name.includes(search) ||
+                                        location.includes(search)
+                                    );
+                                });
                             }
 
                             if (this.filtered_events.length == 0) {
                                 this.no_events = true;
                             } else {
                                 this.no_events = false;
+                            }
+
+                            if (this.custom_filtered_events.length == 0) {
+                                this.no_custom_events = true;
+                            } else {
+                                this.no_custom_events = false;
                             }
                         },
 

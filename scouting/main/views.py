@@ -100,9 +100,23 @@ def get_data(request):
 @csrf_exempt
 def get_custom_events(request):
     if request.method == "POST":
+        data = []
+
         # TODO: Support year selection
         events = Event.objects.filter(year=2024, custom=True)
-        return JsonResponse(list(events), safe=False)
+
+        for event in events:
+            event_data = {
+                "custom": True,
+                "name": event.name,
+                "year": event.year,
+                "start_date": event.custom_data["date_begins"],
+                "end_date": event.custom_data["date_ends"],
+                "location": event.custom_data["location"]
+            }
+            data.append(event_data)
+
+        return JsonResponse(json.dumps(data), safe=False)
         
     else:
         return HttpResponse("Request is not a POST request!", status=501)
