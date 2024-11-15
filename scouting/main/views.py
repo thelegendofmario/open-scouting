@@ -8,9 +8,12 @@ from main.models import Data, Event
 from . import season_fields
 
 import json
+from datetime import datetime
 
 # TODO: This is a duplicate of a similar array in models.py, I don't know if there's a good way to make these into one array
 YEARS = ["2024", "2025"]
+
+DATE_FORMAT = "%Y-%m-%d"
 
 def index(request):
     context = {
@@ -103,3 +106,21 @@ def get_custom_events(request):
         
     else:
         return HttpResponse("Request is not a POST request!", status=501)
+
+@csrf_exempt
+def create_custom_event(request):
+    if request.method == "POST":
+        data = {
+            "name": request.headers["name"],
+            "year": request.headers["year"],
+            "date_begins": request.headers["date-begins"],
+            "date_ends": request.headers["date-ends"],
+            "location": request.headers["location"]
+        }
+
+        # TODO: Support year selection
+        event = Event(year=2024, name=request.headers["name"], created=timezone.now(), custom=True, custom_data=data)
+        event.save()
+        return HttpResponse(request, "Success")
+    else:
+        return HttpResponse(request, "Request is not a POST request!", status=501)

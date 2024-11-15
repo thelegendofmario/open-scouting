@@ -26,4 +26,7 @@ class Event(models.Model):
     custom_data = models.JSONField(default=dict, blank=True)
 
     def __str__(self):
-        return f"{self.name} in {str(self.year)}"
+        if self.custom:
+            return f"{self.name} in {str(self.year)} (Custom event)"
+        else:
+            return f"{self.name} in {str(self.year)}"
