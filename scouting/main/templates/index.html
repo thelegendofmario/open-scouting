@@ -31,7 +31,8 @@
                     <div class="flex flex-row items-center">
                         <i class="ph-bold ph-calendar-blank dark:text-white text-black font-sans px-1"></i>
                         <p class=" dark:text-white text-black font-sans text-md font-bold px-1" x-text="event_name"></p>
-                        <p class=" dark:text-white text-black font-mono text-sm px-1 opacity-70" x-text="event_code"></p>
+                        <p class=" dark:text-white text-black font-mono text-sm px-1 opacity-70" x-text="event_code" x-show="!custom_event"></p>
+                        <p class=" dark:text-white text-black font-mono text-sm px-1 opacity-70" x-show="custom_event"><i class="ph-bold ph-star"></i> custom</p>
                     </div>
                 </div>
             </div>
@@ -46,6 +47,7 @@
                     team_number: "",
                     event_name: "",
                     event_code: "",
+                    custom_event: false,
 
                     start_over() {
                         window.dispatchEvent(new CustomEvent('start_over'));
@@ -74,6 +76,15 @@
                             this.event_code = event_code;
                         });
 
+                        window.addEventListener('header_custom_event', (event) => {
+                            event.stopImmediatePropagation();
+                            const { event_name } = event.detail;
+
+                            this.event_name = event_name;
+                            this.event_code = false;
+                            this.custom_event = true;
+                        });
+
                         window.addEventListener('get_header_data', (event) => {
                             event.stopImmediatePropagation();
                             const { load_page } = event.detail;
@@ -82,9 +93,10 @@
                             let event_name = this.event_name;
                             let event_code = this.event_code;
                             let load_page_var = load_page;
+                            let custom = this.custom_event;
 
                             window.dispatchEvent(new CustomEvent('header_data', {
-                                detail: { username, event_name, event_code, load_page }
+                                detail: { username, event_name, event_code, load_page, custom }
                             }));
                         });
                     }
@@ -194,7 +206,7 @@
                                         </div>
                                     </div>
                                     <div class="flex flex-col">
-                                        <!-- <button class="ui_button_icon" @click="select_event(event.name, event.event_code)"><i class="ph-bold ph-check-circle"></i></button> -->
+                                        <button class="ui_button_icon" @click="select_custom_event(event.name)"><i class="ph-bold ph-check-circle"></i></button>
                                     </div>
                                 </div>
                             </template>
@@ -316,6 +328,13 @@
                             this.page = 3;
                         },
 
+                        select_custom_event(event_name) {
+                            window.dispatchEvent(new CustomEvent('header_custom_event', {
+                                detail: { event_name }
+                            }));
+                            this.page = 3;
+                        },
+
                         create_custom_event() {
                             window.dispatchEvent(new CustomEvent('open_create_custom_event'));
                         },
@@ -360,9 +379,17 @@
                         if (page == "session") {
                             console.log("This feature is coming soon");
                         } else if (page == "contribute_separately") {
-                            window.location.href = `{{ SERVER_IP }}/contribute?username=${this.username}&event_name=${this.event_name}&event_code=${this.event_code}&`;
+                            if (!this.custom) {
+                                window.location.href = `{{ SERVER_IP }}/contribute?username=${this.username}&event_name=${this.event_name}&event_code=${this.event_code}&`;
+                            } else {
+                                window.location.href = `{{ SERVER_IP }}/contribute?username=${this.username}&event_name=${this.event_name}&custom=true&`;
+                            }
                         } else if (page == "view_data") {
-                            window.location.href = `{{ SERVER_IP }}/data?username=${this.username}&event_name=${this.event_name}&event_code=${this.event_code}&`;
+                            if (!this.custom) {
+                                window.location.href = `{{ SERVER_IP }}/data?username=${this.username}&event_name=${this.event_name}&event_code=${this.event_code}&`;
+                            } else {
+                                window.location.href = `{{ SERVER_IP }}/data?username=${this.username}&event_name=${this.event_name}&custom=true&`;
+                            }
                         }
                     },
 
@@ -373,11 +400,12 @@
 
                         window.addEventListener('header_data', (event) => {
                             event.stopImmediatePropagation();
-                            const { username, event_name, event_code, load_page } = event.detail;
+                            const { username, event_name, event_code, load_page, custom } = event.detail;
 
                             this.username = username;
                             this.event_name = event_name;
                             this.event_code = event_code;
+                            this.custom = custom;
                             this.load_page(load_page);
                         });
                     }
