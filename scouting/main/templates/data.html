@@ -9,11 +9,15 @@
 {% block body %}
 <div class="flex flex-col h-full min-h-screen w-screen overflow-hidden items-center justify-center">
 
-    <div class="flex flex-row w-full md:w-3/4 lg:w-2/3 mx-8 my-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 items-center justify-center" x-data="">
+    <div class="flex flex-row w-full md:w-3/4 lg:w-2/3 mx-8 my-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 items-center justify-center" x-data="data_header()">
         <img class="w-16 h-16 aspect-square m-2 hover:scale-110 transition-all ease-in-out active:scale-95" src="{% static '/main/images/icon_rounded.png' %}" @click="window.location.href = '{{ SERVER_IP }}'">
 
         <div class="flex flex-col">
-            <p class="dark:text-white text-black text-sans text-2xl">Event Data</p>
+            <div class="flex flex-row items-center">
+                <button class="ui_button_icon mr-2" @click="go_to_contribute()"><i class="ph-bold ph-pencil-simple"></i></button>
+                <p class="dark:text-white text-black text-sans text-2xl">Event Data</p>
+            </div>
+
             <div class="flex flex-row">
                 <p class="dark:text-white text-black text-sans text-sm mx-1">Viewing data for event</p>
                 <p class="dark:text-white text-black text-sans font-bold text-sm mx-1">{{ event_name }}</p>
@@ -23,6 +27,20 @@
         </div>
 
     </div>
+
+    <script>
+        function data_header() {
+            return {
+                go_to_contribute() {
+                    let url = new URL(window.location.href);
+                    url.pathname = url.pathname.replace("/data", "/contribute");
+                    window.location.href = url.toString();
+                },
+
+                init() {}
+            }
+        }
+    </script>
     
     <div class="w-full overflow-x-auto mx-16">
         <div class="dark:border-slate-600 border-slate-300 border-1 dark:bg-slate-800 bg-slate-200 width-screen" x-data="dataTable()" x-init="init()">
