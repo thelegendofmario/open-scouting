@@ -9,6 +9,7 @@ from . import season_fields
 
 import json
 from datetime import datetime
+import uuid
 
 # TODO: This is a duplicate of a similar array in models.py, I don't know if there's a good way to make these into one array
 YEARS = ["2024", "2025"]
@@ -48,7 +49,6 @@ def data(request):
     request.session["event_code"] = request.GET.get("event_code", "unknown")
     request.session["custom"] = request.GET.get("custom", "unknown")
 
-
     context = {
         "SERVER_IP": settings.SERVER_IP,
         "TBA_API_KEY": settings.TBA_API_KEY,
@@ -62,12 +62,13 @@ def data(request):
 
 @csrf_exempt
 def submit(request):
+    print(request.GET.get("event_name"))
     if request.method == "POST":
         if request.headers["custom"] == "true":
-            events = Event.objects.filter(event_name=request.headers["event_name"], event_code=True)
+            events = Event.objects.filter(name=request.headers["event_name"], event_code=request.headers["event_code"], custom=True)
 
             # TODO: Support year selection
-            data = Data(year=2024, event=request.headers["event_name"], data=json.loads(request.headers["data"]), created=timezone.now(), event_model=events[0])
+            data = Data(year=2024, event=request.headers["event_name"], event_code=request.headers["event_code"], data=json.loads(request.headers["data"]), created=timezone.now(), event_model=events[0])
             data.save()
             return HttpResponse(request, "Success")
             
@@ -89,8 +90,21 @@ def submit(request):
 @csrf_exempt
 def get_data(request):
     if request.method == "POST":
+        if request.headers["custom"] == "true":
+            events = Event.objects.filter(name=request.headers["event_name"], event_code=request.headers["event_code"], custom=True)
+            
+        else:
+            events = Event.objects.filter(event_code=request.headers["event_code"])
+            if len(events) == 0:
+                event = Event(year=2024, name=request.headers["event_name"], event_code=request.headers["event_code"], custom=False, created=timezone.now())
+                event.save()
+            else:
+                event = events[0]
 
-        data = Data.objects.filter(year=2024, event=request.session["event_name"], event_code=request.session["event_code"])
+        # TODO: Support year selection
+        data = Data.objects.filter(year=2024, event=request.headers["event_name"], event_code=request.headers["event_code"], event_model=events[0])
+
+        print(data)
 
         data_json = []
         for item in data:
@@ -107,8 +121,10 @@ def get_data(request):
                     all_names.append(item['name'])
 
         return JsonResponse({"data": data_json, "data_headers": list(all_names)}, safe=False)
+
     else:
         return HttpResponse("Request is not a POST request!", status=501)
+        
 
 @csrf_exempt
 def get_custom_events(request):
@@ -125,7 +141,8 @@ def get_custom_events(request):
                 "year": event.year,
                 "start_date": event.custom_data["date_begins"],
                 "end_date": event.custom_data["date_ends"],
-                "location": event.custom_data["location"]
+                "location": event.custom_data["location"],
+                "event_code": event.event_code
             }
             data.append(event_data)
 
@@ -137,16 +154,19 @@ def get_custom_events(request):
 @csrf_exempt
 def create_custom_event(request):
     if request.method == "POST":
+        UUID = uuid.uuid4().hex
+            
         data = {
             "name": request.headers["name"],
             "year": request.headers["year"],
             "date_begins": request.headers["date-begins"],
             "date_ends": request.headers["date-ends"],
-            "location": request.headers["location"]
+            "location": request.headers["location"],
+            "event_code": UUID
         }
 
         # TODO: Support year selection
-        event = Event(year=2024, name=request.headers["name"], created=timezone.now(), custom=True, custom_data=data)
+        event = Event(year=2024, name=request.headers["name"], created=timezone.now(), event_code=UUID, custom=True, custom_data=data)
         event.save()
         return HttpResponse(request, "Success")
     else:

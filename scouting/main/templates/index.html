@@ -32,8 +32,7 @@
                         <i class="ph-bold ph-calendar-blank dark:text-white text-black font-sans px-1" x-show="!custom_event"></i>
                         <i class="ph-bold ph-calendar-star dark:text-white text-black font-sans px-1" x-show="custom_event"></i>
                         <p class=" dark:text-white text-black font-sans text-md font-bold px-1" x-text="event_name"></p>
-                        <p class=" dark:text-white text-black font-mono text-sm px-1 opacity-70" x-text="event_code" x-show="!custom_event"></p>
-                        <p class=" dark:text-white text-black font-mono text-sm px-1 opacity-70" x-show="custom_event"><i class="ph-bold ph-star"></i> custom</p>
+                        <p class=" dark:text-white text-black font-mono text-sm px-1 opacity-70 max-w-14 overflow-x-hidden" x-text="event_code"></p>
                     </div>
                 </div>
             </div>
@@ -79,10 +78,10 @@
 
                         window.addEventListener('header_custom_event', (event) => {
                             event.stopImmediatePropagation();
-                            const { event_name } = event.detail;
+                            const { event_name, event_code } = event.detail;
 
                             this.event_name = event_name;
-                            this.event_code = false;
+                            this.event_code = event_code;
                             this.custom_event = true;
                         });
 
@@ -207,7 +206,7 @@
                                         </div>
                                     </div>
                                     <div class="flex flex-col">
-                                        <button class="ui_button_icon" @click="select_custom_event(event.name)"><i class="ph-bold ph-check-circle"></i></button>
+                                        <button class="ui_button_icon" @click="select_custom_event(event.name, event.event_code)"><i class="ph-bold ph-check-circle"></i></button>
                                     </div>
                                 </div>
                             </template>
@@ -258,6 +257,7 @@
                         
                                 let custom_data = JSON.parse(await response.json());
                                 this.custom_events = custom_data;
+
                                 this.update_filters();
                             });
                         },
@@ -329,9 +329,9 @@
                             this.page = 3;
                         },
 
-                        select_custom_event(event_name) {
+                        select_custom_event(event_name, event_code ) {
                             window.dispatchEvent(new CustomEvent('header_custom_event', {
-                                detail: { event_name }
+                                detail: { event_name, event_code }
                             }));
                             this.page = 3;
                         },
@@ -383,13 +383,13 @@
                             if (!this.custom) {
                                 window.location.href = `{{ SERVER_IP }}/contribute?username=${this.username}&event_name=${this.event_name}&event_code=${this.event_code}&`;
                             } else {
-                                window.location.href = `{{ SERVER_IP }}/contribute?username=${this.username}&event_name=${this.event_name}&custom=true&`;
+                                window.location.href = `{{ SERVER_IP }}/contribute?username=${this.username}&event_name=${this.event_name}&event_code=${this.event_code}&custom=true&`;
                             }
                         } else if (page == "view_data") {
                             if (!this.custom) {
                                 window.location.href = `{{ SERVER_IP }}/data?username=${this.username}&event_name=${this.event_name}&event_code=${this.event_code}&`;
                             } else {
-                                window.location.href = `{{ SERVER_IP }}/data?username=${this.username}&event_name=${this.event_name}&custom=true&`;
+                                window.location.href = `{{ SERVER_IP }}/data?username=${this.username}&event_name=${this.event_name}&event_code=${this.event_code}&custom=true&`;
                             }
                         }
                     },
