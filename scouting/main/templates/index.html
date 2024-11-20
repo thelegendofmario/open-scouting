@@ -196,7 +196,7 @@
                                         <p class="dark:text-white text-black font-sans" x-text="event.name"></p>
                                         <div class="flex flex-row">
                                             <!-- <p class="dark:text-white text-black font-sans font-bold text-sm" x-text="event.event_type_string"></p><p class="dark:text-white text-black font-sans text-sm mx-1">-</p> -->
-                                            <p class="dark:text-white text-black font-sans font-bold text-sm">Custom Event</p><p class="dark:text-white text-black font-sans text-sm mx-1">-</p>
+                                            <p class="dark:text-white text-black font-sans font-bold text-sm" x-text="event.type || 'Custom Event'"></p><p class="dark:text-white text-black font-sans text-sm mx-1">-</p>
                                             <p class="dark:text-white text-black font-sans text-sm" x-text="event.location"></p>
                                         </div>
                                         <div class="flex flex-row">
@@ -444,6 +444,16 @@
                 <input class="ui_input" placeholder="Event location" x-ref="location" @input="check_fields">
                 <p class="text-black dark:text-white/80 font-sans text-xs text-left mb-2">Where will this event be held?</p>
 
+                <select class="ui_input" placeholder="Year" x-ref="type" @change="check_fields">
+                    <option value="N/A">Select an Event Type</option>
+                    <option value="District">District Event</option>
+                    <option value="Regional">Regional Event</option>
+                    <option value="Preseason">Preseason Event</option>
+                    <option value="Offseason">Offseason Event</option>
+                    <option value="Other Event">Other Event</option>
+                </select>
+                <p class="text-black dark:text-white/80 font-sans text-xs text-left mb-2" @input="check_fields">What kind of event is this?</p>
+
                 <button class="ui_button" :disabled="!able_to_submit" @click="create_event"><i class="ph-bold ph-check"></i> Create new Custom Event</button>
             </div>
         </div>
@@ -482,7 +492,7 @@
                     },
 
                     check_fields() {
-                        if (this.$refs.date_begins.value == "" || this.$refs.date_ends.value == "" || this.$refs.name.value == "" || this.$refs.location.value == "") {
+                        if (this.$refs.date_begins.value == "" || this.$refs.date_ends.value == "" || this.$refs.name.value == "" || this.$refs.location.value == "" || this.$refs.type.value == "N/A") {
                             valid = false;
                         } else {
                             valid = true;
@@ -504,6 +514,7 @@
                                     "date-begins": this.$refs.date_begins.value,
                                     "date-ends": this.$refs.date_ends.value,
                                     "location": this.$refs.location.value,
+                                    "type": this.$refs.type.value,
                                 }
                             });
 
@@ -522,6 +533,7 @@
                         this.$refs.date_begins.value = "";
                         this.$refs.date_ends.value = "";
                         this.$refs.location.value = "";
+                        this.$refs.type.value = "N/A";
                     },
 
                     init() {

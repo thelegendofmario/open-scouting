@@ -142,6 +142,7 @@ def get_custom_events(request):
                 "start_date": event.custom_data["date_begins"],
                 "end_date": event.custom_data["date_ends"],
                 "location": event.custom_data["location"],
+                "type": event.custom_data.get("type", ""),
                 "event_code": event.event_code
             }
             data.append(event_data)
@@ -162,6 +163,7 @@ def create_custom_event(request):
             "date_begins": request.headers["date-begins"],
             "date_ends": request.headers["date-ends"],
             "location": request.headers["location"],
+            "type": request.headers["type"],
             "event_code": UUID
         }
 
