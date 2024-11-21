@@ -98,7 +98,7 @@ Set the following global environment variables:
 ### djlint
 This project uses `djlint` to lint the templates. You can run this using the following command
 ```bash
-djlint cardie --reformat
+djlint scouting --reformat
 ```
 
 ## Contributing
@@ -118,7 +118,7 @@ Eventually, `development` will be merged into `main` and your changes will be re
     - [x] Submit data to the server
   - [x] View all data for event
 - [ ] Create sessions for scouting
-- [ ] If the event isn't on TBA, then make it so users can add custom events
+- [x] If the event isn't on TBA, then make it so users can add custom events
 - [ ] Be able to view events from previous years
 - [x] Light mode style support
 - [ ] Expand data in the table and show who submitted it and when it was submitted
