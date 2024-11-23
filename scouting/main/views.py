@@ -131,8 +131,7 @@ def get_custom_events(request):
     if request.method == "POST":
         data = []
 
-        # TODO: Support year selection
-        events = Event.objects.filter(year=2024, custom=True)
+        events = Event.objects.filter(year=request.headers["year"], custom=True)
 
         for event in events:
             event_data = {
@@ -167,9 +166,23 @@ def create_custom_event(request):
             "event_code": UUID
         }
 
-        # TODO: Support year selection
-        event = Event(year=2024, name=request.headers["name"], created=timezone.now(), event_code=UUID, custom=True, custom_data=data)
+        event = Event(year=data["year"], name=request.headers["name"], created=timezone.now(), event_code=UUID, custom=True, custom_data=data)
         event.save()
         return HttpResponse(request, "Success")
     else:
         return HttpResponse(request, "Request is not a POST request!", status=501)
+
+@csrf_exempt
+def get_year_data(request):
+    if request.method == "POST":
+        print(request.headers["year"])
+        events = Event.objects.filter(year=request.headers["year"])
+
+        data = {
+            "events": len(events),
+        }
+
+        return JsonResponse(json.dumps(data), safe=False)
+
+    else:
+        return HttpResponse("Request is not a POST request!", status=501)
