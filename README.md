@@ -5,6 +5,9 @@
   <h1>Open Scouting</h1>
 
   **An open source application for easier scouting at First Robotics competitions**
+
+  **[Releases](https://github.com/nfoert/open-scouting/releases) ● [Issues](https://github.com/nfoert/open-scouting/issues) ● [Development branch](https://github.com/nfoert/open-scouting/tree/development)**
+
 </div>
 
 <div align="center">
@@ -41,7 +44,7 @@ git clone https://github.com/nfoert/open-scouting
 
 Then, navigate to that directory and create a new python virtual environment
 ```bash
-cd cardie
+cd scouting
 python3 -m venv .venv
 ```
 
@@ -64,7 +67,7 @@ cp .env-template .env
 
 Next, create a django superuser and make and migrate the models
 ```bash
-cd cardie
+cd scouting
 python manage.py createsuperuser
 python manage.py makemigrations
 python manage.py migrate
@@ -95,8 +98,17 @@ Set the following global environment variables:
 ### djlint
 This project uses `djlint` to lint the templates. You can run this using the following command
 ```bash
-djlint cardie --reformat
+djlint scouting --reformat
 ```
+
+## Contributing
+Contributions are welcome to this project! Please see the [issues](https://github.com/nfoert/open-scouting/issues) page for any current bugs or features that need implemented.
+
+When contributing, please fork this repository (ensure you uncheck the "Copy the `main` branch only check box, this gives you access to the `development` branch with the latest changes)
+
+Next, create a new branch and implement your changes. You can install this project locally for testing by following the steps in [Development Installation](#development-installation). Once you've made your changes, please open a pull request into the `development` branch, and your changes will be reviewed.
+
+Eventually, `development` will be merged into `main` and your changes will be released into production with a new release. Thanks for your contribution!
 
 ## To-Do
 - [x] Basic features
@@ -106,7 +118,9 @@ djlint cardie --reformat
     - [x] Submit data to the server
   - [x] View all data for event
 - [ ] Create sessions for scouting
-- [ ] If the event isn't on TBA, then make it so users can add custom events
-- [ ] Be able to view events from previous years
+- [x] If the event isn't on TBA, then make it so users can add custom events
+- [x] Be able to view events from previous years
 - [x] Light mode style support
 - [ ] Expand data in the table and show who submitted it and when it was submitted
+- [ ] Collapsible menu
+- [ ] Offline support

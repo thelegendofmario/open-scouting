@@ -9,11 +9,14 @@
 {% block body %}
     <div class="flex flex-col h-full w-screen items-center justify-center">
 
-        <div class="flex flex-row w-full md:w-3/4 lg:w-2/3 mx-8 my-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 items-center justify-center" x-data="">
+        <div class="flex flex-row w-full md:w-3/4 lg:w-2/3 mx-8 my-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 items-center justify-center" x-data="contribute_header()">
             <img class="w-16 h-16 aspect-square m-2 hover:scale-110 transition-all ease-in-out active:scale-95" src="{% static '/main/images/icon_rounded.png' %}" @click="window.location.href = '{{ SERVER_IP }}'">
 
             <div class="flex flex-col">
-                <p class="dark:text-white text-black text-sans text-2xl">Contribute</p>
+                <div class="flex flex-row items-center">
+                    <button class="ui_button_icon mr-2" @click="go_to_data()"><i class="ph-bold ph-hard-drives"></i></button>
+                    <p class="dark:text-white text-black text-sans text-2xl">Contribute</p>
+                </div>
                 <div class="flex flex-row">
                     <p class="dark:text-white text-black text-sans text-sm mx-1">Contributing data to event</p>
                     <p class="dark:text-white text-black text-sans font-bold text-sm mx-1">{{ event_name }}</p>
@@ -22,6 +25,20 @@
                 </div>
             </div>
         </div>
+
+        <script>
+            function contribute_header() {
+                return {
+                    go_to_data() {
+                        let url = new URL(window.location.href);
+                        url.pathname = url.pathname.replace("/contribute", "/data");
+                        window.location.href = url.toString();
+                    },
+
+                    init() {}
+                }
+            }
+        </script>
 
         <div class="lex flex-row w-full md:w-3/4 lg:w-2/3 mx-8 mb-4 py-2 dark:bg-green-800 bg-green-400 border-2 dark:border-green-700 border-green-500 bg-opacity-80 rounded-lg border-opacity-80 items-center justify-center" x-data="submitted_check()"  x-show="show" x-transition>
             <div>
@@ -269,7 +286,9 @@
                                 headers: {
                                         "data": JSON.stringify(this.create_json_data()),
                                         "event-name": "{{ event_name }}",
-                                        "event-code": "{{ event_code }}"
+                                        "event-code": "{{ event_code }}",
+                                        "custom": "{{ custom }}",
+                                        "year": "{{ year }}"
                                     }
                                 });
 
