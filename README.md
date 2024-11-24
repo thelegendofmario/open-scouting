@@ -44,7 +44,7 @@ git clone https://github.com/nfoert/open-scouting
 
 Then, navigate to that directory and create a new python virtual environment
 ```bash
-cd cardie
+cd scouting
 python3 -m venv .venv
 ```
 
@@ -67,7 +67,7 @@ cp .env-template .env
 
 Next, create a django superuser and make and migrate the models
 ```bash
-cd cardie
+cd scouting
 python manage.py createsuperuser
 python manage.py makemigrations
 python manage.py migrate
@@ -108,7 +108,7 @@ When contributing, please fork this repository (ensure you uncheck the "Copy the
 
 Next, create a new branch and implement your changes. You can install this project locally for testing by following the steps in [Development Installation](#development-installation). Once you've made your changes, please open a pull request into the `development` branch, and your changes will be reviewed.
 
-Eventually, `development` will be merged into `main` and your changes will be released into production. Thanks for your contribution!
+Eventually, `development` will be merged into `main` and your changes will be released into production with a new release. Thanks for your contribution!
 
 ## To-Do
 - [x] Basic features
@@ -119,6 +119,8 @@ Eventually, `development` will be merged into `main` and your changes will be re
   - [x] View all data for event
 - [ ] Create sessions for scouting
 - [x] If the event isn't on TBA, then make it so users can add custom events
-- [ ] Be able to view events from previous years
+- [x] Be able to view events from previous years
 - [x] Light mode style support
 - [ ] Expand data in the table and show who submitted it and when it was submitted
+- [ ] Collapsible menu
+- [ ] Offline support
