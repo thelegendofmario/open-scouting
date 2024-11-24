@@ -12,9 +12,15 @@ from datetime import datetime
 import uuid
 
 # TODO: This is a duplicate of a similar array in models.py, I don't know if there's a good way to make these into one array
-YEARS = ["2024", "2025"]
+YEARS = ["2024"]
 
 DATE_FORMAT = "%Y-%m-%d"
+
+def get_season_data_from_year(year):
+    if year == "2024":
+        return season_fields.crescendo
+    else:
+        return None
 
 def index(request):
     context = {
@@ -30,15 +36,17 @@ def contribute(request):
     request.session["event_name"] = request.GET.get("event_name", "unknown")
     request.session["event_code"] = request.GET.get("event_code", "unknown")
     request.session["custom"] = request.GET.get("custom", "unknown")
+    request.session["year"] = request.GET.get("year", "unknown")
 
     context = {
         "SERVER_IP": settings.SERVER_IP,
         "TBA_API_KEY": settings.TBA_API_KEY,
-        "season_fields": json.dumps(season_fields.crescendo),
+        "season_fields": json.dumps(get_season_data_from_year(request.GET.get("year", "unknown"))),
         "username": request.GET.get("username", "unknown"),
         "event_name": request.GET.get("event_name", "unknown"),
         "event_code": request.GET.get("event_code", "unknown"),
-        "custom": request.GET.get("custom", "unknown")
+        "custom": request.GET.get("custom", "unknown"),
+        "year": request.GET.get("year", "unknown")
     }
 
     return render(request, "contribute.html", context)
@@ -48,6 +56,7 @@ def data(request):
     request.session["event_name"] = request.GET.get("event_name", "unknown")
     request.session["event_code"] = request.GET.get("event_code", "unknown")
     request.session["custom"] = request.GET.get("custom", "unknown")
+    request.session["year"] = request.GET.get("year", "unknown")
 
     context = {
         "SERVER_IP": settings.SERVER_IP,
@@ -55,7 +64,8 @@ def data(request):
         "username": request.GET.get("username", "unknown"),
         "event_name": request.GET.get("event_name", "unknown"),
         "event_code": request.GET.get("event_code", "unknown"),
-        "custom": request.GET.get("custom", "unknown")
+        "custom": request.GET.get("custom", "unknown"),
+        "year": request.GET.get("year", "unknown")
     }
 
     return render(request, "data.html", context)
@@ -67,21 +77,19 @@ def submit(request):
         if request.headers["custom"] == "true":
             events = Event.objects.filter(name=request.headers["event_name"], event_code=request.headers["event_code"], custom=True)
 
-            # TODO: Support year selection
-            data = Data(year=2024, event=request.headers["event_name"], event_code=request.headers["event_code"], data=json.loads(request.headers["data"]), created=timezone.now(), event_model=events[0])
+            data = Data(year=request.headers["year"], event=request.headers["event_name"], event_code=request.headers["event_code"], data=json.loads(request.headers["data"]), created=timezone.now(), event_model=events[0])
             data.save()
             return HttpResponse(request, "Success")
             
         else:
             events = Event.objects.filter(event_code=request.headers["event_code"])
             if len(events) == 0:
-                event = Event(year=2024, name=request.headers["event_name"], event_code=request.headers["event_code"], created=timezone.now())
+                event = Event(year=request.headers["year"], name=request.headers["event_name"], event_code=request.headers["event_code"], created=timezone.now())
                 event.save()
             else:
                 event = events[0]
 
-            # TODO: Support year selection
-            data = Data(year=2024, event=request.headers["event_name"], event_code=request.headers["event_code"], data=json.loads(request.headers["data"]), created=timezone.now(), event_model=event)
+            data = Data(year=request.headers["year"], event=request.headers["event_name"], event_code=request.headers["event_code"], data=json.loads(request.headers["data"]), created=timezone.now(), event_model=event)
             data.save()
             return HttpResponse(request, "Success")
     else:
@@ -96,13 +104,12 @@ def get_data(request):
         else:
             events = Event.objects.filter(event_code=request.headers["event_code"])
             if len(events) == 0:
-                event = Event(year=2024, name=request.headers["event_name"], event_code=request.headers["event_code"], custom=False, created=timezone.now())
+                event = Event(year=request.headers["year"], name=request.headers["event_name"], event_code=request.headers["event_code"], custom=False, created=timezone.now())
                 event.save()
             else:
                 event = events[0]
 
-        # TODO: Support year selection
-        data = Data.objects.filter(year=2024, event=request.headers["event_name"], event_code=request.headers["event_code"], event_model=events[0])
+        data = Data.objects.filter(year=request.headers["year"], event=request.headers["event_name"], event_code=request.headers["event_code"], event_model=events[0])
 
         print(data)
 

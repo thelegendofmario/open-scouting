@@ -57,6 +57,7 @@
                         this.team_number = "";
                         this.event_name = "";
                         this.event_code = "";
+                        this.year = "";
                     },
 
                     init() {
@@ -77,8 +78,7 @@
                             this.event_code = event_code;
                         });
 
-                        window.addEventListener('event_year', (event) => {
-                            event.stopImmediatePropagation();
+                        window.addEventListener('header_year', (event) => {
                             const { year } = event.detail;
                             this.year = year;
                         });
@@ -101,9 +101,10 @@
                             let event_code = this.event_code;
                             let load_page_var = load_page;
                             let custom = this.custom_event;
+                            let year = this.year;
 
                             window.dispatchEvent(new CustomEvent('header_data', {
-                                detail: { username, event_name, event_code, load_page, custom }
+                                detail: { username, event_name, event_code, load_page, custom, year }
                             }));
                         });
                     }
@@ -392,14 +393,14 @@
                             window.dispatchEvent(new CustomEvent('header_event', {
                                 detail: { event_name, event_code }
                             }));
-                            this.page = 3;
+                            this.page = 4;
                         },
 
                         select_custom_event(event_name, event_code ) {
                             window.dispatchEvent(new CustomEvent('header_custom_event', {
                                 detail: { event_name, event_code }
                             }));
-                            this.page = 3;
+                            this.page = 4;
                         },
 
                         create_custom_event() {
@@ -455,15 +456,15 @@
                             console.log("This feature is coming soon");
                         } else if (page == "contribute_separately") {
                             if (!this.custom) {
-                                window.location.href = `{{ SERVER_IP }}/contribute?username=${this.username}&event_name=${this.event_name}&event_code=${this.event_code}&`;
+                                window.location.href = `{{ SERVER_IP }}/contribute?username=${this.username}&event_name=${this.event_name}&event_code=${this.event_code}&year=${this.year}&`;
                             } else {
-                                window.location.href = `{{ SERVER_IP }}/contribute?username=${this.username}&event_name=${this.event_name}&event_code=${this.event_code}&custom=true&`;
+                                window.location.href = `{{ SERVER_IP }}/contribute?username=${this.username}&event_name=${this.event_name}&event_code=${this.event_code}&year=${this.year}&custom=true&`;
                             }
                         } else if (page == "view_data") {
                             if (!this.custom) {
-                                window.location.href = `{{ SERVER_IP }}/data?username=${this.username}&event_name=${this.event_name}&event_code=${this.event_code}&`;
+                                window.location.href = `{{ SERVER_IP }}/data?username=${this.username}&event_name=${this.event_name}&event_code=${this.event_code}&year=${this.year}&`;
                             } else {
-                                window.location.href = `{{ SERVER_IP }}/data?username=${this.username}&event_name=${this.event_name}&event_code=${this.event_code}&custom=true&`;
+                                window.location.href = `{{ SERVER_IP }}/data?username=${this.username}&event_name=${this.event_name}&event_code=${this.event_code}&year=${this.year}&custom=true&`;
                             }
                         }
                     },
@@ -475,12 +476,13 @@
 
                         window.addEventListener('header_data', (event) => {
                             event.stopImmediatePropagation();
-                            const { username, event_name, event_code, load_page, custom } = event.detail;
+                            const { username, event_name, event_code, load_page, custom, year } = event.detail;
 
                             this.username = username;
                             this.event_name = event_name;
                             this.event_code = event_code;
                             this.custom = custom;
+                            this.year = year;
                             this.load_page(load_page);
                         });
                     }

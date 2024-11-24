@@ -86,7 +86,8 @@
                         headers: {
                             "event-name": "{{ event_name }}",
                             "event-code": "{{ event_code }}",
-                            "custom": "{{ custom }}"
+                            "custom": "{{ custom }}",
+                            "year": "{{ year }}"
                         }
                     })
                     .then(response => response.json().then(json => {
