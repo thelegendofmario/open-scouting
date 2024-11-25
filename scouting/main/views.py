@@ -72,7 +72,6 @@ def data(request):
 
 @csrf_exempt
 def submit(request):
-    print(request.GET.get("event_name"))
     if request.method == "POST":
         if request.headers["custom"] == "true":
             events = Event.objects.filter(name=request.headers["event_name"], event_code=request.headers["event_code"], custom=True)
@@ -110,8 +109,6 @@ def get_data(request):
                 event = events[0]
 
         data = Data.objects.filter(year=request.headers["year"], event=request.headers["event_name"], event_code=request.headers["event_code"], event_model=events[0])
-
-        print(data)
 
         data_json = []
         for item in data:
@@ -182,7 +179,6 @@ def create_custom_event(request):
 @csrf_exempt
 def get_year_data(request):
     if request.method == "POST":
-        print(request.headers["year"])
         events = Event.objects.filter(year=request.headers["year"])
 
         data = {
