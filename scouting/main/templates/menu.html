@@ -6,42 +6,48 @@
 
     <div x-show="open" @click.outside="open = false" x-transition class="flex flex-col fixed bottom-0 z-10 inset-x-0 mx-auto bg-slate-200/80 dark:bg-slate-700/80 border-2 dark:border-slate-600 border-slate-300 rounded-t-2xl backdrop-blur-md w-screen md:w-3/4 lg:w-1/2 h-3/4 md:min-h-1/2 overflow-y-auto p-4" x-transition>
         <div class="flex flex-row justify-between items-center">
-            <div class="flex flex-row dark:text-white text-black items-center text-xl font-bold" x-data="menu_clock()">
-                <i class="ph-bold ph-clock mr-1"></i>
-                <p x-text="hour"></p>
-                <p class="animate-pulse">:</p>
-                <p x-text="minute"></p>
-            </div>
+            <div class="flex flex-row">
+                <div class="flex flex-row dark:text-white text-black items-center text-xl font-bold" x-data="menu_clock()">
+                    <i class="ph-bold ph-clock mr-1"></i>
+                    <p x-text="hour"></p>
+                    <p class="animate-pulse">:</p>
+                    <p x-text="minute"></p>
+                </div>
+    
+                <script>
+                    function menu_clock() {
+                        return {
+                            hour: 0,
+                            minute: 0,
+    
+                            update_time() {
+                                let now = new Date();
+                                this.hour = now.toLocaleTimeString('en-US', { hour: '2-digit', hour12: true }).split(':')[0].replace(" PM", "").replace(" AM", "");
+                                this.minute = now.getMinutes() < 10 ? '0' + now.getMinutes() : now.getMinutes();
 
-            <script>
-                function menu_clock() {
-                    return {
-                        hour: 0,
-                        minute: 0,
-
-                        update_time() {
-                            let now = new Date();
-                            this.hour = now.getHours();
-                            this.minute = now.getMinutes();
-                        },
-
-                        init() {
-                            let now = new Date();
-                            this.hour = now.getHours();
-                            this.minute = now.getMinutes();
-
-                            let seconds_until_next_minute = 60 - now.getSeconds();
-                            setTimeout(() => {
-                                this.update_time();
-
-                                setInterval(() => {
+                                return now;
+                            },
+    
+                            init() {    
+                                let seconds_until_next_minute = 60 - this.update_time().getSeconds();
+                                setTimeout(() => {
                                     this.update_time();
-                                }, 60000);
-                            }, seconds_until_next_minute * 1000);
+    
+                                    setInterval(() => {
+                                        this.update_time();
+                                    }, 60000);
+                                }, seconds_until_next_minute * 1000);
+                            }
                         }
                     }
-                }
-            </script>
+                </script>
+
+                <div class="flex flex-row items-center dark:text-white text-black text-md mx-1 ml-2">
+                    <i class="ph-bold ph-wifi-high" x-show="!offline"></i>
+                    <i class="ph-bold ph-wifi-slash" x-show="offline"></i>
+                </div>
+            </div>
+            
 
             <button class="ui_button_icon" @click="open = false"><i class="ph-bold ph-x"></i></button>
         </div>
@@ -54,8 +60,25 @@
     function menu() {
         return {
             open: false,
+            offline: !navigator.onLine,
 
-            init() {}
+            offline_check() {
+                if (this.offline != !navigator.onLine) {
+                    this.offline = !navigator.onLine;
+                    if (this.offline) {
+                        window.dispatchEvent(new CustomEvent('scouting_offline'));
+                    } else {
+                        window.dispatchEvent(new CustomEvent('scouting_online'));
+                    }
+                }
+            },
+
+            init() {
+                // Check every half a second if the user is offline or not
+                setInterval(() => {
+                    this.offline_check();
+                }, 500);
+            }
         }
     }
 </script>
