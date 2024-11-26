@@ -102,7 +102,7 @@ djlint scouting --reformat
 ```
 
 ## Contributing
-Contributions are welcome to this project! Please see the [issues](https://github.com/nfoert/open-scouting/issues) page for any current bugs or features that need implemented.
+Contributions are welcome to this project! Please see the [issues](https://github.com/nfoert/open-scouting/issues) page or the [roadmap](ROADMAP.md) for any current bugs or features that need implemented.
 
 When contributing, please fork this repository (ensure you uncheck the "Copy the `main` branch only check box, this gives you access to the `development` branch with the latest changes)
 
@@ -111,6 +111,8 @@ Next, create a new branch and implement your changes. You can install this proje
 Eventually, `development` will be merged into `main` and your changes will be released into production with a new release. Thanks for your contribution!
 
 ## To-Do
+Also see the [roadmap](ROADMAP.md)
+
 - [x] Basic features
   - [x] Index page operation selection
   - [x] Contribute data separately
