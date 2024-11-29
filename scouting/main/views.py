@@ -70,6 +70,10 @@ def data(request):
 
     return render(request, "data.html", context)
 
+def service_worker(request):
+    sw_path = settings.BASE_DIR / "frontend" / "sw.js"
+    return HttpResponse(open(sw_path).read(), content_type='application/javascript')
+
 @csrf_exempt
 def submit(request):
     if request.method == "POST":

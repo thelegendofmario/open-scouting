@@ -5,8 +5,9 @@ This document describes the roadmap for Open Scouting, and roughly when each fea
 
 ## To-Do
 ### `v0.0.3-alpha`
-- [ ] [#24](https://github.com/nfoert/open-scouting/issues/24) - Implement a collapsible menu
-  - [ ] [#14](https://github.com/nfoert/open-scouting/issues/14) - Add a dark mode toggle
+- [x] [#24](https://github.com/nfoert/open-scouting/issues/24) - Implement a collapsible menu
+  - [x] [#14](https://github.com/nfoert/open-scouting/issues/14) - Add a dark mode toggle
+  - [x] [#4](https://github.com/nfoert/open-scouting/issues/4) - Attribute The Blue Alliance
 - [ ] [#17](https://github.com/nfoert/open-scouting/issues/17) - Offline use of the application
 
 ### `v0.0.4-alpha`

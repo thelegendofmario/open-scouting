@@ -6,6 +6,7 @@ urlpatterns = [
     path("", views.index, name="index"),
     path("contribute", views.contribute, name="contribute"),
     path("data", views.data, name="data"),
+    path("sw.js", views.service_worker),
     path("submit", views.submit, name="submit"),
     path("get_data", views.get_data, name="get_data"),
     path("get_custom_events", views.get_custom_events, name="get_custom_events"),
