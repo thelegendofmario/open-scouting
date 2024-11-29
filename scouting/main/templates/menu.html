@@ -15,7 +15,7 @@
             </div>
         </div>
 
-        <div class="md:bottom-4 md:right-4 text-white text-xl md:text-3xl p-1 md:p-2 dark:bg-slate-700/80 border-2 dark:border-slate-600 bg-slate-200/80 border-slate-300 rounded-full backdrop-blur-md hover:scale-110 active:scale-95 transition-all" x-show="!open" @click="open = true" t-transition>
+        <div class="md:bottom-4 md:right-4 dark:text-white text-black text-xl md:text-3xl p-1 md:p-2 dark:bg-slate-700/80 border-2 dark:border-slate-600 bg-slate-200/80 border-slate-300 rounded-full backdrop-blur-md hover:scale-110 active:scale-95 transition-all w-10 h-10 md:w-16 md:h-16 flex flex-row items-center justify-center" x-show="!open" @click="open = true" t-transition>
             <i class="ph-bold ph-list"></i>
         </div>
     </div>
@@ -169,7 +169,7 @@
                     this.show_notification(title, body, icon);
                 });
 
-                // this.show_notification('Open Scouting', 'Welcome to Open Scouting!', 'star');
+                this.show_notification('Open Scouting', 'Welcome to Open Scouting!', 'star');
             }
         }
     }
