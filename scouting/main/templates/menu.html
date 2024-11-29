@@ -70,6 +70,10 @@
         </div>
 
         <div class="grid-cols-2 grid gap-x-2 gap-y-2 pt-6">
+            <button class="dark:text-white text-black dark:bg-slate-700/80 bg-slate-200/80 backdrop-blur-md dark:border-slate-600 border-slate-300 border-2 rounded-lg py-4 hover:scale-105 active:scale-95 active:dark:bg-slate-800/60 active:bg-slate-300 transition-all hover:bg-slate-100 hover:dark:bg-slate-600 text-center text-md" @click="toggle_dark_mode()"><i class="ph-bold ph-moon" x-show="dark_mode" x-transition></i> <i class="ph-bold ph-sun" x-show="!dark_mode" x-transition></i> <p x-show="dark_mode">Light Mode</p> <p x-show="!dark_mode">Dark Mode</p></button>
+        </div>
+
+        <div class="grid-cols-2 grid gap-x-2 gap-y-2 pt-6">
             <a href="{{ SERVER_IP }}" class="dark:text-white text-black dark:bg-slate-700/80 bg-slate-200/80 backdrop-blur-md dark:border-slate-600 border-slate-300 border-2 rounded-lg py-4 hover:scale-105 active:scale-95 active:dark:bg-slate-800/60 active:bg-slate-300 transition-all hover:bg-slate-100 hover:dark:bg-slate-600 text-center text-md"><i class="ph-bold ph-house"></i> Home</a>
             <!-- TODO: Update these links when repo moves -->
             <a href="https://github.com/nfoert/open-scouting" class="dark:text-white text-black dark:bg-slate-700/80 bg-slate-200/80 backdrop-blur-md dark:border-slate-600 border-slate-300 border-2 rounded-lg py-4 hover:scale-105 active:scale-95 active:dark:bg-slate-800/60 active:bg-slate-300 transition-all hover:bg-slate-100 hover:dark:bg-slate-600 text-center text-md"><i class="ph-bold ph-github-logo"></i> Source Code</a>
@@ -93,6 +97,7 @@
                 icon: '',
                 icon_class: ''
             },
+            dark_mode: true,
 
             offline_check() {
                 if (this.offline != !navigator.onLine) {
@@ -129,7 +134,30 @@
                 this.notification.icon = '';
             },
 
+            update_dark_mode() {
+                if (this.dark_mode) {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('theme', 'light');
+                }
+            },
+
+            toggle_dark_mode() {
+                this.dark_mode = !this.dark_mode;
+                this.update_dark_mode();
+            },
+
             init() {
+                if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    this.dark_mode = true;
+                } else {
+                    this.dark_mode = false;
+                }
+
+                this.update_dark_mode();
+
                 // Check every half a second if the user is offline or not
                 setInterval(() => {
                     this.offline_check();
