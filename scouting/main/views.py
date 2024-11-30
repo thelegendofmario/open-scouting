@@ -103,6 +103,7 @@ def get_data(request):
     if request.method == "POST":
         if request.headers["custom"] == "true":
             events = Event.objects.filter(name=request.headers["event_name"], event_code=request.headers["event_code"], custom=True)
+            event = events[0]
             
         else:
             events = Event.objects.filter(event_code=request.headers["event_code"])
@@ -112,7 +113,7 @@ def get_data(request):
             else:
                 event = events[0]
 
-        data = Data.objects.filter(year=request.headers["year"], event=request.headers["event_name"], event_code=request.headers["event_code"], event_model=events[0])
+        data = Data.objects.filter(year=request.headers["year"], event=request.headers["event_name"], event_code=request.headers["event_code"], event_model=event)
 
         data_json = []
         for item in data:
