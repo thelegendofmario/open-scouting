@@ -455,15 +455,15 @@
                             console.log("This feature is coming soon");
                         } else if (page == "contribute_separately") {
                             if (!this.custom) {
-                                window.location.href = `{{ SERVER_IP }}/contribute?username=${this.username}&event_name=${this.event_name}&event_code=${this.event_code}&year=${this.year}&`;
+                                window.location.href = `{{ SERVER_IP }}/contribute?username=${encodeURIComponent(this.username)}&event_name=${encodeURIComponent(this.event_name)}&event_code=${this.event_code}&year=${this.year}&`;
                             } else {
-                                window.location.href = `{{ SERVER_IP }}/contribute?username=${this.username}&event_name=${this.event_name}&event_code=${this.event_code}&year=${this.year}&custom=true&`;
+                                window.location.href = `{{ SERVER_IP }}/contribute?username=${encodeURIComponent(this.username)}&event_name=${encodeURIComponent(this.event_name)}&event_code=${this.event_code}&year=${this.year}&custom=true&`;
                             }
                         } else if (page == "view_data") {
                             if (!this.custom) {
-                                window.location.href = `{{ SERVER_IP }}/data?username=${this.username}&event_name=${this.event_name}&event_code=${this.event_code}&year=${this.year}&`;
+                                window.location.href = `{{ SERVER_IP }}/data?username=${encodeURIComponent(this.username)}&event_name=${encodeURIComponent(this.event_name)}&event_code=${this.event_code}&year=${this.year}&`;
                             } else {
-                                window.location.href = `{{ SERVER_IP }}/data?username=${this.username}&event_name=${this.event_name}&event_code=${this.event_code}&year=${this.year}&custom=true&`;
+                                window.location.href = `{{ SERVER_IP }}/data?username=${encodeURIComponent(this.username)}&event_name=${encodeURIComponent(this.event_name)}&event_code=${this.event_code}&year=${this.year}&custom=true&`;
                             }
                         }
                     },
