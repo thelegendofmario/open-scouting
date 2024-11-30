@@ -42,8 +42,8 @@
         }
     </script>
     
-    <div class="w-full overflow-x-auto mx-16">
-        <div class="dark:border-slate-600 border-slate-300 border-1 dark:bg-slate-800 bg-slate-200 width-screen" x-data="dataTable()" x-init="init()">
+    <div class="w-full overflow-x-auto mx-16" x-data="dataTable()" x-init="init()" x-transition>
+        <div x-show="!offline && !no_data" class="dark:border-slate-600 border-slate-300 border-1 dark:bg-slate-800 bg-slate-200 width-screen">
             <table class="min-w-full border-2 dark:border-slate-600 border-slate-300 table-auto">
                 <thead>
                     <tr class="px-2">
@@ -63,8 +63,15 @@
                 </tbody>
             </table>
         </div>
-    </div>
+
+        <div class="flex flex-row w-screen items-center justify-center" x-show="offline" x-transition>
+            <p class="dark:text-white text-black text-sans text-lg mx-1 text-center"><i class="ph ph-wifi-slash"></i> You can't view data when you're offline.</p>
+        </div>
     
+        <div class="flex flex-row w-screen items-center justify-center" x-show="no_data" x-transition>
+            <p class="dark:text-white text-black text-sans text-lg mx-1 text-center"><i class="ph ph-info"></i> No data found for this event.</p>
+        </div>
+    </div>
     
     <script>
         function dataTable() {
@@ -72,6 +79,8 @@
                 headers: [],
                 entries: {},
                 SERVER_IP: "{{ SERVER_IP }}",
+                no_data: false,
+                offline: false,
 
                 generate_header_text(header_text) {
                     return header_text.replaceAll("_", " ");
@@ -93,9 +102,21 @@
                     .then(response => response.json().then(json => {
                         this.headers = json.data_headers;
                         this.entries = json.data;
+
+                        if (this.headers.length == 0) {
+                            if (!this.offline) {
+                                this.no_data = true;
+                            }
+                        }
                     }))
                     .then(data => console.log(data))
                     .catch(error => console.error(error));
+
+                    if (navigator.onLine) {
+                        this.offline = false;
+                    } else {
+                        this.offline = true;
+                    }
                 }
             }
         }

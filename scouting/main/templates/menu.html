@@ -116,6 +116,7 @@
                         this.show_notification("Device offline", "You're now offline. Some features will be reduced until you're back online.", "wifi-slash");
                     } else {
                         window.dispatchEvent(new CustomEvent('scouting_online'));
+                        this.show_notification("Device online", "You're back online.", "wifi-high");
                     }
                 }
             },
