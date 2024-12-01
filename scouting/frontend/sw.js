@@ -1,3 +1,5 @@
+let service_worker_cache_first = true;
+
 const addResourcesToCache = async (resources) => {
     const cache = await caches.open("v1");
     await cache.addAll(resources);
@@ -45,6 +47,40 @@ const cacheFirst = async ({ request, preloadResponsePromise }) => {
     }
 };
 
+const networkFirst = async ({ request, preloadResponsePromise }) => {
+    // First try to get the resource from the network
+    try {
+        const responseFromNetwork = await fetch(request);
+        // response may be used only once
+        // we need to save clone to put one copy in cache
+        // and serve second one
+        if (responseFromNetwork) {
+            putInCache(request, responseFromNetwork.clone());
+            return responseFromNetwork;
+        }
+
+        // Next try to use (and cache) the preloaded response, if it's there
+        const preloadResponse = await preloadResponsePromise;
+        if (preloadResponse) {
+            console.log("Using preload response", preloadResponse);
+            putInCache(request, preloadResponse.clone());
+            return preloadResponse;
+        }
+
+        // Finally try to get the resource from cache
+        const responseFromCache = await caches.match(request);
+        if (responseFromCache) {
+            console.log("Found in cache: ", request.url);
+            return responseFromCache;
+        }
+    } catch (error) {
+        return new Response("Network error happened", {
+            status: 408,
+            headers: { "Content-Type": "text/plain" },
+        });
+    }
+};
+
 // Enable navigation preload
 const enableNavigationPreload = async () => {
     if (self.registration.navigationPreload) {
@@ -73,10 +109,28 @@ self.addEventListener("install", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
-    event.respondWith(
-        cacheFirst({
-            request: event.request,
-            preloadResponsePromise: event.preloadResponse,
-        }),
-    );
+    if (service_worker_cache_first) {
+        event.respondWith(
+            cacheFirst({
+                request: event.request,
+                preloadResponsePromise: event.preloadResponse,
+            }),
+        );
+    } else {
+        event.respondWith(
+            networkFirst({
+                request: event.request,
+                preloadResponsePromise: event.preloadResponse,
+            }),
+        );
+    }
 });
+
+addEventListener("message", (event) => {
+    if (event.data.type === "service_worker_mode") {
+        service_worker_cache_first = event.data.service_worker_cache_first;
+    } else {
+        console.log("Unknown service worker message");
+    }
+});
+  
