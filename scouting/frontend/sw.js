@@ -109,14 +109,14 @@ self.addEventListener("install", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
-    if (service_worker_cache_first) {
+    if (service_worker_cache_first === true) {
         event.respondWith(
             cacheFirst({
                 request: event.request,
                 preloadResponsePromise: event.preloadResponse,
             }),
         );
-    } else {
+    } else if (service_worker_cache_first === false) {
         event.respondWith(
             networkFirst({
                 request: event.request,

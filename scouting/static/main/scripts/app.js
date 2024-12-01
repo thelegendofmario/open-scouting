@@ -21,7 +21,7 @@ navigator.serviceWorker.ready.then((registration) => {
     registration.active.postMessage(
         {
             "type": "service_worker_mode",
-            "service_worker_cache_first": localStorage.getItem("service_worker_cache_first")
+            "service_worker_cache_first": JSON.parse(localStorage.getItem("service_worker_cache_first"))
         },
     );
 });
