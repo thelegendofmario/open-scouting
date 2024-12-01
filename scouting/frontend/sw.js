@@ -127,8 +127,10 @@ self.addEventListener("fetch", (event) => {
 });
 
 addEventListener("message", (event) => {
+    console.log("Received service worker message");
     if (event.data.type === "service_worker_mode") {
         service_worker_cache_first = event.data.service_worker_cache_first;
+        console.log(`Service worker cache first mode: ${service_worker_cache_first}`);
     } else {
         console.log("Unknown service worker message");
     }

@@ -85,7 +85,7 @@
             <button @click="credits_open = !credits_open" class="dark:text-white text-black dark:bg-slate-700/80 bg-slate-200/80 backdrop-blur-md dark:border-slate-600 border-slate-300 border-2 rounded-lg py-4 hover:scale-105 active:scale-95 active:dark:bg-slate-800/60 active:bg-slate-300 transition-all hover:bg-slate-100 hover:dark:bg-slate-600 text-center text-md w-full"><i x-show="!credits_open" class="ph-bold ph-heart"></i> <i x-show="credits_open" class="ph-bold ph-x"></i> Credits</button>
 
             <div x-show="credits_open" x-collapse class="mx-6">
-                <p class="dark:text-white text-black text-md pt-2">Powered by <a href="https://www.thebluealliance.com" class="dark:text-blue-400 text-blue-600 hover:dark:text-blue-500 hover:text-blue-700 transition-colors">The Blue Alliance</a></p>
+                <p class="dark:text-white text-black text-md pt-2">Killed by <a href="https://www.thebluealliance.com" class="dark:text-blue-400 text-blue-600 hover:dark:text-blue-500 hover:text-blue-700 transition-colors">The Blue Alliance</a></p>
             </div>
         </div>
 
@@ -94,8 +94,8 @@
 
             <div x-show="developer_open" x-collapse class="grid=cols-2 grid gap-x-2 gap-y-2 pt-6 mx-6">
                 <button class="dark:text-white text-black dark:bg-slate-700/80 bg-slate-200/80 backdrop-blur-md dark:border-slate-600 border-slate-300 border-2 rounded-lg py-4 hover:scale-105 active:scale-95 active:dark:bg-slate-800/60 active:bg-slate-300 transition-all hover:bg-slate-100 hover:dark:bg-slate-600 text-center text-md" @click="clear_service_worker_cache()">Clear service worker cache</button>
-                <button class="dark:text-white text-black dark:bg-slate-700/80 bg-slate-200/80 backdrop-blur-md dark:border-slate-600 border-slate-300 border-2 rounded-lg py-4 hover:scale-105 active:scale-95 active:dark:bg-slate-800/60 active:bg-slate-300 transition-all hover:bg-slate-100 hover:dark:bg-slate-600 text-center text-md" @click="toggle_service_worker_mode()" x-show="!service_worker_cache_first">Network-first service worker</button>
-                <button class="dark:text-white text-black dark:bg-slate-700/80 bg-slate-200/80 backdrop-blur-md dark:border-slate-600 border-slate-300 border-2 rounded-lg py-4 hover:scale-105 active:scale-95 active:dark:bg-slate-800/60 active:bg-slate-300 transition-all hover:bg-slate-100 hover:dark:bg-slate-600 text-center text-md" @click="toggle_service_worker_mode()" x-show="service_worker_cache_first">Cache-first service worker</button>
+                <button class="dark:text-white text-black dark:bg-slate-700/80 bg-slate-200/80 backdrop-blur-md dark:border-slate-600 border-slate-300 border-2 rounded-lg py-4 hover:scale-105 active:scale-95 active:dark:bg-slate-800/60 active:bg-slate-300 transition-all hover:bg-slate-100 hover:dark:bg-slate-600 text-center text-md" @click="toggle_service_worker_mode()" x-show="service_worker_cache_first">Network-first service worker</button>
+                <button class="dark:text-white text-black dark:bg-slate-700/80 bg-slate-200/80 backdrop-blur-md dark:border-slate-600 border-slate-300 border-2 rounded-lg py-4 hover:scale-105 active:scale-95 active:dark:bg-slate-800/60 active:bg-slate-300 transition-all hover:bg-slate-100 hover:dark:bg-slate-600 text-center text-md" @click="toggle_service_worker_mode()" x-show="!service_worker_cache_first">Cache-first service worker</button>
             </div>
         </div>
     </div>
@@ -175,9 +175,12 @@
                 await caches.delete('v1');
             },
 
-            toggle_service_worker_mode() {
+            async toggle_service_worker_mode() {
                 this.service_worker_cache_first = !this.service_worker_cache_first;
                 localStorage.setItem("service_worker_cache_first", this.service_worker_cache_first);
+                await caches.delete('v1');
+
+                location.reload();
             },
 
             init() {
@@ -188,6 +191,8 @@
                 }
 
                 this.update_dark_mode();
+
+                this.service_worker_cache_first = JSON.parse(localStorage.getItem("service_worker_cache_first"));
 
                 // Check every half a second if the user is offline or not
                 setInterval(() => {

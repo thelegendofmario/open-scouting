@@ -26,4 +26,8 @@ navigator.serviceWorker.ready.then((registration) => {
     );
 });
 
+if (localStorage.getItem("service_worker_cache_first") === null) {
+    localStorage.setItem("service_worker_cache_first", true);
+}
+
 registerServiceWorker();
