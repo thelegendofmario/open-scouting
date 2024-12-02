@@ -24,10 +24,33 @@ navigator.serviceWorker.ready.then((registration) => {
             "service_worker_cache_first": JSON.parse(localStorage.getItem("service_worker_cache_first"))
         },
     );
+    registration.active.postMessage(
+        {
+            "type": "offline_manual",
+            "offline_manual": JSON.parse(localStorage.getItem("offline_manual"))
+        },
+    );
+});
+
+window.addEventListener('sw_update_offline_manual', (event) => {
+    event.stopImmediatePropagation();
+
+    navigator.serviceWorker.ready.then((registration) => {
+        registration.active.postMessage(
+            {
+                "type": "offline_manual",
+                "offline_manual": JSON.parse(localStorage.getItem("offline_manual"))
+            },
+        );
+    });
 });
 
 if (localStorage.getItem("service_worker_cache_first") === null) {
     localStorage.setItem("service_worker_cache_first", true);
+}
+
+if (localStorage.getItem("offline_manual") === null) {
+    localStorage.setItem("offline_manual", false);
 }
 
 registerServiceWorker();

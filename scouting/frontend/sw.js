@@ -1,4 +1,5 @@
 let service_worker_cache_first = true;
+let offline_manual = false;
 
 const addResourcesToCache = async (resources) => {
     const cache = await caches.open("v1");
@@ -81,6 +82,33 @@ const networkFirst = async ({ request, preloadResponsePromise }) => {
     }
 };
 
+const offline = async ({ request, preloadResponsePromise }) => {
+    // First try to get the resource from the cache
+    const responseFromCache = await caches.match(request);
+    if (responseFromCache) {
+        console.log("Found in cache: ", request.url);
+        return responseFromCache;
+    }
+
+    // Next try to use (and cache) the preloaded response, if it's there
+    const preloadResponse = await preloadResponsePromise;
+    if (preloadResponse) {
+        console.log("Using preload response", preloadResponse);
+        putInCache(request, preloadResponse.clone());
+        return preloadResponse;
+    }
+
+    if (!responseFromCache && !preloadResponse) {
+        // when even the fallback response is not available,
+        // there is nothing we can do, but we must always
+        // return a Response object
+        return new Response("Network error happened", {
+            status: 408,
+            headers: { "Content-Type": "text/plain" },
+        });
+    }
+};
+
 // Enable navigation preload
 const enableNavigationPreload = async () => {
     if (self.registration.navigationPreload) {
@@ -109,20 +137,29 @@ self.addEventListener("install", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
-    if (service_worker_cache_first === true) {
+    if (offline_manual === true) {
         event.respondWith(
-            cacheFirst({
+            offline({
                 request: event.request,
                 preloadResponsePromise: event.preloadResponse,
             }),
         );
-    } else if (service_worker_cache_first === false) {
-        event.respondWith(
-            networkFirst({
-                request: event.request,
-                preloadResponsePromise: event.preloadResponse,
-            }),
-        );
+    } else {
+        if (service_worker_cache_first === true) {
+            event.respondWith(
+                cacheFirst({
+                    request: event.request,
+                    preloadResponsePromise: event.preloadResponse,
+                }),
+            );
+        } else if (service_worker_cache_first === false) {
+            event.respondWith(
+                networkFirst({
+                    request: event.request,
+                    preloadResponsePromise: event.preloadResponse,
+                }),
+            );
+        }
     }
 });
 
@@ -131,6 +168,11 @@ addEventListener("message", (event) => {
     if (event.data.type === "service_worker_mode") {
         service_worker_cache_first = event.data.service_worker_cache_first;
         console.log(`Service worker cache first mode: ${service_worker_cache_first}`);
+
+    } else if (event.data.type === "offline_manual") {
+        offline_manual = event.data.offline_manual;
+        console.log(`Offline manual mode: ${offline_manual}`);
+    
     } else {
         console.log("Unknown service worker message");
     }
