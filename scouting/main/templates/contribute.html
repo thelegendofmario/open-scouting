@@ -281,9 +281,49 @@
 
                     async submit_button() {
                         if (this.check_fields()) {
+                            let report_uuid = crypto.randomUUID();
+
+                            const openRequest = indexedDB.open("scouting_data", 1);
+
+                            openRequest.onupgradeneeded = (event) => {
+                                const db = event.target.result;
+                                const objectStore = db.createObjectStore("backups", { keyPath: "uuid" });
+                            };
+
+                            openRequest.onsuccess = (event) => {
+                                const db = event.target.result;
+                                
+                                const transaction = db.transaction(["backups"], "readwrite");
+                                const objectStore = transaction.objectStore("backups");
+
+                                const report_backup = {
+                                    uuid: report_uuid,
+                                    data: this.create_json_data(),
+                                    event_name: "{{ event_name }}",
+                                    event_code: "{{ event_code }}",
+                                    custom: "{{ custom }}",
+                                    year: "{{ year }}"
+                                }
+
+                                const request = objectStore.add(report_backup);
+
+                                request.onsuccess = (event) => {
+                                    console.log("Data added to the database");
+                                };
+
+                                request.onerror = (event) => {
+                                    console.log("Error adding data to the database: " + event.target.errorCode);
+                                };
+                            };
+
+                            openRequest.onerror = (event) => {
+                                console.log("Error opening database: " + event.target.errorCode);
+                            };
+
                             var response = await fetch("{{ SERVER_IP }}/submit", {
                                 method: "POST",
                                 headers: {
+                                        "uuid": report_uuid,
                                         "data": JSON.stringify(this.create_json_data()),
                                         "event-name": "{{ event_name }}",
                                         "event-code": "{{ event_code }}",

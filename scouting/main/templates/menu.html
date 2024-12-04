@@ -124,8 +124,6 @@
             offline_manual_last: false,
 
             offline_check() {
-                console.log(this.offline, this.offline_manual);
-
                 if (this.offline_manual == true && this.offline_manual_last == true) {
                     this.offline_manual_last = false;
                     window.dispatchEvent(new CustomEvent('scouting_offline'));

@@ -4,6 +4,7 @@ YEARS = [(2024, "2024")]
 
 # Stores individual contributed data for each year and event
 class Data(models.Model):
+    uuid = models.UUIDField(null=True, blank=True)
     year = models.IntegerField(choices=YEARS)
     event = models.CharField(max_length=999)
     event_code = models.CharField(max_length=99)

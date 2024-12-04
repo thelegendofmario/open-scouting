@@ -80,7 +80,7 @@ def submit(request):
         if request.headers["custom"] == "true":
             events = Event.objects.filter(name=request.headers["event_name"], event_code=request.headers["event_code"], custom=True)
 
-            data = Data(year=request.headers["year"], event=request.headers["event_name"], event_code=request.headers["event_code"], data=json.loads(request.headers["data"]), created=timezone.now(), event_model=events[0])
+            data = Data(uuid=request.headers["uuid"], year=request.headers["year"], event=request.headers["event_name"], event_code=request.headers["event_code"], data=json.loads(request.headers["data"]), created=timezone.now(), event_model=events[0])
             data.save()
             return HttpResponse(request, "Success")
             
@@ -92,7 +92,7 @@ def submit(request):
             else:
                 event = events[0]
 
-            data = Data(year=request.headers["year"], event=request.headers["event_name"], event_code=request.headers["event_code"], data=json.loads(request.headers["data"]), created=timezone.now(), event_model=event)
+            data = Data(uuid=request.headers["uuid"], year=request.headers["year"], event=request.headers["event_name"], event_code=request.headers["event_code"], data=json.loads(request.headers["data"]), created=timezone.now(), event_model=event)
             data.save()
             return HttpResponse(request, "Success")
     else:
