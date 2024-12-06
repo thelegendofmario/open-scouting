@@ -122,14 +122,15 @@
             <p class="dark:text-white text-black font-sans text-md">Checkable reports</p>
         </div>
 
-        <button class="ui_button"><i class="ph-bold ph-check"></i> Check Reports</button>
-        <button class="ui_button"><i class="ph-bold ph-trash"></i> Clear Saved Reports</button>
+        <button class="ui_button" @click="check_local_backup_reports()"><i class="ph-bold ph-check"></i> Check Reports</button>
+        <button class="ui_button" @click="clear_local_backup_reports()"><i class="ph-bold ph-trash"></i> Clear Saved Reports</button>
     </div>
     
     <script>
         function menu_report_backup_check() {
             return {
                 locally_backed_up_reports: 0,
+                backed_up_reports_checked: false,
 
                 get_local_backup_reports() {
                     const openRequest = indexedDB.open("scouting_data", 1);
@@ -161,8 +162,62 @@
                     };
                 },
 
-                check_local_backup_reports() {
+                async check_local_backup_reports() {
+                    const openRequest = indexedDB.open("scouting_data", 1);
 
+                    openRequest.onupgradeneeded = (event) => {
+                        const db = event.target.result;
+                        const objectStore = db.createObjectStore("backups", { keyPath: "uuid" });
+                    };
+
+                    openRequest.onsuccess = (event) => {
+                        const db = event.target.result;
+                        
+                        const transaction = db.transaction(["backups"], "readwrite");
+                        const objectStore = transaction.objectStore("backups");
+
+                        const request = objectStore.getAll();
+
+                        request.onsuccess = async (event) => {
+                            let reports = event.target.result;
+
+                            let report_list = [];
+
+                            for (report in reports) {
+                                let data = {
+                                    uuid: reports[report].uuid,
+                                    data: reports[report].data,
+                                    event_name: reports[report].event_name,
+                                    event_code: reports[report].event_code,
+                                    custom: reports[report].custom,
+                                    year: reports[report].year
+                                }
+
+                                report_list.push(data);
+                            }
+
+                            var response = await fetch("{{ SERVER_IP }}/check_local_backup_reports", {
+                            method: "POST",
+                            headers: {
+                                    "data": JSON.stringify(report_list),
+                                }
+                            });
+
+                            response.text().then(async (text) => {
+                                if (response.ok) {
+                                    console.log(text);
+                                }
+                            });
+                        };
+
+                        request.onerror = (event) => {
+                            console.log("Error adding data to the database: " + event.target.errorCode);
+                        };
+                    };
+
+                    openRequest.onerror = (event) => {
+                        console.log("Error opening database: " + event.target.errorCode);
+                    };
                 },
 
                 clear_saved_backup_reports() {
