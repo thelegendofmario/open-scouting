@@ -123,6 +123,21 @@
         </div>
 
         <button class="ui_button" @click="check_local_backup_reports()"><i class="ph-bold ph-check"></i> Check Reports</button>
+
+        <div x-show="backed_up_reports_checked" class="flex flex-col items-center justify-center w-full my-2" x-transition>
+            <p class="dark:text-white text-black font-bold"><i class="ph-bold ph-check"></i> Reports have been checked</p>
+
+            <div class="flex flex-row w-full items-center justify-center">
+                <p x-text="backed_up_reports_found" class="dark:text-white text-black text-sm font-bold"></p>
+                <p class="dark:text-white text-black font-sans text-sm ml-1">Backed up reports found</p>
+            </div>
+
+            <div class="flex flex-row w-full items-center justify-center">
+                <p x-text="backed_up_reports_not_found" class="dark:text-white text-black text-sm font-bold"></p>
+                <p class="dark:text-white text-black font-sans text-sm ml-1">Backed up reports not found</p>
+            </div>
+        </div>
+
         <button class="ui_button" @click="clear_local_backup_reports()"><i class="ph-bold ph-trash"></i> Clear Saved Reports</button>
     </div>
     
@@ -131,6 +146,8 @@
             return {
                 locally_backed_up_reports: 0,
                 backed_up_reports_checked: false,
+                backed_up_reports_found: 0,
+                backed_up_reports_not_found: 0,
 
                 get_local_backup_reports() {
                     const openRequest = indexedDB.open("scouting_data", 1);
@@ -203,9 +220,12 @@
                                 }
                             });
 
-                            response.text().then(async (text) => {
+                            response.json().then(async (json) => {
                                 if (response.ok) {
-                                    console.log(text);
+                                    json = JSON.parse(json);
+                                    this.backed_up_reports_found = json.reports_found;
+                                    this.backed_up_reports_not_found = json.reports_not_found;
+                                    this.backed_up_reports_checked = true;
                                 }
                             });
                         };
