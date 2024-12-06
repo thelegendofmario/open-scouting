@@ -83,7 +83,7 @@
         </div>
 
         <div class="flex flex-col pt-6 w-full">
-            <button class="dark:text-white text-black dark:bg-slate-700/80 bg-slate-200/80 backdrop-blur-md dark:border-slate-600 border-slate-300 border-2 rounded-lg py-4 hover:scale-105 active:scale-95 active:dark:bg-slate-800/60 active:bg-slate-300 transition-all hover:bg-slate-100 hover:dark:bg-slate-600 text-center text-md" @click="mrbc_open = true">Check Backed Up Scouting Reports</button>
+            <button class="dark:text-white text-black dark:bg-slate-700/80 bg-slate-200/80 backdrop-blur-md dark:border-slate-600 border-slate-300 border-2 rounded-lg py-4 hover:scale-105 active:scale-95 active:dark:bg-slate-800/60 active:bg-slate-300 transition-all hover:bg-slate-100 hover:dark:bg-slate-600 text-center text-md" @click="mrbc_open = true"><i class="ph-bold ph-seal-check"></i> Check Backed Up Scouting Reports</button>
         </div>
 
         <div class="flex flex-col pt-6 w-full">
@@ -124,8 +124,8 @@
 
         <button class="ui_button" @click="check_local_backup_reports()"><i class="ph-bold ph-check"></i> Check Reports</button>
 
-        <div x-show="backed_up_reports_checked" class="flex flex-col items-center justify-center w-full my-2" x-transition>
-            <p class="dark:text-white text-black font-bold"><i class="ph-bold ph-check"></i> Reports have been checked</p>
+        <div x-show="backed_up_reports_checked" class="flex flex-col items-center justify-center w-full my-2" x-collapse>
+            <p class="dark:text-white text-black font-bold"><i class="ph-bold ph-seal-check"></i> Reports have been checked</p>
 
             <div class="flex flex-row w-full items-center justify-center">
                 <p x-text="backed_up_reports_found" class="dark:text-white text-black text-sm font-bold"></p>
@@ -138,7 +138,12 @@
             </div>
         </div>
 
-        <button class="ui_button" @click="clear_local_backup_reports()"><i class="ph-bold ph-trash"></i> Clear Saved Reports</button>
+        <button class="ui_button" @click="backed_up_reports_confirm_delete = !backed_up_reports_confirm_delete"><i class="ph-bold ph-trash"></i> Clear Saved Reports</button>
+
+        <div x-show="backed_up_reports_confirm_delete" class="flex flex-row items-center justify-center w-full" x-collapse>
+            <button class="ui_button mx-2" @click="backed_up_reports_confirm_delete = false"><i class="ph-bold ph-x"></i> Cancel</button>
+            <button class="ui_button mx-2 hover:bg-red-600/80 active:bg-red-700/80" @click="clear_saved_backup_reports()"><i class="ph-bold ph-trash"></i> Confirm</button>
+        </div>
     </div>
     
     <script>
@@ -148,6 +153,7 @@
                 backed_up_reports_checked: false,
                 backed_up_reports_found: 0,
                 backed_up_reports_not_found: 0,
+                backed_up_reports_confirm_delete: false,
 
                 get_local_backup_reports() {
                     const openRequest = indexedDB.open("scouting_data", 1);
@@ -241,11 +247,37 @@
                 },
 
                 clear_saved_backup_reports() {
+                    const openRequest = indexedDB.open("scouting_data", 1);
 
+                    openRequest.onupgradeneeded = (event) => {
+                        const db = event.target.result;
+                        const objectStore = db.createObjectStore("backups", { keyPath: "uuid" });
+                    };
+
+                    openRequest.onsuccess = (event) => {
+                        const db = event.target.result;
+                        
+                        const transaction = db.transaction(["backups"], "readwrite");
+                        const objectStore = transaction.objectStore("backups");
+
+                        const request = objectStore.clear();
+
+                        request.onsuccess = (event) => {
+                            this.locally_backed_up_reports = 0;
+                            this.backed_up_reports_confirm_delete = false;
+                        };
+
+                        request.onerror = (event) => {
+                            console.log("Error adding data to the database: " + event.target.errorCode);
+                        };
+                    };
+
+                    openRequest.onerror = (event) => {
+                        console.log("Error opening database: " + event.target.errorCode);
+                    };
                 },
 
                 init() {
-
                     this.get_local_backup_reports();
                 }
             }
