@@ -308,19 +308,30 @@
             offline_check() {
                 if (this.offline_manual == true && this.offline_manual_last == true) {
                     this.offline_manual_last = false;
+                    globalThis.offline = true;
                     window.dispatchEvent(new CustomEvent('scouting_offline'));
                     this.show_notification("Device offline", "You're now offline. Some features will be reduced until you're back online.", "wifi-slash");
 
                 } else {
-                    this.offline_manual_last = false;
+                    if (this.offline_manual_last == true) {
+                        this.offline_manual_last = false;
+                        globalThis.offline = false;
+                    }
+
+                    if (this.offline_manual == true) {
+                        globalThis.offline = true;
+                    }
 
                     if (this.offline != !navigator.onLine) {
                         this.offline = !navigator.onLine;
+                        globalThis.offline = !navigator.onLine;
 
                         if (this.offline) {
+                            globalThis.offline = true;
                             window.dispatchEvent(new CustomEvent('scouting_offline'));
                             this.show_notification("Device offline", "You're now offline. Some features will be reduced until you're back online.", "wifi-slash");
                         } else {
+                            globalThis.offline = false;
                             window.dispatchEvent(new CustomEvent('scouting_online'));
                             this.show_notification("Device online", "You're back online.", "wifi-high");
                         }
@@ -401,6 +412,8 @@
                 if (this.offline_manual == true) {
                     this.offline_manual_last = true;
                 }
+
+                globalThis.offline = false;
 
                 // Check every half a second if the user is offline or not
                 setInterval(() => {
