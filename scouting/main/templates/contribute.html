@@ -211,7 +211,7 @@
                             
                         });
                     },
-
+                    
                     init() {
                         this.parse_json(JSON.parse(this.field_data));
                     }
@@ -308,7 +308,7 @@
                         if (this.check_fields()) {
                             let report_uuid = crypto.randomUUID();
 
-                            const openRequest = indexedDB.open("scouting_data", 1);
+                            const openRequest = indexedDB.open("scouting_data", 2);
 
                             openRequest.onupgradeneeded = (event) => {
                                 const db = event.target.result;
