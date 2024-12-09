@@ -32,7 +32,12 @@
 - Have an custom interface for viewing all the collected data
 - Have a system for quickly setting up all the required data entries for a new season
   - Have fields to quickly set up and provide to the user when scouting, e.g. "text", "boolean", "data" ect.
-- Allow other teams to use it and contribute data to the server
+- Allow other teams to view and contribute data to the same server
+- Create custom events if events aren't listed on TBA
+- Keep backups of scouting reports locally
+- Dark/light mode theme support
+- The site works fully offline if there's no internet connection at all
+- Manually go offline in case of bad connection
 
 ## Development Installation
 Follow these steps to get the server running locally for contributing or development
@@ -104,7 +109,7 @@ djlint scouting --reformat
 ## Contributing
 Contributions are welcome to this project! Please see the [issues](https://github.com/nfoert/open-scouting/issues) page or the [roadmap](ROADMAP.md) for any current bugs or features that need implemented.
 
-When contributing, please fork this repository (ensure you uncheck the "Copy the `main` branch only check box, this gives you access to the `development` branch with the latest changes)
+When contributing, please fork this repository (ensure you uncheck the "Copy the `main` branch only" check box, this gives you access to the `development` branch with the latest changes)
 
 Next, create a new branch and implement your changes. You can install this project locally for testing by following the steps in [Development Installation](#development-installation). Once you've made your changes, please open a pull request into the `development` branch, and your changes will be reviewed.
 
@@ -124,5 +129,5 @@ Also see the [roadmap](ROADMAP.md)
 - [x] Be able to view events from previous years
 - [x] Light mode style support
 - [ ] Expand data in the table and show who submitted it and when it was submitted
-- [ ] Collapsible menu
+- [x] Collapsible menu
 - [ ] Offline support
