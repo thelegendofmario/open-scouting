@@ -222,3 +222,32 @@ def check_local_backup_reports(request):
 
     else:
         return HttpResponse("Request is not a POST request!", status=501)
+
+@csrf_exempt
+def upload_offline_reports(request):
+    # TODO: This is identical to the previous function, is this necessary or should they be merged into one?
+    if request.method == "POST":
+        reports_found = 0
+        reports_not_found = 0
+
+        reports_list = json.loads(request.headers["data"])
+
+        for report in reports_list:
+            data = Data.objects.filter(uuid=report["uuid"], event_code=report["event_code"], year=report["year"])
+            
+            if data:
+                reports_found += 1
+            else:
+                reports_not_found += 1
+                new_data = Data(uuid=report["uuid"], year=report["year"], event=report["event_name"], event_code=report["event_code"], data=report["data"], created=timezone.now())
+                new_data.save()
+
+        data = {
+            "reports_found": reports_found,
+            "reports_not_found": reports_not_found
+        }
+
+        return JsonResponse(json.dumps(data), safe=False)
+
+    else:
+        return HttpResponse("Request is not a POST request!", status=501)

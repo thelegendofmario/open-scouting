@@ -91,7 +91,7 @@
                 </div>
             </div>
             
-            <button class="ui_button"><i class="ph-bold ph-cloud-arrow-up"></i> Upload</button>
+            <button class="ui_button" @click="upload_offline_reports()"><i class="ph-bold ph-cloud-arrow-up"></i> Upload</button>
         </div>
 
         <div class="flex flex-col pt-6 w-full">
@@ -329,10 +329,12 @@
                     if (this.offline_manual_last == true) {
                         this.offline_manual_last = false;
                         globalThis.offline = false;
+                        window.dispatchEvent(new CustomEvent('scouting_online'));
                     }
 
                     if (this.offline_manual == true) {
                         globalThis.offline = true;
+                        window.dispatchEvent(new CustomEvent('scouting_offline'));
                     }
 
                     if (this.offline != !navigator.onLine) {
@@ -450,6 +452,75 @@
                 }
             },
 
+            upload_offline_reports() {
+                const openRequest = indexedDB.open("scouting_data", 2);
+
+                openRequest.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    const objectStore = db.createObjectStore("offline_reports", { keyPath: "uuid" });
+                };
+
+                openRequest.onsuccess = (event) => {
+                    const db = event.target.result;
+                    
+                    const transaction = db.transaction(["offline_reports"], "readwrite");
+                    const objectStore = transaction.objectStore("offline_reports");
+
+                    const request = objectStore.getAll();
+
+                    request.onsuccess = async (event) => {
+                        let reports = event.target.result;
+
+                        let report_list = [];
+
+                        for (report in reports) {
+                            let data = {
+                                uuid: reports[report].uuid,
+                                data: reports[report].data,
+                                event_name: reports[report].event_name,
+                                event_code: reports[report].event_code,
+                                custom: reports[report].custom,
+                                year: reports[report].year
+                            }
+
+                            report_list.push(data);
+                        }
+
+                        var response = await fetch("{{ SERVER_IP }}/upload_offline_reports", {
+                        method: "POST",
+                        headers: {
+                                "data": JSON.stringify(report_list),
+                            }
+                        });
+
+                        response.json().then(async (json) => {
+                            if (response.ok) {
+                                const transaction = db.transaction(["offline_reports"], "readwrite");
+                                const objectStore = transaction.objectStore("offline_reports");
+                                const clear_request = objectStore.clear();
+
+                                clear_request.onsuccess = (event) => {
+                                    this.offline_reports = false;
+                                    this.show_notification("Reports have been uploaded", "All your reports have been stored on the server", "check-circle");
+                                };
+
+                                clear_request.onerror = (event) => {
+                                    console.log("Error clearing the object store");
+                                }
+
+                            } else {
+                                console.log("There was an issue uploading scouting reports");
+                                this.show_notification("There was an issue uploading scouting reports", "Your reports may have not been uploaded", "warning");
+                            }
+                        });
+                    };
+
+                    request.onerror = (event) => {
+                        console.log("Error adding data to the database: " + event.target.errorCode);
+                    };
+                }
+            },
+
             init() {
                 if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
                     this.dark_mode = true;
@@ -467,6 +538,8 @@
                 }
 
                 globalThis.offline = false;
+
+                this.offline_check();
 
                 // Check every half a second if the user is offline or not
                 setInterval(() => {
