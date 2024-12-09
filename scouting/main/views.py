@@ -204,7 +204,6 @@ def check_local_backup_reports(request):
         reports_list = json.loads(request.headers["data"])
 
         for report in reports_list:
-            print(report)
             data = Data.objects.filter(uuid=report["uuid"], event_code=report["event_code"], year=report["year"])
             
             if data:
