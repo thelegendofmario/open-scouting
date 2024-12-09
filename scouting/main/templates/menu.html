@@ -137,16 +137,17 @@
         <button class="ui_button" @click="check_local_backup_reports()"><i class="ph-bold ph-check"></i> Check Reports</button>
 
         <div x-show="backed_up_reports_checked" class="flex flex-col items-center justify-center w-full my-2" x-collapse>
-            <p class="dark:text-white text-black font-bold"><i class="ph-bold ph-seal-check"></i> Reports have been checked</p>
+            <p class="dark:text-white text-black font-bold"><i class="ph-bold ph-seal-check"></i> Reports have been checked with the server</p>
+            <p class="dark:text-white text-black text-sm mb-2">If they were missing, they were automatically uploaded</p>
 
             <div class="flex flex-row w-full items-center justify-center">
                 <p x-text="backed_up_reports_found" class="dark:text-white text-black text-sm font-bold"></p>
-                <p class="dark:text-white text-black font-sans text-sm ml-1">Backed up reports found</p>
+                <p class="dark:text-white text-black font-sans text-sm ml-1">Backed up reports found on the server</p>
             </div>
 
             <div class="flex flex-row w-full items-center justify-center">
                 <p x-text="backed_up_reports_not_found" class="dark:text-white text-black text-sm font-bold"></p>
-                <p class="dark:text-white text-black font-sans text-sm ml-1">Backed up reports not found</p>
+                <p class="dark:text-white text-black font-sans text-sm ml-1">Backed up reports not found on the server</p>
             </div>
         </div>
 
