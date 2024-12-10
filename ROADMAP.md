@@ -4,12 +4,6 @@ This document describes the roadmap for Open Scouting, and roughly when each fea
 ---
 
 ## To-Do
-### `v0.0.3-alpha`
-- [x] [#24](https://github.com/nfoert/open-scouting/issues/24) - Implement a collapsible menu
-  - [x] [#14](https://github.com/nfoert/open-scouting/issues/14) - Add a dark mode toggle
-  - [x] [#4](https://github.com/nfoert/open-scouting/issues/4) - Attribute The Blue Alliance
-- [ ] [#17](https://github.com/nfoert/open-scouting/issues/17) - Offline use of the application
-
 ### `v0.0.4-alpha`
 - [ ] [#9](https://github.com/nfoert/open-scouting/issues/9) - Create a wiki page for how season_fields.py should be formatted
 - [ ] [#7](https://github.com/nfoert/open-scouting/issues/7) - Add a field for additional notes
@@ -19,10 +13,15 @@ This document describes the roadmap for Open Scouting, and roughly when each fea
 
 ---
 ## Completed
+### `v0.0.3-alpha`
+- [x] [#24](https://github.com/nfoert/open-scouting/issues/24) - Implement a collapsible menu
+  - [x] [#14](https://github.com/nfoert/open-scouting/issues/14) - Add a dark mode toggle
+  - [x] [#4](https://github.com/nfoert/open-scouting/issues/4) - Attribute The Blue Alliance
+- [x] [#17](https://github.com/nfoert/open-scouting/issues/17) - Offline use of the application
+
 ### `v0.0.2-alpha`
 - [x] [#2](https://github.com/nfoert/open-scouting/issues/2) - Add custom events
 - [x] [#3](https://github.com/nfoert/open-scouting/issues/3) - View events from previous years
-
 
 ### `v0.0.1-alpha`
 - [x] Initial release with basic features
