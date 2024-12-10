@@ -70,14 +70,17 @@ def data(request):
 
     return render(request, "data.html", context)
 
+def service_worker(request):
+    sw_path = settings.BASE_DIR / "frontend" / "sw.js"
+    return HttpResponse(open(sw_path).read(), content_type='application/javascript')
+
 @csrf_exempt
 def submit(request):
-    print(request.GET.get("event_name"))
     if request.method == "POST":
         if request.headers["custom"] == "true":
             events = Event.objects.filter(name=request.headers["event_name"], event_code=request.headers["event_code"], custom=True)
 
-            data = Data(year=request.headers["year"], event=request.headers["event_name"], event_code=request.headers["event_code"], data=json.loads(request.headers["data"]), created=timezone.now(), event_model=events[0])
+            data = Data(uuid=request.headers["uuid"], year=request.headers["year"], event=request.headers["event_name"], event_code=request.headers["event_code"], data=json.loads(request.headers["data"]), created=timezone.now(), event_model=events[0])
             data.save()
             return HttpResponse(request, "Success")
             
@@ -89,7 +92,7 @@ def submit(request):
             else:
                 event = events[0]
 
-            data = Data(year=request.headers["year"], event=request.headers["event_name"], event_code=request.headers["event_code"], data=json.loads(request.headers["data"]), created=timezone.now(), event_model=event)
+            data = Data(uuid=request.headers["uuid"], year=request.headers["year"], event=request.headers["event_name"], event_code=request.headers["event_code"], data=json.loads(request.headers["data"]), created=timezone.now(), event_model=event)
             data.save()
             return HttpResponse(request, "Success")
     else:
@@ -100,6 +103,7 @@ def get_data(request):
     if request.method == "POST":
         if request.headers["custom"] == "true":
             events = Event.objects.filter(name=request.headers["event_name"], event_code=request.headers["event_code"], custom=True)
+            event = events[0]
             
         else:
             events = Event.objects.filter(event_code=request.headers["event_code"])
@@ -109,9 +113,7 @@ def get_data(request):
             else:
                 event = events[0]
 
-        data = Data.objects.filter(year=request.headers["year"], event=request.headers["event_name"], event_code=request.headers["event_code"], event_model=events[0])
-
-        print(data)
+        data = Data.objects.filter(year=request.headers["year"], event=request.headers["event_name"], event_code=request.headers["event_code"], event_model=event)
 
         data_json = []
         for item in data:
@@ -182,11 +184,67 @@ def create_custom_event(request):
 @csrf_exempt
 def get_year_data(request):
     if request.method == "POST":
-        print(request.headers["year"])
         events = Event.objects.filter(year=request.headers["year"])
 
         data = {
             "events": len(events),
+        }
+
+        return JsonResponse(json.dumps(data), safe=False)
+
+    else:
+        return HttpResponse("Request is not a POST request!", status=501)
+
+@csrf_exempt
+def check_local_backup_reports(request):
+    if request.method == "POST":
+        reports_found = 0
+        reports_not_found = 0
+
+        reports_list = json.loads(request.headers["data"])
+
+        for report in reports_list:
+            data = Data.objects.filter(uuid=report["uuid"], event_code=report["event_code"], year=report["year"])
+            
+            if data:
+                reports_found += 1
+            else:
+                reports_not_found += 1
+                new_data = Data(uuid=report["uuid"], year=report["year"], event=report["event_name"], event_code=report["event_code"], data=report["data"], created=timezone.now())
+                new_data.save()
+
+        data = {
+            "reports_found": reports_found,
+            "reports_not_found": reports_not_found
+        }
+
+        return JsonResponse(json.dumps(data), safe=False)
+
+    else:
+        return HttpResponse("Request is not a POST request!", status=501)
+
+@csrf_exempt
+def upload_offline_reports(request):
+    # TODO: This is identical to the previous function, is this necessary or should they be merged into one?
+    if request.method == "POST":
+        reports_found = 0
+        reports_not_found = 0
+
+        reports_list = json.loads(request.headers["data"])
+
+        for report in reports_list:
+            data = Data.objects.filter(uuid=report["uuid"], event_code=report["event_code"], year=report["year"])
+            
+            if data:
+                reports_found += 1
+            else:
+                reports_not_found += 1
+                new_data = Data(uuid=report["uuid"], year=report["year"], event=report["event_name"], event_code=report["event_code"], data=report["data"], created=timezone.now())
+                new_data.save()
+
+        data = {
+            "reports_found": reports_found,
+            "reports_not_found": reports_not_found
         }
 
         return JsonResponse(json.dumps(data), safe=False)

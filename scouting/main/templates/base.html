@@ -10,6 +10,15 @@
         <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
         <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
+        <script src="{% static '/main/scripts/app.js' %}"></script>
+
+        <script>
+            document.documentElement.classList.toggle(
+                'dark',
+                localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)
+            )
+        </script>
+
         {% block stylesheets %}
         {% endblock stylesheets %}
         <link href="{% static '/main/styles.css' %}" rel="stylesheet">
@@ -24,6 +33,8 @@
     </head>
     <body class="bg-gradient-to-br from-rose-200 to-blue-200 dark:bg-gradient-to-br dark:from-slate-800 dark:to-slate-900">
         {% block body %}{% endblock %}
+
+        {% include 'menu.html' %}
 
         {% block scripts %}{% endblock %}
     </body>
