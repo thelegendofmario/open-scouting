@@ -204,6 +204,12 @@
                                 option.text = choice;
                                 field_element.appendChild(option);
                             });
+                        } else if (field.type === "text") {
+                            field_element = document.createElement('input');
+                            field_element.type = 'text';
+                            field_element.setAttribute('name', field.simple_name);
+                            field_element.setAttribute('x-ref', field.simple_name);
+                            field_element.classList = "dark:text-white text-black dark:bg-slate-700 bg-slate-300 rounded px-2 py-1 mb-2";
                         }
 
                         if (field.required) {
@@ -316,7 +322,7 @@
                         for (const field of all_inputs) {
                             let value;
                             if (field.value) {
-                                if (field.getAttribute("scouting_type") == "large_integer") {
+                                if (field.getAttribute("scouting_type") == "large_integer" || field.getAttribute("scouting_type") === "text") {
                                     value = field.value;
 
                                 } else if (field.getAttribute("scouting_type") == "boolean") {

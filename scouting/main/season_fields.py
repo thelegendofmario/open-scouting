@@ -145,4 +145,16 @@ crescendo = [
             },
         ],
     },
+    {
+        "section": "Additional Notes",
+        "simple_name": "additional_notes",
+        "fields": [
+            {
+                "name": "Additional Notes or Comments",
+                "simple_name": "notes",
+                "type": "text",
+                "required": False,
+            },
+        ],
+    },
 ]
