@@ -138,4 +138,4 @@ Also see the [roadmap](ROADMAP.md)
 - [x] Light mode style support
 - [ ] Expand data in the table and show who submitted it and when it was submitted
 - [x] Collapsible menu
-- [ ] Offline support
+- [x] Offline support

@@ -130,12 +130,44 @@
 
                         let field_element;
 
-                        if (field.type === 'integer') {
+                        if (field.type === 'large_integer') {
                             field_element = document.createElement('input');
                             field_element.type = 'number';
                             field_element.setAttribute('name', field.simple_name);
                             field_element.setAttribute('x-ref', field.simple_name);
                             field_element.classList = "dark:text-white text-black dark:bg-slate-700 bg-slate-300 rounded px-2 py-1 mb-2";
+
+                        } else if (field.type === 'integer') {
+                            field_element = document.createElement("div");
+                            field_element.classList = "flex flex-row align-center items-center justify-between";
+                            field_element.classList.add("field_other")
+                            field_element.setAttribute("x-data", `{ value: ${field.default}, min: ${field.minimum}, max: ${field.maximum} }`);
+                            field_element.setAttribute("x-bind:value", `value`);
+                            field_element.setAttribute('name', field.simple_name);
+                            field_element.setAttribute('x-ref', field.simple_name);
+
+                            let integer_text = document.createElement('p');
+                            integer_text.setAttribute('x-text', "value");
+                            integer_text.classList = "dark:text-white text-black text-xl font-bold";
+
+                            let integer_buttons = document.createElement("div");
+                            integer_buttons.classList = "flex flex-row";
+
+                            let integer_add_button = document.createElement("button");
+                            integer_add_button.classList = "ui_button_icon mx-2";
+                            integer_add_button.setAttribute("x-on:click", "value < max ? value = value + 1 : null");
+                            integer_add_button.innerHTML = `<i class="ph-bold ph-plus"></i>`;
+
+                            let integer_subtract_button = document.createElement("button");
+                            integer_subtract_button.classList = "ui_button_icon mx-2";
+                            integer_subtract_button.setAttribute("x-on:click", "value > min ? value = value - 1 : null");
+                            integer_subtract_button.innerHTML = `<i class="ph-bold ph-minus"></i>`;
+
+                            integer_buttons.appendChild(integer_add_button);
+                            integer_buttons.appendChild(integer_subtract_button);
+
+                            field_element.appendChild(integer_text);
+                            field_element.appendChild(integer_buttons);
 
                         } else if (field.type === 'boolean') {
                             field_element = document.createElement('input');
@@ -279,13 +311,12 @@
 
                         let all_inputs = document.querySelectorAll("input");
                         let all_selects = document.querySelectorAll("select");
+                        let other_fields = document.querySelectorAll(".field_other")
 
                         for (const field of all_inputs) {
                             let value;
-                            console.log("Looking at " + field);
-                            console.log("value is " + field.value)
                             if (field.value) {
-                                if (field.getAttribute("scouting_type") == "integer") {
+                                if (field.getAttribute("scouting_type") == "large_integer") {
                                     value = field.value;
 
                                 } else if (field.getAttribute("scouting_type") == "boolean") {
@@ -308,6 +339,24 @@
                                 if (field.getAttribute("scouting_type") == "choice" || field.getAttribute("scouting_type") == "multiple_choice") {
                                     value = field.value;
 
+                                }
+
+                                let data_field = {
+                                    "name": field.getAttribute("x-ref"),
+                                    "type": field.getAttribute("scouting_type"),
+                                    "value": value
+                                }
+
+                                data.push(data_field);
+                            }
+                        }
+
+                        for (const field of other_fields) {
+                            let value;
+                            if (field.value) {
+
+                                if (field.getAttribute("scouting_type") == "integer") {
+                                    value = field.value;
                                 }
 
                                 let data_field = {

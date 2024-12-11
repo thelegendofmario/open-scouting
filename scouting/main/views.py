@@ -175,6 +175,8 @@ def get_data(request):
                 if item["name"] not in all_names:
                     all_names.append(item["name"])
 
+        print(data_json)
+
         return JsonResponse(
             {"data": data_json, "data_headers": list(all_names)}, safe=False
         )
