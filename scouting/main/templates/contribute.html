@@ -9,12 +9,17 @@
 {% block body %}
     <div class="flex flex-col h-full w-screen items-center justify-center">
 
-        <div class="flex flex-row w-full md:w-3/4 lg:w-2/3 mx-8 my-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 items-center justify-center" x-data="contribute_header()">
-            <img class="w-16 h-16 aspect-square m-2 hover:scale-110 transition-all ease-in-out active:scale-95" src="{% static '/main/images/icon_rounded.png' %}" @click="window.location.href = '{{ SERVER_IP }}'">
+        <div class="flex flex-row w-full md:w-3/4 lg:w-2/3 mx-8 my-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 items-center justify-center"
+             x-data="contribute_header()">
+            <img class="w-16 h-16 aspect-square m-2 hover:scale-110 transition-all ease-in-out active:scale-95"
+                 src="{% static '/main/images/icon_rounded.png' %}"
+                 @click="window.location.href = '{{ SERVER_IP }}'">
 
             <div class="flex flex-col">
                 <div class="flex flex-row items-center">
-                    <button class="ui_button_icon mr-2" @click="go_to_data()"><i class="ph-bold ph-hard-drives"></i></button>
+                    <button class="ui_button_icon mr-2" @click="go_to_data()">
+                        <i class="ph-bold ph-hard-drives"></i>
+                    </button>
                     <p class="dark:text-white text-black text-sans text-2xl">Contribute</p>
                 </div>
                 <div class="flex flex-row">
@@ -40,9 +45,14 @@
             }
         </script>
 
-        <div class="lex flex-row w-full md:w-3/4 lg:w-2/3 mx-8 mb-4 py-2 dark:bg-green-800/70 bg-green-400/70 border-2 dark:border-green-700 border-green-500 bg-opacity-80 rounded-lg border-opacity-80 items-center justify-center" x-data="submitted_check()"  x-show="show" x-transition>
+        <div class="lex flex-row w-full md:w-3/4 lg:w-2/3 mx-8 mb-4 py-2 dark:bg-green-800/70 bg-green-400/70 border-2 dark:border-green-700 border-green-500 bg-opacity-80 rounded-lg border-opacity-80 items-center justify-center"
+             x-data="submitted_check()"
+             x-show="show"
+             x-transition>
             <div>
-                <p class="dark:text-white text-black text-sans text-center"><i class="ph-bold ph-check-circle"></i> The data has been successfully submitted</p>
+                <p class="dark:text-white text-black text-sans text-center">
+                    <i class="ph-bold ph-check-circle"></i> The data has been successfully submitted
+                </p>
             </div>
         </div>
 
@@ -65,9 +75,14 @@
 
         </script>
 
-        <div class="lex flex-row w-full md:w-3/4 lg:w-2/3 mx-8 mb-4 py-2 dark:bg-orange-800/70 bg-orange-400/70 border-2 dark:border-orange-700 border-orange-500 bg-opacity-80 rounded-lg border-opacity-80 items-center justify-center" x-data="submitted_offline_check()"  x-show="show" x-transition>
+        <div class="lex flex-row w-full md:w-3/4 lg:w-2/3 mx-8 mb-4 py-2 dark:bg-orange-800/70 bg-orange-400/70 border-2 dark:border-orange-700 border-orange-500 bg-opacity-80 rounded-lg border-opacity-80 items-center justify-center"
+             x-data="submitted_offline_check()"
+             x-show="show"
+             x-transition>
             <div>
-                <p class="dark:text-white text-black text-sans text-center"><i class="ph-bold ph-floppy-disk"></i> The data has been successfully stored locally. It will be uploaded when you go online.</p>
+                <p class="dark:text-white text-black text-sans text-center">
+                    <i class="ph-bold ph-floppy-disk"></i> The data has been successfully stored locally. It will be uploaded when you go online.
+                </p>
             </div>
         </div>
 
@@ -219,8 +234,11 @@
             }
         </script>
 
-        <div class="flex flex-col md:flex-row w-full md:w-3/4 lg:w-2/3 mx-8 my-4 py-2 dark:bg-slate-800 bg-slate-200 border-2 dark:border-slate-700 border-slate-300 rounded-lg mb-4 items-center justify-center" x-data="submit_manager()">
-            <button class="ui_button mr-4" @click="submit_button()"><i class="ph-bold ph-check-circle"></i> Submit</button>
+        <div class="flex flex-col md:flex-row w-full md:w-3/4 lg:w-2/3 mx-8 my-4 py-2 dark:bg-slate-800 bg-slate-200 border-2 dark:border-slate-700 border-slate-300 rounded-lg mb-4 items-center justify-center"
+             x-data="submit_manager()">
+            <button class="ui_button mr-4" @click="submit_button()">
+                <i class="ph-bold ph-check-circle"></i> Submit
+            </button>
 
             <div x-show="missing_required_fields" x-transition>
                 <p class="text-sans dark:text-red-700 text-red-500 font-bold text-center">Please fill out all of the required fields</p>
@@ -424,4 +442,5 @@
     </div>
 {% endblock %}
 
-{% block scripts %}{% endblock %}
+{% block scripts %}
+{% endblock %}
