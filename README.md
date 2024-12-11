@@ -106,6 +106,14 @@ This project uses `djlint` to lint the templates. You can run this using the fol
 djlint scouting --reformat
 ```
 
+### ruff
+This project uses [`ruff`](https://docs.astral.sh/ruff/) to lint and format the code.
+You can run the following command to lint and format the code.
+```bash
+ruff check cardie --fix
+```
+For VS Code users, you can install the `ruff` extension to get linting and formatting on save.
+
 ## Contributing
 Contributions are welcome to this project! Please see the [issues](https://github.com/nfoert/open-scouting/issues) page or the [roadmap](ROADMAP.md) for any current bugs or features that need implemented.
 
