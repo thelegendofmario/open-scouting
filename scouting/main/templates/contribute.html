@@ -227,15 +227,40 @@
                     },
 
                     create_section(section) {
-                        let section_text = document.createElement("p");
-                        section_text.innerHTML = `<i class="ph-bold ph-arrow-bend-down-right"></i> ${section.section}`;
-                        section_text.classList = "dark:text-white text-black text-md text-sans mb-2";
+                        let section_text_text = document.createElement("p");
+                        section_text_text.innerHTML = `<i class="ph-bold ph-arrow-bend-down-right"></i> ${section.section}`;
+                        section_text_text.classList = "dark:text-white text-black text-md text-sans";
+
+                        let section_text_icon_open = document.createElement("p");
+                        section_text_icon_open.innerHTML = "<i class='ph-bold ph-caret-up'></i>";
+                        section_text_icon_open.classList = "text-black dark:text-white";
+                        section_text_icon_open.setAttribute("x-show", "!open");
+
+                        let section_text_icon_close = document.createElement("p");
+                        section_text_icon_close.innerHTML = "<i class='ph-bold ph-caret-down'></i>";
+                        section_text_icon_close.classList = "text-black dark:text-white";
+                        section_text_icon_close.setAttribute("x-show", "open");
+
+                        let section_text = document.createElement("div");
+                        section_text.appendChild(section_text_text);
+                        section_text.appendChild(section_text_icon_open);
+                        section_text.appendChild(section_text_icon_close);
+                        section_text.classList = "dark:text-white text-black flex flex-row items-center justify-between cursor-pointer";
+
+                        section_text.setAttribute("x-on:click", "open = !open");
+
+                        let section_box = document.createElement("div");
+                        section_box.className = "section_box mt-2";
+                        section_box.setAttribute("x-show", "open");
+                        section_box.setAttribute("x-collapse", "");
 
                         let section_element = document.createElement("div");
                         section_element.setAttribute("x-ref", section.simple_name ? section.simple_name : 'no_simple_name');
                         section_element.classList = "dark:bg-slate-800 bg-slate-200 border-2 dark:border-slate-700 border-slate-300 rounded-lg mb-4 px-8 py-4 flex flex-col";
+                        section_element.setAttribute("x-data", "{ open: true }");
 
                         section_element.appendChild(section_text);
+                        section_element.appendChild(section_box);
 
                         return section_element;
                     },
@@ -245,11 +270,11 @@
                             if (section) { // Create all sub fields inside
                                 if (parent.fields) { // If the item is a section
                                     let section_element = this.create_section(parent);
-                                    section.appendChild(section_element);
+                                    section.querySelector(".section_box").appendChild(section_element);
                                     this.parse_json(parent.fields, section_element);
 
                                 } else { // If the item is a field
-                                    section.appendChild(this.create_field(parent));
+                                    section.querySelector(".section_box").appendChild(this.create_field(parent));
                                 }
 
                             } else {
@@ -262,7 +287,6 @@
                                     this.$root.appendChild(this.create_field(parent));
                                 }
                             }
-                            
                         });
                     },
                     

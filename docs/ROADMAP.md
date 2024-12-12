@@ -5,12 +5,12 @@ This document describes the roadmap for Open Scouting, and roughly when each fea
 
 ## To-Do
 ### `v0.0.4-alpha`
-- [ ] [#9](https://github.com/nfoert/open-scouting/issues/9) - Create a wiki page for how season_fields.py should be formatted
+- [x] [#9](https://github.com/nfoert/open-scouting/issues/9) - Create a wiki page for how season_fields.py should be formatted
 - [x] [#7](https://github.com/nfoert/open-scouting/issues/7) - Add a field for additional notes
 - [x] [#25](https://github.com/nfoert/open-scouting/issues/25) - Add increment buttons to numerical values
   - [x] [#10](https://github.com/nfoert/open-scouting/issues/10) - Add 0 to season_fields.py choices
 - [ ] [#16](https://github.com/nfoert/open-scouting/issues/16) - Show data in the table differently depending on the kind of field
-- [ ] [#37](https://github.com/nfoert/open-scouting/issues/37) - Be able to collapse sections in /submit
+- [x] [#37](https://github.com/nfoert/open-scouting/issues/37) - Be able to collapse sections in /submit
 
 ### `v0.0.5-alpha`
 - [ ] [#23](https://github.com/nfoert/open-scouting/issues/23) - URL Parameter support on `/index`
