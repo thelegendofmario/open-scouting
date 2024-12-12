@@ -115,7 +115,7 @@ ruff check cardie --fix
 For VS Code users, you can install the `ruff` extension to get linting and formatting on save.
 
 ## Contributing
-Contributions are welcome to this project! Please see the [issues](https://github.com/nfoert/open-scouting/issues) page or the [roadmap](ROADMAP.md) for any current bugs or features that need implemented.
+Contributions are welcome to this project! Please see the [issues](https://github.com/nfoert/open-scouting/issues) page or the [roadmap](/docs/ROADMAP.md) for any current bugs or features that need implemented.
 
 When contributing, please fork this repository (ensure you uncheck the "Copy the `main` branch only" check box, this gives you access to the `development` branch with the latest changes)
 
@@ -124,18 +124,4 @@ Next, create a new branch and implement your changes. You can install this proje
 Eventually, `development` will be merged into `main` and your changes will be released into production with a new release. Thanks for your contribution!
 
 ## To-Do
-Also see the [roadmap](ROADMAP.md)
-
-- [x] Basic features
-  - [x] Index page operation selection
-  - [x] Contribute data separately
-    - [x] Display all fields for the data
-    - [x] Submit data to the server
-  - [x] View all data for event
-- [ ] Create sessions for scouting
-- [x] If the event isn't on TBA, then make it so users can add custom events
-- [x] Be able to view events from previous years
-- [x] Light mode style support
-- [ ] Expand data in the table and show who submitted it and when it was submitted
-- [x] Collapsible menu
-- [x] Offline support
+Please see the [roadmap](/docs/ROADMAP.md) for the currently planned out things that need to be completed. Additionally, see the [issues page](https://github.com/nfoert/open-scouting/issues) for any current bugs or features that need implemented, but aren't officially scheduled.
