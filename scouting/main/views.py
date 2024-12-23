@@ -6,6 +6,7 @@ from django.utils import timezone
 
 from main.models import Data, Event
 from . import season_fields
+from . import demo_data
 
 import json
 from datetime import datetime
@@ -17,9 +18,18 @@ YEARS = ["2024"]
 DATE_FORMAT = "%Y-%m-%d"
 
 
+# TODO: Move to respective .py files instead
 def get_season_data_from_year(year):
     if year == "2024":
         return season_fields.crescendo
+    else:
+        return None
+
+
+# TODO: Move to respective .py files instead
+def get_demo_data_from_year(year):
+    if year == "2024":
+        return demo_data.crescendo
     else:
         return None
 
@@ -139,49 +149,72 @@ def submit(request):
 @csrf_exempt
 def get_data(request):
     if request.method == "POST":
-        if request.headers["custom"] == "true":
-            events = Event.objects.filter(
-                name=request.headers["event_name"],
-                event_code=request.headers["event_code"],
-                custom=True,
+        if request.headers["demo"] == "true":
+            data = get_demo_data_from_year(request.headers["year"])
+
+            data_json = []
+            for item in data:
+                item_data = {"created": "unknown", "data": item}
+                data_json.append(item_data)
+
+            print(data_json)
+
+            all_names = []
+            for entry in data:
+                for item in entry:
+                    if item["name"] not in all_names:
+                        all_names.append(item["name"])
+
+            return JsonResponse(
+                {"data": data_json, "data_headers": list(all_names), "demo": True},
+                safe=False,
             )
-            event = events[0]
 
         else:
-            events = Event.objects.filter(event_code=request.headers["event_code"])
-            if len(events) == 0:
-                event = Event(
-                    year=request.headers["year"],
+            if request.headers["custom"] == "true":
+                events = Event.objects.filter(
                     name=request.headers["event_name"],
                     event_code=request.headers["event_code"],
-                    custom=False,
-                    created=timezone.now(),
+                    custom=True,
                 )
-                event.save()
-            else:
                 event = events[0]
 
-        data = Data.objects.filter(
-            year=request.headers["year"],
-            event=request.headers["event_name"],
-            event_code=request.headers["event_code"],
-            event_model=event,
-        )
+            else:
+                events = Event.objects.filter(event_code=request.headers["event_code"])
+                if len(events) == 0:
+                    event = Event(
+                        year=request.headers["year"],
+                        name=request.headers["event_name"],
+                        event_code=request.headers["event_code"],
+                        custom=False,
+                        created=timezone.now(),
+                    )
+                    event.save()
+                else:
+                    event = events[0]
 
-        data_json = []
-        for item in data:
-            item_data = {"created": item.created.isoformat(), "data": item.data}
-            data_json.append(item_data)
+            data = Data.objects.filter(
+                year=request.headers["year"],
+                event=request.headers["event_name"],
+                event_code=request.headers["event_code"],
+                event_model=event,
+            )
 
-        all_names = []
-        for entry in data:
-            for item in entry.data:
-                if item["name"] not in all_names:
-                    all_names.append(item["name"])
+            data_json = []
+            for item in data:
+                item_data = {"created": item.created.isoformat(), "data": item.data}
+                data_json.append(item_data)
 
-        return JsonResponse(
-            {"data": data_json, "data_headers": list(all_names)}, safe=False
-        )
+            all_names = []
+            for entry in data:
+                for item in entry.data:
+                    if item["name"] not in all_names:
+                        all_names.append(item["name"])
+
+            return JsonResponse(
+                {"data": data_json, "data_headers": list(all_names), "demo": False},
+                safe=False,
+            )
 
     else:
         return HttpResponse("Request is not a POST request!", status=501)
