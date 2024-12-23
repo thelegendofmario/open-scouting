@@ -23,11 +23,19 @@
                     <p class="dark:text-white text-black text-sans text-2xl">Event Data</p>
                 </div>
 
-                <div class="flex flex-row">
+                <div class="flex flex-row" x-show="!demo">
                     <p class="dark:text-white text-black text-sans text-sm mx-1">Viewing data for event</p>
                     <p class="dark:text-white text-black text-sans font-bold text-sm mx-1">{{ event_name }}</p>
                     <p class="dark:text-white text-black text-sans text-sm mx-1">as</p>
                     <p class="dark:text-white text-black text-sans font-bold text-sm mx-1">{{ username }}</p>
+                </div>
+
+                <div class="flex flex-col p-2 ml-2 mt-2 rounded-md border-solid border-2 dark:border-slate-600 dark:bg-purple-900/50 border-slate-300 bg-purple-200/50"
+                     x-show="demo">
+                    <p class="dark:text-white text-black font-sans text-md ">
+                        <i class="ph-bold ph-test-tube"></i> Open Scouting is in demo mode
+                    </p>
+                    <p class="dark:text-white text-black font-sans text-sm">Example contributed data is being shown, it is not data from any real matches or events</p>
                 </div>
             </div>
 
@@ -36,13 +44,20 @@
         <script>
         function data_header() {
             return {
+                demo: false, 
                 go_to_contribute() {
                     let url = new URL(window.location.href);
                     url.pathname = url.pathname.replace("/data", "/contribute");
                     window.location.href = url.toString();
                 },
 
-                init() {}
+                init() {
+                    try {
+                        this.demo = JSON.parse("{{ demo }}");
+                    } catch {
+                        this.demo = false;
+                    }
+                }
             }
         }
         </script>
