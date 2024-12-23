@@ -1,0 +1,137 @@
+<script>
+    function menu_report_backup_check() {
+        return {
+            locally_backed_up_reports: 0,
+            backed_up_reports_checked: false,
+            backed_up_reports_found: 0,
+            backed_up_reports_not_found: 0,
+            backed_up_reports_confirm_delete: false,
+
+            get_local_backup_reports() {
+                const openRequest = indexedDB.open("scouting_data", 2);
+
+                openRequest.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    const objectStore = db.createObjectStore("backups", { keyPath: "uuid" });
+                };
+
+                openRequest.onsuccess = (event) => {
+                    const db = event.target.result;
+                    
+                    const transaction = db.transaction(["backups"], "readwrite");
+                    const objectStore = transaction.objectStore("backups");
+
+                    const request = objectStore.count();
+
+                    request.onsuccess = (event) => {
+                        this.locally_backed_up_reports = event.target.result;
+                    };
+
+                    request.onerror = (event) => {
+                        console.log("Error adding data to the database: " + event.target.errorCode);
+                    };
+                };
+
+                openRequest.onerror = (event) => {
+                    console.log("Error opening database: " + event.target.errorCode);
+                };
+            },
+
+            async check_local_backup_reports() {
+                const openRequest = indexedDB.open("scouting_data", 2);
+
+                openRequest.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    const objectStore = db.createObjectStore("backups", { keyPath: "uuid" });
+                };
+
+                openRequest.onsuccess = (event) => {
+                    const db = event.target.result;
+                    
+                    const transaction = db.transaction(["backups"], "readwrite");
+                    const objectStore = transaction.objectStore("backups");
+
+                    const request = objectStore.getAll();
+
+                    request.onsuccess = async (event) => {
+                        let reports = event.target.result;
+
+                        let report_list = [];
+
+                        for (report in reports) {
+                            let data = {
+                                uuid: reports[report].uuid,
+                                data: reports[report].data,
+                                event_name: reports[report].event_name,
+                                event_code: reports[report].event_code,
+                                custom: reports[report].custom,
+                                year: reports[report].year
+                            }
+
+                            report_list.push(data);
+                        }
+
+                        var response = await fetch("{{ SERVER_IP }}/check_local_backup_reports", {
+                        method: "POST",
+                        headers: {
+                                "data": JSON.stringify(encodeURIComponent(report_list)),
+                            }
+                        });
+
+                        response.json().then(async (json) => {
+                            if (response.ok) {
+                                json = JSON.parse(json);
+                                this.backed_up_reports_found = json.reports_found;
+                                this.backed_up_reports_not_found = json.reports_not_found;
+                                this.backed_up_reports_checked = true;
+                            }
+                        });
+                    };
+
+                    request.onerror = (event) => {
+                        console.log("Error adding data to the database: " + event.target.errorCode);
+                    };
+                };
+
+                openRequest.onerror = (event) => {
+                    console.log("Error opening database: " + event.target.errorCode);
+                };
+            },
+
+            clear_saved_backup_reports() {
+                const openRequest = indexedDB.open("scouting_data", 2);
+
+                openRequest.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    const objectStore = db.createObjectStore("backups", { keyPath: "uuid" });
+                };
+
+                openRequest.onsuccess = (event) => {
+                    const db = event.target.result;
+                    
+                    const transaction = db.transaction(["backups"], "readwrite");
+                    const objectStore = transaction.objectStore("backups");
+
+                    const request = objectStore.clear();
+
+                    request.onsuccess = (event) => {
+                        this.locally_backed_up_reports = 0;
+                        this.backed_up_reports_confirm_delete = false;
+                    };
+
+                    request.onerror = (event) => {
+                        console.log("Error adding data to the database: " + event.target.errorCode);
+                    };
+                };
+
+                openRequest.onerror = (event) => {
+                    console.log("Error opening database: " + event.target.errorCode);
+                };
+            },
+
+            init() {
+                this.get_local_backup_reports();
+            }
+        }
+    }
+</script>

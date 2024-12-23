@@ -1,0 +1,266 @@
+<script>
+    function menu() {
+        return {
+            open: false,
+            offline: !navigator.onLine,
+            notification_shown: false,
+            notification: {
+                title: '',
+                body: '',
+                icon: '',
+                icon_class: ''
+            },
+            dark_mode: true,
+            credits_open: false,
+            developer_open: false,
+            service_worker_cache_first: true,
+            offline_manual: false,
+            offline_manual_last: false,
+            mrbc_open: false,
+            offline_reports: false,
+
+            offline_check() {
+                if (this.offline_manual == true && this.offline_manual_last == true) {
+                    this.offline_manual_last = false;
+                    globalThis.offline = true;
+                    window.dispatchEvent(new CustomEvent('scouting_offline'));
+                    this.show_notification("Device offline", "You're now offline. Some features will be reduced until you're back online.", "wifi-slash");
+
+                } else {
+                    if (this.offline_manual_last == true) {
+                        this.offline_manual_last = false;
+                        globalThis.offline = false;
+                        window.dispatchEvent(new CustomEvent('scouting_online'));
+                    }
+
+                    if (this.offline_manual == true) {
+                        globalThis.offline = true;
+                        window.dispatchEvent(new CustomEvent('scouting_offline'));
+                    }
+
+                    if (this.offline != !navigator.onLine) {
+                        this.offline = !navigator.onLine;
+                        globalThis.offline = !navigator.onLine;
+
+                        if (this.offline) {
+                            globalThis.offline = true;
+                            window.dispatchEvent(new CustomEvent('scouting_offline'));
+                            this.show_notification("Device offline", "You're now offline. Some features will be reduced until you're back online.", "wifi-slash");
+                        } else {
+                            globalThis.offline = false;
+                            window.dispatchEvent(new CustomEvent('scouting_online'));
+                            this.show_notification("Device online", "You're back online.", "wifi-high");
+                        }
+                    }
+                }
+            },
+
+            show_notification(title, body, icon) {
+                if (this.notification_shown) {
+                    this.hide_notification();
+                }
+
+                this.notification.title = title;
+                this.notification.body = body;
+                this.notification.icon = icon;
+                this.notification.icon_class = "ph-bold ph-" + icon;
+                this.notification_shown = true;
+
+                setTimeout(() => {
+                    this.hide_notification();
+                }, 5000);
+            },
+
+            hide_notification() {
+                this.notification_shown = false;
+                this.notification.title = '';
+                this.notification.body = '';
+                this.notification.icon = '';
+            },
+
+            update_dark_mode() {
+                if (this.dark_mode) {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('theme', 'light');
+                }
+            },
+
+            toggle_dark_mode() {
+                this.dark_mode = !this.dark_mode;
+                this.update_dark_mode();
+            },
+
+            async clear_service_worker_cache() {
+                await caches.delete('v1');
+            },
+
+            async toggle_service_worker_mode() {
+                this.service_worker_cache_first = !this.service_worker_cache_first;
+                localStorage.setItem("service_worker_cache_first", this.service_worker_cache_first);
+                await caches.delete('v1');
+
+                location.reload();
+            },
+
+            toggle_offline_manual() {
+                this.offline_manual = !this.offline_manual;
+                this.offline_manual_last = true;
+                localStorage.setItem("offline_manual", this.offline_manual);
+
+                window.dispatchEvent(new CustomEvent('sw_update_offline_manual'));
+            },
+
+            check_for_offline_reports() {
+                if (globalThis.offline == false) {
+                    const openRequest = indexedDB.open("scouting_data", 2);
+
+                    openRequest.onupgradeneeded = (event) => {
+                        const db = event.target.result;
+                        const objectStore = db.createObjectStore("offline_reports", { keyPath: "uuid" });
+                    };
+
+                    openRequest.onsuccess = (event) => {
+                        const db = event.target.result;
+                        
+                        const transaction = db.transaction(["offline_reports"], "readwrite");
+                        const objectStore = transaction.objectStore("offline_reports");
+
+                        request = objectStore.count();
+
+                        request.onsuccess = (event) => {
+                            if (event.target.result > 0) {
+                                this.offline_reports = true;
+                                this.show_notification("Reports available to upload.", `You have ${event.target.result} reports that were saved offline ready to upload`, "cloud-arrow-up");
+                            
+                            } else {
+                                this.offline_reports = false;
+                            }
+                        };
+
+                        request.onerror = (event) => {
+                            console.log("Error adding data to the database: " + event.target.errorCode);
+                        };
+                    };
+
+                    openRequest.onerror = (event) => {
+                        console.log("Error opening database: " + event.target.errorCode);
+                    };
+                } else {
+                    this.offline_reports = false;
+                }
+            },
+
+            upload_offline_reports() {
+                const openRequest = indexedDB.open("scouting_data", 2);
+
+                openRequest.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    const objectStore = db.createObjectStore("offline_reports", { keyPath: "uuid" });
+                };
+
+                openRequest.onsuccess = (event) => {
+                    const db = event.target.result;
+                    
+                    const transaction = db.transaction(["offline_reports"], "readwrite");
+                    const objectStore = transaction.objectStore("offline_reports");
+
+                    const request = objectStore.getAll();
+
+                    request.onsuccess = async (event) => {
+                        let reports = event.target.result;
+
+                        let report_list = [];
+
+                        for (report in reports) {
+                            let data = {
+                                uuid: reports[report].uuid,
+                                data: reports[report].data,
+                                event_name: reports[report].event_name,
+                                event_code: reports[report].event_code,
+                                custom: reports[report].custom,
+                                year: reports[report].year
+                            }
+
+                            report_list.push(data);
+                        }
+
+                        var response = await fetch("{{ SERVER_IP }}/upload_offline_reports", {
+                        method: "POST",
+                        headers: {
+                                "data": JSON.stringify(encodeURIComponent(report_list)),
+                            }
+                        });
+
+                        response.json().then(async (json) => {
+                            if (response.ok) {
+                                const transaction = db.transaction(["offline_reports"], "readwrite");
+                                const objectStore = transaction.objectStore("offline_reports");
+                                const clear_request = objectStore.clear();
+
+                                clear_request.onsuccess = (event) => {
+                                    this.offline_reports = false;
+                                    this.show_notification("Reports have been uploaded", "All your reports have been stored on the server", "check-circle");
+                                };
+
+                                clear_request.onerror = (event) => {
+                                    console.log("Error clearing the object store");
+                                }
+
+                            } else {
+                                console.log("There was an issue uploading scouting reports");
+                                this.show_notification("There was an issue uploading scouting reports", "Your reports may have not been uploaded", "warning");
+                            }
+                        });
+                    };
+
+                    request.onerror = (event) => {
+                        console.log("Error adding data to the database: " + event.target.errorCode);
+                    };
+                }
+            },
+
+            init() {
+                if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    this.dark_mode = true;
+                } else {
+                    this.dark_mode = false;
+                }
+
+                this.update_dark_mode();
+
+                this.service_worker_cache_first = JSON.parse(localStorage.getItem("service_worker_cache_first"));
+                this.offline_manual = JSON.parse(localStorage.getItem("offline_manual"));
+
+                if (this.offline_manual == true) {
+                    this.offline_manual_last = true;
+                }
+
+                globalThis.offline = false;
+
+                this.offline_check();
+
+                // Check every half a second if the user is offline or not
+                setInterval(() => {
+                    this.offline_check();
+                }, 500);
+
+                window.addEventListener('scouting_notification', (event) => {
+                    event.stopImmediatePropagation();
+                    const { title, body, icon } = event.detail;
+                    this.show_notification(title, body, icon);
+                });
+
+                this.check_for_offline_reports();
+
+                window.addEventListener('scouting_online', (event) => {
+                    this.check_for_offline_reports();
+                });
+
+                // this.show_notification('Open Scouting', 'Welcome to Open Scouting!', 'star');
+            }
+        }
+    }
+</script>

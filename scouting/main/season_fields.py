@@ -7,16 +7,16 @@ crescendo = [
             {
                 "name": "Team Number",
                 "simple_name": "team_number",
-                "type": "integer",
+                "type": "large_integer",
                 "required": True,
             },
             {
                 "name": "Match Number",
                 "simple_name": "match_number",
-                "type": "integer",
+                "type": "large_integer",
                 "required": True,
             },
-        ]
+        ],
     },
     {
         "section": "Auton",
@@ -25,18 +25,22 @@ crescendo = [
             {
                 "name": "Speaker Shot",
                 "simple_name": "speaker_shot",
-                "type": "choice",
-                "choices": ["N/A", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
+                "type": "integer",
+                "default": 0,
+                "minimum": 0,
+                "maximum": 30,
                 "required": False,
             },
             {
                 "name": "Amp Shot",
                 "simple_name": "amp_shot",
-                "type": "choice",
-                "choices": ["N/A", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
+                "type": "integer",
+                "default": 0,
+                "minimum": 0,
+                "maximum": 30,
                 "required": False,
             },
-        ]
+        ],
     },
     {
         "section": "Teleop",
@@ -49,18 +53,22 @@ crescendo = [
                     {
                         "name": "Speaker Shot",
                         "simple_name": "speaker_shot",
-                        "type": "choice",
-                        "choices": ["N/A", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
+                        "type": "integer",
+                        "default": 0,
+                        "minimum": 0,
+                        "maximum": 30,
                         "required": False,
                     },
                     {
                         "name": "Speaker Misses",
                         "simple_name": "speaker_miss",
-                        "type": "choice",
-                        "choices": ["N/A", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
+                        "type": "integer",
+                        "default": 0,
+                        "minimum": 0,
+                        "maximum": 30,
                         "required": False,
                     },
-                ]
+                ],
             },
             {
                 "section": "Amp",
@@ -69,20 +77,24 @@ crescendo = [
                     {
                         "name": "Amp Shots",
                         "simple_name": "amp_shot",
-                        "type": "choice",
-                        "choices": ["N/A", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
+                        "type": "integer",
+                        "default": 0,
+                        "minimum": 0,
+                        "maximum": 30,
                         "required": False,
                     },
                     {
                         "name": "Amp Misses",
                         "simple_name": "amp_miss",
-                        "type": "choice",
-                        "choices": ["N/A", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
+                        "type": "integer",
+                        "default": 0,
+                        "minimum": 0,
+                        "maximum": 30,
                         "required": False,
                     },
-                ]
+                ],
             },
-        ]
+        ],
     },
     {
         "section": "Extra Information",
@@ -131,6 +143,18 @@ crescendo = [
                 "type": "boolean",
                 "required": False,
             },
-        ]
+        ],
+    },
+    {
+        "section": "Additional Notes",
+        "simple_name": "additional_notes",
+        "fields": [
+            {
+                "name": "Additional Notes or Comments",
+                "simple_name": "notes",
+                "type": "text",
+                "required": False,
+            },
+        ],
     },
 ]

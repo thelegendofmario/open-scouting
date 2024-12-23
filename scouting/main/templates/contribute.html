@@ -9,19 +9,34 @@
 {% block body %}
     <div class="flex flex-col h-full w-screen items-center justify-center">
 
-        <div class="flex flex-row w-full md:w-3/4 lg:w-2/3 mx-8 my-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 items-center justify-center" x-data="contribute_header()">
-            <img class="w-16 h-16 aspect-square m-2 hover:scale-110 transition-all ease-in-out active:scale-95" src="{% static '/main/images/icon_rounded.png' %}" @click="window.location.href = '{{ SERVER_IP }}'">
+        <div class="flex flex-row w-full md:w-3/4 lg:w-2/3 mx-8 my-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 items-center justify-center"
+             x-data="contribute_header()">
+            <img class="w-16 h-16 aspect-square m-2 hover:scale-110 transition-all ease-in-out active:scale-95"
+                 src="{% static '/main/images/icon_rounded.png' %}"
+                 @click="window.location.href = '{{ SERVER_IP }}'">
 
             <div class="flex flex-col">
                 <div class="flex flex-row items-center">
-                    <button class="ui_button_icon mr-2" @click="go_to_data()"><i class="ph-bold ph-hard-drives"></i></button>
+
+                    <button class="ui_button_icon mr-2" @click="go_to_data()">
+                        <i class="ph-bold ph-hard-drives"></i>
+                    </button>
                     <p class="dark:text-white text-black text-sans text-2xl">Contribute</p>
                 </div>
-                <div class="flex flex-row">
+
+                <div class="flex flex-row" x-show="!demo">
                     <p class="dark:text-white text-black text-sans text-sm mx-1">Contributing data to event</p>
                     <p class="dark:text-white text-black text-sans font-bold text-sm mx-1">{{ event_name }}</p>
                     <p class="dark:text-white text-black text-sans text-sm mx-1">as</p>
                     <p class="dark:text-white text-black text-sans font-bold text-sm mx-1">{{ username }}</p>
+                </div>
+
+                <div class="flex flex-col p-2 ml-2 mt-2 rounded-lg border-solid border-2 dark:border-slate-600 dark:bg-purple-900/50 border-slate-300 bg-purple-200/50"
+                     x-show="demo">
+                    <p class="dark:text-white text-black font-sans text-md ">
+                        <i class="ph-bold ph-test-tube"></i> Open Scouting is in demo mode
+                    </p>
+                    <p class="dark:text-white text-black font-sans text-sm">Any contributed data will not be saved to the server</p>
                 </div>
             </div>
         </div>
@@ -29,20 +44,33 @@
         <script>
             function contribute_header() {
                 return {
+                    demo: false,
+
                     go_to_data() {
                         let url = new URL(window.location.href);
                         url.pathname = url.pathname.replace("/contribute", "/data");
                         window.location.href = url.toString();
                     },
 
-                    init() {}
+                    init() {
+                        try {
+                            this.demo = JSON.parse("{{ demo }}");
+                        } catch {
+                            this.demo = false;
+                        }
+                    }
                 }
             }
         </script>
 
-        <div class="lex flex-row w-full md:w-3/4 lg:w-2/3 mx-8 mb-4 py-2 dark:bg-green-800/70 bg-green-400/70 border-2 dark:border-green-700 border-green-500 bg-opacity-80 rounded-lg border-opacity-80 items-center justify-center" x-data="submitted_check()"  x-show="show" x-transition>
+        <div class="lex flex-row w-full md:w-3/4 lg:w-2/3 mx-8 mb-4 py-2 dark:bg-green-800/70 bg-green-400/70 border-2 dark:border-green-700 border-green-500 bg-opacity-80 rounded-lg border-opacity-80 items-center justify-center"
+             x-data="submitted_check()"
+             x-show="show"
+             x-transition>
             <div>
-                <p class="dark:text-white text-black text-sans text-center"><i class="ph-bold ph-check-circle"></i> The data has been successfully submitted</p>
+                <p class="dark:text-white text-black text-sans text-center">
+                    <i class="ph-bold ph-check-circle"></i> The data has been successfully submitted
+                </p>
             </div>
         </div>
 
@@ -65,9 +93,14 @@
 
         </script>
 
-        <div class="lex flex-row w-full md:w-3/4 lg:w-2/3 mx-8 mb-4 py-2 dark:bg-orange-800/70 bg-orange-400/70 border-2 dark:border-orange-700 border-orange-500 bg-opacity-80 rounded-lg border-opacity-80 items-center justify-center" x-data="submitted_offline_check()"  x-show="show" x-transition>
+        <div class="lex flex-row w-full md:w-3/4 lg:w-2/3 mx-8 mb-4 py-2 dark:bg-orange-800/70 bg-orange-400/70 border-2 dark:border-orange-700 border-orange-500 bg-opacity-80 rounded-lg border-opacity-80 items-center justify-center"
+             x-data="submitted_offline_check()"
+             x-show="show"
+             x-transition>
             <div>
-                <p class="dark:text-white text-black text-sans text-center"><i class="ph-bold ph-floppy-disk"></i> The data has been successfully stored locally. It will be uploaded when you go online.</p>
+                <p class="dark:text-white text-black text-sans text-center">
+                    <i class="ph-bold ph-floppy-disk"></i> The data has been successfully stored locally. It will be uploaded when you go online.
+                </p>
             </div>
         </div>
 
@@ -87,6 +120,36 @@
                     }
                 }
             }
+
+        </script>
+
+        <div class="lex flex-row w-full md:w-3/4 lg:w-2/3 mx-8 mb-4 py-2 dark:bg-purple-900/50 bg-purple-200/50 dark:border-purple-900/80 border-2 border-purple-500 bg-opacity-80 rounded-lg border-opacity-80 items-center justify-center"
+             x-data="demo_check()"
+             x-show="show"
+             x-transition>
+            <div>
+                <p class="dark:text-white text-black text-sans text-center">
+                    <i class="ph-bold ph-test-tube"></i> The data isn't submitted to the server while you're in demo mode
+                </p>
+            </div>
+        </div>
+
+        <script>
+        function demo_check() {
+        return {
+            show: false,
+
+            init() {
+                try {
+                    this.show = JSON.parse(
+                        new URL(window.location.href).searchParams.get("submitted_demo").toLowerCase()
+                    );
+                } catch {
+                    this.show = false;
+                }
+            }
+        }
+        }
 
         </script>
 
@@ -114,12 +177,44 @@
 
                         let field_element;
 
-                        if (field.type === 'integer') {
+                        if (field.type === 'large_integer') {
                             field_element = document.createElement('input');
                             field_element.type = 'number';
                             field_element.setAttribute('name', field.simple_name);
                             field_element.setAttribute('x-ref', field.simple_name);
                             field_element.classList = "dark:text-white text-black dark:bg-slate-700 bg-slate-300 rounded px-2 py-1 mb-2";
+
+                        } else if (field.type === 'integer') {
+                            field_element = document.createElement("div");
+                            field_element.classList = "flex flex-row align-center items-center justify-between";
+                            field_element.classList.add("field_other")
+                            field_element.setAttribute("x-data", `{ value: ${field.default}, min: ${field.minimum}, max: ${field.maximum} }`);
+                            field_element.setAttribute("x-bind:value", `value`);
+                            field_element.setAttribute('name', field.simple_name);
+                            field_element.setAttribute('x-ref', field.simple_name);
+
+                            let integer_text = document.createElement('p');
+                            integer_text.setAttribute('x-text', "value");
+                            integer_text.classList = "dark:text-white text-black text-xl font-bold";
+
+                            let integer_buttons = document.createElement("div");
+                            integer_buttons.classList = "flex flex-row";
+
+                            let integer_add_button = document.createElement("button");
+                            integer_add_button.classList = "ui_button_icon mx-2";
+                            integer_add_button.setAttribute("x-on:click", "value < max ? value = value + 1 : null");
+                            integer_add_button.innerHTML = `<i class="ph-bold ph-plus"></i>`;
+
+                            let integer_subtract_button = document.createElement("button");
+                            integer_subtract_button.classList = "ui_button_icon mx-2";
+                            integer_subtract_button.setAttribute("x-on:click", "value > min ? value = value - 1 : null");
+                            integer_subtract_button.innerHTML = `<i class="ph-bold ph-minus"></i>`;
+
+                            integer_buttons.appendChild(integer_add_button);
+                            integer_buttons.appendChild(integer_subtract_button);
+
+                            field_element.appendChild(integer_text);
+                            field_element.appendChild(integer_buttons);
 
                         } else if (field.type === 'boolean') {
                             field_element = document.createElement('input');
@@ -156,6 +251,12 @@
                                 option.text = choice;
                                 field_element.appendChild(option);
                             });
+                        } else if (field.type === "text") {
+                            field_element = document.createElement('input');
+                            field_element.type = 'text';
+                            field_element.setAttribute('name', field.simple_name);
+                            field_element.setAttribute('x-ref', field.simple_name);
+                            field_element.classList = "dark:text-white text-black dark:bg-slate-700 bg-slate-300 rounded px-2 py-1 mb-2";
                         }
 
                         if (field.required) {
@@ -173,15 +274,40 @@
                     },
 
                     create_section(section) {
-                        let section_text = document.createElement("p");
-                        section_text.innerHTML = `<i class="ph-bold ph-arrow-bend-down-right"></i> ${section.section}`;
-                        section_text.classList = "dark:text-white text-black text-md text-sans mb-2";
+                        let section_text_text = document.createElement("p");
+                        section_text_text.innerHTML = `<i class="ph-bold ph-arrow-bend-down-right"></i> ${section.section}`;
+                        section_text_text.classList = "dark:text-white text-black text-md text-sans";
+
+                        let section_text_icon_open = document.createElement("p");
+                        section_text_icon_open.innerHTML = "<i class='ph-bold ph-caret-up'></i>";
+                        section_text_icon_open.classList = "text-black dark:text-white";
+                        section_text_icon_open.setAttribute("x-show", "!open");
+
+                        let section_text_icon_close = document.createElement("p");
+                        section_text_icon_close.innerHTML = "<i class='ph-bold ph-caret-down'></i>";
+                        section_text_icon_close.classList = "text-black dark:text-white";
+                        section_text_icon_close.setAttribute("x-show", "open");
+
+                        let section_text = document.createElement("div");
+                        section_text.appendChild(section_text_text);
+                        section_text.appendChild(section_text_icon_open);
+                        section_text.appendChild(section_text_icon_close);
+                        section_text.classList = "dark:text-white text-black flex flex-row items-center justify-between cursor-pointer";
+
+                        section_text.setAttribute("x-on:click", "open = !open");
+
+                        let section_box = document.createElement("div");
+                        section_box.className = "section_box mt-2";
+                        section_box.setAttribute("x-show", "open");
+                        section_box.setAttribute("x-collapse", "");
 
                         let section_element = document.createElement("div");
                         section_element.setAttribute("x-ref", section.simple_name ? section.simple_name : 'no_simple_name');
                         section_element.classList = "dark:bg-slate-800 bg-slate-200 border-2 dark:border-slate-700 border-slate-300 rounded-lg mb-4 px-8 py-4 flex flex-col";
+                        section_element.setAttribute("x-data", "{ open: true }");
 
                         section_element.appendChild(section_text);
+                        section_element.appendChild(section_box);
 
                         return section_element;
                     },
@@ -191,11 +317,11 @@
                             if (section) { // Create all sub fields inside
                                 if (parent.fields) { // If the item is a section
                                     let section_element = this.create_section(parent);
-                                    section.appendChild(section_element);
+                                    section.querySelector(".section_box").appendChild(section_element);
                                     this.parse_json(parent.fields, section_element);
 
                                 } else { // If the item is a field
-                                    section.appendChild(this.create_field(parent));
+                                    section.querySelector(".section_box").appendChild(this.create_field(parent));
                                 }
 
                             } else {
@@ -208,7 +334,6 @@
                                     this.$root.appendChild(this.create_field(parent));
                                 }
                             }
-                            
                         });
                     },
                     
@@ -219,8 +344,11 @@
             }
         </script>
 
-        <div class="flex flex-col md:flex-row w-full md:w-3/4 lg:w-2/3 mx-8 my-4 py-2 dark:bg-slate-800 bg-slate-200 border-2 dark:border-slate-700 border-slate-300 rounded-lg mb-4 items-center justify-center" x-data="submit_manager()">
-            <button class="ui_button mr-4" @click="submit_button()"><i class="ph-bold ph-check-circle"></i> Submit</button>
+        <div class="flex flex-col md:flex-row w-full md:w-3/4 lg:w-2/3 mx-8 my-4 py-2 dark:bg-slate-800 bg-slate-200 border-2 dark:border-slate-700 border-slate-300 rounded-lg mb-4 items-center justify-center"
+             x-data="submit_manager()">
+            <button class="ui_button mr-4" @click="submit_button()">
+                <i class="ph-bold ph-check-circle"></i> Submit
+            </button>
 
             <div x-show="missing_required_fields" x-transition>
                 <p class="text-sans dark:text-red-700 text-red-500 font-bold text-center">Please fill out all of the required fields</p>
@@ -260,13 +388,12 @@
 
                         let all_inputs = document.querySelectorAll("input");
                         let all_selects = document.querySelectorAll("select");
+                        let other_fields = document.querySelectorAll(".field_other")
 
                         for (const field of all_inputs) {
                             let value;
-                            console.log("Looking at " + field);
-                            console.log("value is " + field.value)
                             if (field.value) {
-                                if (field.getAttribute("scouting_type") == "integer") {
+                                if (field.getAttribute("scouting_type") == "large_integer" || field.getAttribute("scouting_type") === "text") {
                                     value = field.value;
 
                                 } else if (field.getAttribute("scouting_type") == "boolean") {
@@ -301,107 +428,64 @@
                             }
                         }
 
+                        for (const field of other_fields) {
+                            let value;
+                            if (field.value) {
+
+                                if (field.getAttribute("scouting_type") == "integer") {
+                                    value = field.value;
+                                }
+
+                                let data_field = {
+                                    "name": field.getAttribute("x-ref"),
+                                    "type": field.getAttribute("scouting_type"),
+                                    "value": value
+                                }
+
+                                data.push(data_field);
+                            }
+                        }
+
                         return data;
                     },
 
                     async submit_button() {
-                        if (this.check_fields()) {
-                            let report_uuid = crypto.randomUUID();
+                        try {
+                            var demo_param = JSON.parse(new URL(window.location.href).searchParams.get("demo").toLowerCase())
+                        } catch {
+                            var demo_param = false;
+                        }
 
-                            const openRequest = indexedDB.open("scouting_data", 2);
-
-                            openRequest.onupgradeneeded = (event) => {
-                                const db = event.target.result;
-                                const objectStore = db.createObjectStore("backups", { keyPath: "uuid" });
-                            };
-
-                            openRequest.onsuccess = (event) => {
-                                const db = event.target.result;
-                                
-                                const transaction = db.transaction(["backups"], "readwrite");
-                                const objectStore = transaction.objectStore("backups");
-
-                                const report_backup = {
-                                    uuid: report_uuid,
-                                    data: this.create_json_data(),
-                                    event_name: "{{ event_name }}",
-                                    event_code: "{{ event_code }}",
-                                    custom: "{{ custom }}",
-                                    year: "{{ year }}"
-                                }
-
-                                const request = objectStore.add(report_backup);
-
-                                request.onsuccess = (event) => {
-                                    console.log("Data added to the database");
-                                };
-
-                                request.onerror = (event) => {
-                                    console.log("Error adding data to the database: " + event.target.errorCode);
-                                };
-                            };
-
-                            openRequest.onerror = (event) => {
-                                console.log("Error opening database: " + event.target.errorCode);
-                            };
-
-                            if (globalThis.offline == false) {
-                                var response = await fetch("{{ SERVER_IP }}/submit", {
-                                method: "POST",
-                                headers: {
-                                        "uuid": report_uuid,
-                                        "data": JSON.stringify(this.create_json_data()),
-                                        "event-name": "{{ event_name }}",
-                                        "event-code": "{{ event_code }}",
-                                        "custom": "{{ custom }}",
-                                        "year": "{{ year }}"
-                                    }
-                                });
-
-                                response.text().then(async (text) => {
-                                    const url = new URL(window.location.href);
-
-                                    url.searchParams.set("submitted", true);
-                                    url.searchParams.delete("submitted_offline");
-
-                                    window.location.href = url.toString();
-                                });
-                            } else {
-                                console.log("You're offline, report will be saved offline.")
+                        if (!demo_param) {
+                            if (this.check_fields()) {
+                                let report_uuid = crypto.randomUUID();
 
                                 const openRequest = indexedDB.open("scouting_data", 2);
 
                                 openRequest.onupgradeneeded = (event) => {
                                     const db = event.target.result;
-                                    const objectStore = db.createObjectStore("offline_reports", { keyPath: "uuid" });
+                                    const objectStore = db.createObjectStore("backups", { keyPath: "uuid" });
                                 };
 
                                 openRequest.onsuccess = (event) => {
                                     const db = event.target.result;
                                     
-                                    const transaction = db.transaction(["offline_reports"], "readwrite");
-                                    const objectStore = transaction.objectStore("offline_reports");
+                                    const transaction = db.transaction(["backups"], "readwrite");
+                                    const objectStore = transaction.objectStore("backups");
 
-                                    const offline_report = {
+                                    const report_backup = {
                                         uuid: report_uuid,
                                         data: this.create_json_data(),
-                                        event_name: "{{ event_name }}",
+                                        event_name: encodeURIComponent("{{ event_name }}"),
                                         event_code: "{{ event_code }}",
                                         custom: "{{ custom }}",
                                         year: "{{ year }}"
                                     }
 
-                                    const request = objectStore.add(offline_report);
+                                    const request = objectStore.add(report_backup);
 
                                     request.onsuccess = (event) => {
                                         console.log("Data added to the database");
-
-                                        const url = new URL(window.location.href);
-
-                                        url.searchParams.set("submitted_offline", true);
-                                        url.searchParams.delete("submitted");
-
-                                        window.location.href = url.toString();
                                     };
 
                                     request.onerror = (event) => {
@@ -412,7 +496,89 @@
                                 openRequest.onerror = (event) => {
                                     console.log("Error opening database: " + event.target.errorCode);
                                 };
+
+                                if (globalThis.offline == false) {
+                                    var response = await fetch("{{ SERVER_IP }}/submit", {
+                                    method: "POST",
+                                    headers: {
+                                            "uuid": report_uuid,
+                                            "data": JSON.stringify(this.create_json_data()),
+                                            "event-name": encodeURIComponent("{{ event_name }}"),
+                                            "event-code": "{{ event_code }}",
+                                            "custom": "{{ custom }}",
+                                            "year": "{{ year }}"
+                                        }
+                                    });
+
+                                    response.text().then(async (text) => {
+                                        const url = new URL(window.location.href);
+
+                                        url.searchParams.set("submitted", true);
+                                        url.searchParams.delete("submitted_offline");
+                                        url.searchParams.delete("submitted_demo");
+
+                                        window.location.href = url.toString();
+                                    });
+                                } else {
+                                    console.log("You're offline, report will be saved offline.")
+
+                                    const openRequest = indexedDB.open("scouting_data", 2);
+
+                                    openRequest.onupgradeneeded = (event) => {
+                                        const db = event.target.result;
+                                        const objectStore = db.createObjectStore("offline_reports", { keyPath: "uuid" });
+                                    };
+
+                                    openRequest.onsuccess = (event) => {
+                                        const db = event.target.result;
+                                        
+                                        const transaction = db.transaction(["offline_reports"], "readwrite");
+                                        const objectStore = transaction.objectStore("offline_reports");
+
+                                        const offline_report = {
+                                            uuid: report_uuid,
+                                            data: this.create_json_data(),
+                                            event_name: encodeURIComponent("{{ event_name }}"),
+                                            event_code: "{{ event_code }}",
+                                            custom: "{{ custom }}",
+                                            year: "{{ year }}"
+                                        }
+
+                                        const request = objectStore.add(offline_report);
+
+                                        request.onsuccess = (event) => {
+                                            console.log("Data added to the database");
+
+                                            const url = new URL(window.location.href);
+
+                                            url.searchParams.set("submitted_offline", true);
+                                            url.searchParams.delete("submitted");
+                                            url.searchParams.delete("submitted_demo");
+
+                                            window.location.href = url.toString();
+                                        };
+
+                                        request.onerror = (event) => {
+                                            console.log("Error adding data to the database: " + event.target.errorCode);
+                                        };
+                                    };
+
+                                    openRequest.onerror = (event) => {
+                                        console.log("Error opening database: " + event.target.errorCode);
+                                    };
+                                }
                             }
+                        
+                        } else {
+                            console.log("Submitted in demo mode");
+
+                            const url = new URL(window.location.href);
+
+                            url.searchParams.set("submitted_demo", true);
+                            url.searchParams.delete("submitted");
+                            url.searchParams.delete("submitted_offline");
+
+                            window.location.href = url.toString();
                         }
                     },
 
@@ -424,4 +590,5 @@
     </div>
 {% endblock %}
 
-{% block scripts %}{% endblock %}
+{% block scripts %}
+{% endblock %}
