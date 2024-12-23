@@ -9,10 +9,11 @@ This document describes the roadmap for Open Scouting, and roughly when each fea
 - [x] [#7](https://github.com/nfoert/open-scouting/issues/7) - Add a field for additional notes
 - [x] [#25](https://github.com/nfoert/open-scouting/issues/25) - Add increment buttons to numerical values
   - [x] [#10](https://github.com/nfoert/open-scouting/issues/10) - Add 0 to season_fields.py choices
-- [ ] [#16](https://github.com/nfoert/open-scouting/issues/16) - Show data in the table differently depending on the kind of field
 - [x] [#37](https://github.com/nfoert/open-scouting/issues/37) - Be able to collapse sections in /submit
+- [ ] [#38](https://github.com/nfoert/open-scouting/issues/38) - Add demo mode
 
 ### `v0.0.5-alpha`
+- [ ] [#16](https://github.com/nfoert/open-scouting/issues/16) - Show data in the table differently depending on the kind of field
 - [ ] [#23](https://github.com/nfoert/open-scouting/issues/23) - URL Parameter support on `/index`
 - [ ] [#20](https://github.com/nfoert/open-scouting/issues/20) - Allow the user to create an account
 - [ ] [#13](https://github.com/nfoert/open-scouting/issues/13) - Save the username and team number to Data
