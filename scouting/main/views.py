@@ -157,8 +157,6 @@ def get_data(request):
                 item_data = {"created": "unknown", "data": item}
                 data_json.append(item_data)
 
-            print(data_json)
-
             all_names = []
             for entry in data:
                 for item in entry:
