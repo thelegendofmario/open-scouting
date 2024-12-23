@@ -11,6 +11,7 @@ This document describes the roadmap for Open Scouting, and roughly when each fea
   - [x] [#10](https://github.com/nfoert/open-scouting/issues/10) - Add 0 to season_fields.py choices
 - [x] [#37](https://github.com/nfoert/open-scouting/issues/37) - Be able to collapse sections in /submit
 - [ ] [#38](https://github.com/nfoert/open-scouting/issues/38) - Add demo mode
+- [ ] [#39](https://github.com/nfoert/open-scouting/issues/39) - Non-ASCII characters in event name breaks data submission
 
 ### `v0.0.5-alpha`
 - [ ] [#16](https://github.com/nfoert/open-scouting/issues/16) - Show data in the table differently depending on the kind of field

@@ -23,11 +23,18 @@
                     </button>
                     <p class="dark:text-white text-black text-sans text-2xl">Contribute</p>
                 </div>
-                <div class="flex flex-row">
+                <div class="flex flex-row" x-show="!demo">
                     <p class="dark:text-white text-black text-sans text-sm mx-1">Contributing data to event</p>
                     <p class="dark:text-white text-black text-sans font-bold text-sm mx-1">{{ event_name }}</p>
                     <p class="dark:text-white text-black text-sans text-sm mx-1">as</p>
                     <p class="dark:text-white text-black text-sans font-bold text-sm mx-1">{{ username }}</p>
+                </div>
+                <div class="flex flex-col p-2 ml-2 mt-2 rounded-md border-solid border-2 dark:border-slate-600 dark:bg-purple-900/50 border-slate-300 bg-purple-200/50"
+                     x-show="demo">
+                    <p class="dark:text-white text-black font-sans text-md ">
+                        <i class="ph-bold ph-test-tube"></i> Open Scouting is in demo mode
+                    </p>
+                    <p class="dark:text-white text-black font-sans text-sm">Any contributed data will not be saved to the server</p>
                 </div>
             </div>
         </div>
@@ -35,13 +42,21 @@
         <script>
             function contribute_header() {
                 return {
+                    demo: false,
+
                     go_to_data() {
                         let url = new URL(window.location.href);
                         url.pathname = url.pathname.replace("/contribute", "/data");
                         window.location.href = url.toString();
                     },
 
-                    init() {}
+                    init() {
+                        try {
+                            this.demo = JSON.parse("{{ demo }}");
+                        } catch {
+                            this.demo = false;
+                        }
+                    }
                 }
             }
         </script>
@@ -103,6 +118,36 @@
                     }
                 }
             }
+
+        </script>
+
+        <div class="lex flex-row w-full md:w-3/4 lg:w-2/3 mx-8 mb-4 py-2 dark:bg-purple-900/50 bg-purple-200/50 dark:border-purple-900/80 border-2 border-purple-500 bg-opacity-80 rounded-lg border-opacity-80 items-center justify-center"
+             x-data="demo_check()"
+             x-show="show"
+             x-transition>
+            <div>
+                <p class="dark:text-white text-black text-sans text-center">
+                    <i class="ph-bold ph-test-tube"></i> The data isn't submitted to the server while you're in demo mode
+                </p>
+            </div>
+        </div>
+
+        <script>
+        function demo_check() {
+        return {
+            show: false,
+
+            init() {
+                try {
+                    this.show = JSON.parse(
+                        new URL(window.location.href).searchParams.get("submitted_demo").toLowerCase()
+                    );
+                } catch {
+                    this.show = false;
+                }
+            }
+        }
+        }
 
         </script>
 
@@ -403,84 +448,30 @@
                     },
 
                     async submit_button() {
-                        if (this.check_fields()) {
-                            let report_uuid = crypto.randomUUID();
+                        try {
+                            var demo_param = JSON.parse(new URL(window.location.href).searchParams.get("demo").toLowerCase())
+                        } catch {
+                            var demo_param = false;
+                        }
 
-                            const openRequest = indexedDB.open("scouting_data", 2);
-
-                            openRequest.onupgradeneeded = (event) => {
-                                const db = event.target.result;
-                                const objectStore = db.createObjectStore("backups", { keyPath: "uuid" });
-                            };
-
-                            openRequest.onsuccess = (event) => {
-                                const db = event.target.result;
-                                
-                                const transaction = db.transaction(["backups"], "readwrite");
-                                const objectStore = transaction.objectStore("backups");
-
-                                const report_backup = {
-                                    uuid: report_uuid,
-                                    data: this.create_json_data(),
-                                    event_name: "{{ event_name }}",
-                                    event_code: "{{ event_code }}",
-                                    custom: "{{ custom }}",
-                                    year: "{{ year }}"
-                                }
-
-                                const request = objectStore.add(report_backup);
-
-                                request.onsuccess = (event) => {
-                                    console.log("Data added to the database");
-                                };
-
-                                request.onerror = (event) => {
-                                    console.log("Error adding data to the database: " + event.target.errorCode);
-                                };
-                            };
-
-                            openRequest.onerror = (event) => {
-                                console.log("Error opening database: " + event.target.errorCode);
-                            };
-
-                            if (globalThis.offline == false) {
-                                var response = await fetch("{{ SERVER_IP }}/submit", {
-                                method: "POST",
-                                headers: {
-                                        "uuid": report_uuid,
-                                        "data": JSON.stringify(this.create_json_data()),
-                                        "event-name": "{{ event_name }}",
-                                        "event-code": "{{ event_code }}",
-                                        "custom": "{{ custom }}",
-                                        "year": "{{ year }}"
-                                    }
-                                });
-
-                                response.text().then(async (text) => {
-                                    const url = new URL(window.location.href);
-
-                                    url.searchParams.set("submitted", true);
-                                    url.searchParams.delete("submitted_offline");
-
-                                    window.location.href = url.toString();
-                                });
-                            } else {
-                                console.log("You're offline, report will be saved offline.")
+                        if (!demo_param) {
+                            if (this.check_fields()) {
+                                let report_uuid = crypto.randomUUID();
 
                                 const openRequest = indexedDB.open("scouting_data", 2);
 
                                 openRequest.onupgradeneeded = (event) => {
                                     const db = event.target.result;
-                                    const objectStore = db.createObjectStore("offline_reports", { keyPath: "uuid" });
+                                    const objectStore = db.createObjectStore("backups", { keyPath: "uuid" });
                                 };
 
                                 openRequest.onsuccess = (event) => {
                                     const db = event.target.result;
                                     
-                                    const transaction = db.transaction(["offline_reports"], "readwrite");
-                                    const objectStore = transaction.objectStore("offline_reports");
+                                    const transaction = db.transaction(["backups"], "readwrite");
+                                    const objectStore = transaction.objectStore("backups");
 
-                                    const offline_report = {
+                                    const report_backup = {
                                         uuid: report_uuid,
                                         data: this.create_json_data(),
                                         event_name: "{{ event_name }}",
@@ -489,17 +480,10 @@
                                         year: "{{ year }}"
                                     }
 
-                                    const request = objectStore.add(offline_report);
+                                    const request = objectStore.add(report_backup);
 
                                     request.onsuccess = (event) => {
                                         console.log("Data added to the database");
-
-                                        const url = new URL(window.location.href);
-
-                                        url.searchParams.set("submitted_offline", true);
-                                        url.searchParams.delete("submitted");
-
-                                        window.location.href = url.toString();
                                     };
 
                                     request.onerror = (event) => {
@@ -510,7 +494,89 @@
                                 openRequest.onerror = (event) => {
                                     console.log("Error opening database: " + event.target.errorCode);
                                 };
+
+                                if (globalThis.offline == false) {
+                                    var response = await fetch("{{ SERVER_IP }}/submit", {
+                                    method: "POST",
+                                    headers: {
+                                            "uuid": report_uuid,
+                                            "data": JSON.stringify(this.create_json_data()),
+                                            "event-name": "{{ event_name }}",
+                                            "event-code": "{{ event_code }}",
+                                            "custom": "{{ custom }}",
+                                            "year": "{{ year }}"
+                                        }
+                                    });
+
+                                    response.text().then(async (text) => {
+                                        const url = new URL(window.location.href);
+
+                                        url.searchParams.set("submitted", true);
+                                        url.searchParams.delete("submitted_offline");
+                                        url.searchParams.delete("submitted_demo");
+
+                                        window.location.href = url.toString();
+                                    });
+                                } else {
+                                    console.log("You're offline, report will be saved offline.")
+
+                                    const openRequest = indexedDB.open("scouting_data", 2);
+
+                                    openRequest.onupgradeneeded = (event) => {
+                                        const db = event.target.result;
+                                        const objectStore = db.createObjectStore("offline_reports", { keyPath: "uuid" });
+                                    };
+
+                                    openRequest.onsuccess = (event) => {
+                                        const db = event.target.result;
+                                        
+                                        const transaction = db.transaction(["offline_reports"], "readwrite");
+                                        const objectStore = transaction.objectStore("offline_reports");
+
+                                        const offline_report = {
+                                            uuid: report_uuid,
+                                            data: this.create_json_data(),
+                                            event_name: "{{ event_name }}",
+                                            event_code: "{{ event_code }}",
+                                            custom: "{{ custom }}",
+                                            year: "{{ year }}"
+                                        }
+
+                                        const request = objectStore.add(offline_report);
+
+                                        request.onsuccess = (event) => {
+                                            console.log("Data added to the database");
+
+                                            const url = new URL(window.location.href);
+
+                                            url.searchParams.set("submitted_offline", true);
+                                            url.searchParams.delete("submitted");
+                                            url.searchParams.delete("submitted_demo");
+
+                                            window.location.href = url.toString();
+                                        };
+
+                                        request.onerror = (event) => {
+                                            console.log("Error adding data to the database: " + event.target.errorCode);
+                                        };
+                                    };
+
+                                    openRequest.onerror = (event) => {
+                                        console.log("Error opening database: " + event.target.errorCode);
+                                    };
+                                }
                             }
+                        
+                        } else {
+                            console.log("Submitted in demo mode");
+
+                            const url = new URL(window.location.href);
+
+                            url.searchParams.set("submitted_demo", true);
+                            url.searchParams.delete("submitted");
+                            url.searchParams.delete("submitted_offline");
+
+                            window.location.href = url.toString();
                         }
                     },
 

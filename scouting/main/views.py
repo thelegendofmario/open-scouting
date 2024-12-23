@@ -40,6 +40,7 @@ def contribute(request):
     request.session["event_code"] = request.GET.get("event_code", "unknown")
     request.session["custom"] = request.GET.get("custom", "unknown")
     request.session["year"] = request.GET.get("year", "unknown")
+    request.session["demo"] = request.GET.get("demo", "unknown")
 
     context = {
         "SERVER_IP": settings.SERVER_IP,
@@ -52,6 +53,7 @@ def contribute(request):
         "event_code": request.GET.get("event_code", "unknown"),
         "custom": request.GET.get("custom", "unknown"),
         "year": request.GET.get("year", "unknown"),
+        "demo": request.GET.get("demo", "unknown"),
     }
 
     return render(request, "contribute.html", context)
@@ -63,6 +65,7 @@ def data(request):
     request.session["event_code"] = request.GET.get("event_code", "unknown")
     request.session["custom"] = request.GET.get("custom", "unknown")
     request.session["year"] = request.GET.get("year", "unknown")
+    request.session["demo"] = request.GET.get("demo", "unknown")
 
     context = {
         "SERVER_IP": settings.SERVER_IP,
@@ -72,6 +75,7 @@ def data(request):
         "event_code": request.GET.get("event_code", "unknown"),
         "custom": request.GET.get("custom", "unknown"),
         "year": request.GET.get("year", "unknown"),
+        "demo": request.GET.get("demo", "unknown"),
     }
 
     return render(request, "data.html", context)
