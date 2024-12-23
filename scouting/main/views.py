@@ -295,7 +295,7 @@ def check_local_backup_reports(request):
         reports_found = 0
         reports_not_found = 0
 
-        reports_list = json.loads(request.headers["data"])
+        reports_list = unquote(json.loads(request.headers["data"]))
 
         for report in reports_list:
             data = Data.objects.filter(
@@ -333,7 +333,7 @@ def upload_offline_reports(request):
         reports_found = 0
         reports_not_found = 0
 
-        reports_list = json.loads(request.headers["data"])
+        reports_list = unquote(json.loads(request.headers["data"]))
 
         for report in reports_list:
             data = Data.objects.filter(
