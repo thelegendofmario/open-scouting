@@ -127,7 +127,7 @@
                         `${this.SERVER_IP}/get_data`, {
                         method: 'POST',
                         headers: {
-                            "event-name": "{{ event_name }}",
+                            "event-name": encodeURIComponent("{{ event_name }}"),
                             "event-code": "{{ event_code }}",
                             "custom": "{{ custom }}",
                             "year": "{{ year }}",

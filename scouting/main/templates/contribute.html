@@ -476,7 +476,7 @@
                                     const report_backup = {
                                         uuid: report_uuid,
                                         data: this.create_json_data(),
-                                        event_name: "{{ event_name }}",
+                                        event_name: encodeURIComponent("{{ event_name }}"),
                                         event_code: "{{ event_code }}",
                                         custom: "{{ custom }}",
                                         year: "{{ year }}"
@@ -503,7 +503,7 @@
                                     headers: {
                                             "uuid": report_uuid,
                                             "data": JSON.stringify(this.create_json_data()),
-                                            "event-name": "{{ event_name }}",
+                                            "event-name": encodeURIComponent("{{ event_name }}"),
                                             "event-code": "{{ event_code }}",
                                             "custom": "{{ custom }}",
                                             "year": "{{ year }}"
@@ -538,7 +538,7 @@
                                         const offline_report = {
                                             uuid: report_uuid,
                                             data: this.create_json_data(),
-                                            event_name: "{{ event_name }}",
+                                            event_name: encodeURIComponent("{{ event_name }}"),
                                             event_code: "{{ event_code }}",
                                             custom: "{{ custom }}",
                                             year: "{{ year }}"

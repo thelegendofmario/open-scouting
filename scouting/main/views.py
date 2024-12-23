@@ -11,6 +11,7 @@ from . import demo_data
 import json
 from datetime import datetime
 import uuid
+from urllib.parse import unquote
 
 # TODO: This is a duplicate of a similar array in models.py, I don't know if there's a good way to make these into one array
 YEARS = ["2024"]
@@ -101,7 +102,7 @@ def submit(request):
     if request.method == "POST":
         if request.headers["custom"] == "true":
             events = Event.objects.filter(
-                name=request.headers["event_name"],
+                name=unquote(request.headers["event_name"]),
                 event_code=request.headers["event_code"],
                 custom=True,
             )
@@ -109,7 +110,7 @@ def submit(request):
             data = Data(
                 uuid=request.headers["uuid"],
                 year=request.headers["year"],
-                event=request.headers["event_name"],
+                event=unquote(request.headers["event_name"]),
                 event_code=request.headers["event_code"],
                 data=json.loads(request.headers["data"]),
                 created=timezone.now(),
@@ -123,7 +124,7 @@ def submit(request):
             if len(events) == 0:
                 event = Event(
                     year=request.headers["year"],
-                    name=request.headers["event_name"],
+                    name=unquote(request.headers["event_name"]),
                     event_code=request.headers["event_code"],
                     created=timezone.now(),
                 )
@@ -134,7 +135,7 @@ def submit(request):
             data = Data(
                 uuid=request.headers["uuid"],
                 year=request.headers["year"],
-                event=request.headers["event_name"],
+                event=unquote(request.headers["event_name"]),
                 event_code=request.headers["event_code"],
                 data=json.loads(request.headers["data"]),
                 created=timezone.now(),
@@ -171,7 +172,7 @@ def get_data(request):
         else:
             if request.headers["custom"] == "true":
                 events = Event.objects.filter(
-                    name=request.headers["event_name"],
+                    name=unquote(request.headers["event_name"]),
                     event_code=request.headers["event_code"],
                     custom=True,
                 )
@@ -182,7 +183,7 @@ def get_data(request):
                 if len(events) == 0:
                     event = Event(
                         year=request.headers["year"],
-                        name=request.headers["event_name"],
+                        name=unquote(request.headers["event_name"]),
                         event_code=request.headers["event_code"],
                         custom=False,
                         created=timezone.now(),
@@ -193,7 +194,7 @@ def get_data(request):
 
             data = Data.objects.filter(
                 year=request.headers["year"],
-                event=request.headers["event_name"],
+                event=unquote(request.headers["event_name"]),
                 event_code=request.headers["event_code"],
                 event_model=event,
             )
