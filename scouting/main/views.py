@@ -40,6 +40,7 @@ def index(request):
         "SERVER_IP": settings.SERVER_IP,
         "TBA_API_KEY": settings.TBA_API_KEY,
         "YEARS": json.dumps(YEARS),
+        "SERVER_MESSAGE": settings.SERVER_MESSAGE,
     }
 
     return render(request, "index.html", context)
@@ -56,6 +57,7 @@ def contribute(request):
     context = {
         "SERVER_IP": settings.SERVER_IP,
         "TBA_API_KEY": settings.TBA_API_KEY,
+        "SERVER_MESSAGE": settings.SERVER_MESSAGE,
         "season_fields": json.dumps(
             get_season_data_from_year(request.GET.get("year", "unknown"))
         ),
@@ -81,6 +83,7 @@ def data(request):
     context = {
         "SERVER_IP": settings.SERVER_IP,
         "TBA_API_KEY": settings.TBA_API_KEY,
+        "SERVER_MESSAGE": settings.SERVER_MESSAGE,
         "username": request.GET.get("username", "unknown"),
         "event_name": request.GET.get("event_name", "unknown"),
         "event_code": request.GET.get("event_code", "unknown"),

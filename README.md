@@ -99,6 +99,8 @@ Set the following global environment variables:
 - `DEBUG` -> `False`
 - `DATABASE_URL` -> `${db.DATABASE_URL}` (This works on DigitalOcean, this may not work on every hosting provider)
 
+Additionally, if you wish to show a custom message to the user on each page (demonstration server, currently undergoing maintenance), set the `SERVER_MESSAGE` environment variable to the message you wish to display.
+
 ## Development
 ### djlint
 This project uses `djlint` to lint the templates. You can run this using the following command
