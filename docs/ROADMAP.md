@@ -6,6 +6,9 @@ This document describes the roadmap for Open Scouting, and roughly when each fea
 ## To-Do
 ### `v0.0.5-alpha`
 - [x] [#41](https://github.com/nfoert/open-scouting/issues/41) - Implement a way to show a server message
+- [ ] Implement 2025 season fields and examples
+
+### `v0.0.6-alpha`
 - [ ] [#16](https://github.com/nfoert/open-scouting/issues/16) - Show data in the table differently depending on the kind of field
 - [ ] [#23](https://github.com/nfoert/open-scouting/issues/23) - URL Parameter support on `/index`
 - [ ] [#20](https://github.com/nfoert/open-scouting/issues/20) - Allow the user to create an account
