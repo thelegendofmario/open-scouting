@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load static %}
+{% block head_title %}Open Scouting | Contribute{% endblock %}
+
+{% block head_scripts %}{% endblock %}
+
+{% block stylesheets %}{% endblock %}
+
+{% block body %}
+    <div class="flex h-screen justify-center items-center flex-col w-screen">
+        <img class="w-full md:w-1/2 xl:w-2/6 px-10 hidden dark:block"
+             src="{% static '/main/images/logo_light.png' %}">
+        <img class="w-full md:w-1/2 xl:w-2/6 px-10 dark:hidden block"
+             src="{% static '/main/images/logo_dark.png' %}">
+        <p class="dark:text-white text-black text-sans text-center text-lg">Sign in or create an account</p>
+
+        <div class="mt-4" x-data="auth()">
+            <div class="flex flex-col items-center"
+                 x-show="sign_in"
+                 x-transition:enter.delay.300ms>
+                <p class="dark:text-white text-black text-sans text-center text-2xl mb-2">
+                    <i class="ph-bold ph-user-circle-check"></i> Sign in
+                </p>
+
+                <input class="ui_input" placeholder="Username" type="text">
+                <input class="ui_input" placeholder="Password" type="password">
+                <button class="ui_button">
+                    <i class="ph-bold ph-check-circle"></i> Sign in
+                </button>
+
+                <div class="h-1 w-16 mb-2 dark:bg-slate-700 border-1 dark:border-slate-600 bg-slate-300 border-slate-400 rounded-full"></div>
+                <p class="dark:text-white text-black text-sans text-center text-md">Or...</p>
+                <button class="ui_button" @click="sign_in = false">
+                    <i class="ph-bold ph-user-circle-plus"></i> Create Account
+                </button>
+            </div>
+
+            <div class="flex flex-col items-center"
+                 x-show="!sign_in"
+                 x-transition:enter.delay.300ms>
+                <p class="dark:text-white text-black text-sans text-center text-2xl">
+                    <i class="ph-bold ph-user-circle-plus"></i> Create Account
+                </p>
+
+                <div class="h-1 w-16 mb-2 dark:bg-slate-700 border-1 dark:border-slate-600 bg-slate-300 border-slate-400 rounded-full"></div>
+                <p class="dark:text-white text-black text-sans text-center text-md">Or...</p>
+                <button class="ui_button" @click="sign_in = true">
+                    <i class="ph-bold ph-user-circle-check"></i> Sign in
+                </button>
+            </div>
+        </div>
+
+        <script>
+            function auth() {
+                return {
+                    sign_in: true,
+
+                    init() {
+
+                    }
+                }
+            }
+        </script>
+    </div>
+{% endblock body %}
