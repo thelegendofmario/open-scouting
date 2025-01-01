@@ -53,72 +53,103 @@
                      x-transition:enter.delay.300ms>
                     <p class="dark:text-white text-black text-sans text-center text-md">Enter display name and team number</p>
                     <input class="ui_input"
-                        placeholder="Display Name"
-                        type="text"
-                        x-ref="create_display_name>
-                        <input class="ui_input"
-                               placeholder="Team Number"
-                               type="text"
-                               x-ref="create_team_number">
+                           placeholder="Display Name"
+                           type="text"
+                           x-ref="create_display_name">
+                    <input class="ui_input"
+                           placeholder="Team Number"
+                           type="text"
+                           x-ref="create_team_number">
 
-                        <button class="ui_button mx-1" @click="create_account_page = 2">
+                    <button class="ui_button mx-1" @click="create_account_page = 2">
+                        <i class="ph-bold ph-arrow-circle-right"></i> Next
+                    </button>
+                </div>
+
+                <div class="flex flex-col items-center my-4"
+                     x-show="create_account_page == 2"
+                     x-transition:enter.delay.300ms>
+                    <p class="dark:text-white text-black text-sans text-center text-md">Enter email</p>
+                    <input class="ui_input" placeholder="Email" type="text" x-ref="create_email">
+
+                    <div class="flex flex-row">
+                        <button class="ui_button mx-1" @click="create_account_start_over()">
+                            <i class="ph-bold ph-arrow-circle-left"></i> Start Over
+                        </button>
+                        <button class="ui_button mx-1" @click="create_account_page = 3">
                             <i class="ph-bold ph-arrow-circle-right"></i> Next
                         </button>
                     </div>
-
-                    <div class="flex flex-col items-center my-4"
-                         x-show="create_account_page == 2"
-                         x-transition:enter.delay.300ms>
-                        <p class="dark:text-white text-black text-sans text-center text-md">Enter email</p>
-                        <input class="ui_input" placeholder="Email" type="text" x-ref="create_email">
-
-                        <div class="flex flex-row">
-                            <button class="ui_button mx-1" @click="create_account_start_over()">
-                                <i class="ph-bold ph-arrow-circle-left"></i> Start Over
-                            </button>
-                            <button class="ui_button mx-1" @click="create_account_page = 3">
-                                <i class="ph-bold ph-arrow-circle-right"></i> Next
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="flex flex-col items-center my-4"
-                         x-show="create_account_page == 3"
-                         x-transition:enter.delay.300ms>
-                        <p class="dark:text-white text-black text-sans text-center text-md">Create password</p>
-                        <input class="ui_input"
-                               placeholder="Password"
-                               type="password"
-                               x-ref="create_password">
-
-                        <div class="flex flex-row">
-                            <button class="ui_button mx-1" @click="create_account_start_over()">
-                                <i class="ph-bold ph-arrow-circle-left"></i> Start Over
-                            </button>
-                            <button class="ui_button mx-1" @click="create_account()">
-                                <i class="ph-bold ph-check-circle"></i> Create Account
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="h-1 w-16 mb-2 dark:bg-slate-700 border-1 dark:border-slate-600 bg-slate-300 border-slate-400 rounded-full"></div>
-                    <p class="dark:text-white text-black text-sans text-center text-md">Or...</p>
-                    <button class="ui_button" @click="sign_in = true">
-                        <i class="ph-bold ph-user-circle-check"></i> Sign in
-                    </button>
                 </div>
-            </div>
 
-            <script>
+                <div class="flex flex-col items-center my-4"
+                     x-show="create_account_page == 3"
+                     x-transition:enter.delay.300ms>
+                    <p class="dark:text-white text-black text-sans text-center text-md">Verify email</p>
+                    <p class="dark:text-white text-black text-sans text-center text-sm">
+                        <p class="dark:text-white text-black text-sans text-center text-sm"
+                           x-text="'We sent a verification code to' + user.email + '. Please check your email for a message from {{ EMAIL_HOST_USER }} and enter the verification code below'">
+                        </p>
+                    </p>
+                    <input class="ui_input"
+                           placeholder="Verification Code"
+                           type="text"
+                           x-ref="create_verification_code">
+
+                    <div class="flex flex-row">
+                        <button class="ui_button mx-1" @click="create_account_start_over()">
+                            <i class="ph-bold ph-arrow-circle-left"></i> Start Over
+                        </button>
+                        <button class="ui_button mx-1" @click="create_account_page = 4">
+                            <i class="ph-bold ph-arrow-circle-right"></i> Verify
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex flex-col items-center my-4"
+                     x-show="create_account_page == 4"
+                     x-transition:enter.delay.300ms>
+                    <p class="dark:text-white text-black text-sans text-center text-md">Create password</p>
+                    <input class="ui_input"
+                           placeholder="Password"
+                           type="password"
+                           x-ref="create_password">
+
+                    <div class="flex flex-row">
+                        <button class="ui_button mx-1" @click="create_account_start_over()">
+                            <i class="ph-bold ph-arrow-circle-left"></i> Start Over
+                        </button>
+                        <button class="ui_button mx-1" @click="create_account()">
+                            <i class="ph-bold ph-check-circle"></i> Create Account
+                        </button>
+                    </div>
+                </div>
+
+                <div class="h-1 w-16 mb-2 dark:bg-slate-700 border-1 dark:border-slate-600 bg-slate-300 border-slate-400 rounded-full"></div>
+                <p class="dark:text-white text-black text-sans text-center text-md">Or...</p>
+                <button class="ui_button" @click="sign_in = true">
+                    <i class="ph-bold ph-user-circle-check"></i> Sign in
+                </button>
+            </div>
+        </div>
+
+        <script>
             function auth() {
                 return {
                     sign_in: true,
                     create_account_page: 1,
+                    user: {
+                        display_name: "",
+                        team_number: "",
+                        email: "",
+                        password: "",
+                    },
 
                     create_account_start_over() {
                         this.$refs.create_display_name.value = '';
                         this.$refs.create_team_number.value = '';
                         this.$refs.create_email.value = '';
+                        this.$refs.create_verification_code.value = '';
                         this.$refs.create_password.value = '';
                         this.create_account_page = 1;
                     },
@@ -132,6 +163,6 @@
                     }
                 }
             }
-            </script>
-        </div>
-    {% endblock body %}
+        </script>
+    </div>
+{% endblock body %}
