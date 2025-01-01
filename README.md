@@ -101,6 +101,15 @@ Set the following global environment variables:
 
 Additionally, if you wish to show a custom message to the user on each page (demonstration server, currently undergoing maintenance), set the `SERVER_MESSAGE` environment variable to the message you wish to display.
 
+If you wish to send emails with the server, set the following environment variables:
+- `EMAIL_ENABLED` -> `True`
+- `EMAIL_BACKEND` -> `django.core.mail.backends.smtp.EmailBackend`
+- `EMAIL_HOST` -> `<your email host>`
+- `EMAIL_HOST_USER` -> `<your email host username>`
+- `EMAIL_HOST_PASSWORD` -> `<your email host password>`
+- `EMAIL_PORT` -> `<your email host port>`
+- `EMAIL_USE_TLS` -> `<True if your email host uses TLS>`
+
 ## Development
 ### djlint
 This project uses `djlint` to lint the templates. You can run this using the following command

@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
+from django.core.mail import send_mail
 
 from main.models import Data, Event
 from . import season_fields
