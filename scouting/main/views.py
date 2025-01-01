@@ -3,11 +3,11 @@ from django.http import JsonResponse
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
-from django.core.mail import send_mail
 
 from main.models import Data, Event
 from . import season_fields
 from . import demo_data
+from . import email
 
 import json
 from datetime import datetime
@@ -43,6 +43,8 @@ def index(request):
         "YEARS": json.dumps(YEARS),
         "SERVER_MESSAGE": settings.SERVER_MESSAGE,
     }
+
+    email.send_welcome(["nofoert@gmail.com"], "nfoert")
 
     return render(request, "index.html", context)
 
