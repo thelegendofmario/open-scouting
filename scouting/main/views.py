@@ -44,8 +44,6 @@ def index(request):
         "SERVER_MESSAGE": settings.SERVER_MESSAGE,
     }
 
-    email.send_welcome(["nofoert@gmail.com"], "nfoert")
-
     return render(request, "index.html", context)
 
 
