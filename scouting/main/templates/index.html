@@ -281,6 +281,8 @@
                         },
 
                         next() {
+                            this.selected_year = this.$refs.year.value;
+
                             window.dispatchEvent(new CustomEvent('header_year', {
                                 detail: { year: this.selected_year }
                             }));
@@ -545,7 +547,6 @@
                             });
 
                             window.addEventListener('header_year', (event) => {
-                                event.stopImmediatePropagation();
                                 const { year } = event.detail;
                                 this.year = year;
 
