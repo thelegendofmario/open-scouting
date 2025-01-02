@@ -1732,6 +1732,11 @@ video {
   color: rgb(255 255 255 / 0.8);
 }
 
+.dark\:text-black:where(.dark, .dark *) {
+  --tw-text-opacity: 1;
+  color: rgb(0 0 0 / var(--tw-text-opacity));
+}
+
 .dark\:hover\:bg-purple-900\/80:hover:where(.dark, .dark *) {
   background-color: rgb(88 28 135 / 0.8);
 }

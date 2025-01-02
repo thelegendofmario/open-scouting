@@ -59,7 +59,19 @@
                     <input class="ui_input"
                            placeholder="Team Number"
                            type="text"
-                           x-ref="create_team_number">
+                           x-ref="create_team_number"
+                           @input.debounce.250ms="display_team_number">
+
+                    <div class="flex flex-row items-center justify-center mt-2"
+                         x-show="team_number.show"
+                         x-transition>
+                        <img :src="team_number.avatar"
+                             @error="team_number.show_image = false"
+                             x-show="team_number.show_image"
+                             x-transition>
+                        <p class="dark:text-white text-black text-sans text-md ml-4"
+                           x-text="team_number.nickname"></p>
+                    </div>
 
                     <button class="ui_button mx-1" @click="create_account_page = 2">
                         <i class="ph-bold ph-arrow-circle-right"></i> Next
@@ -144,6 +156,12 @@
                         email: "",
                         password: "",
                     },
+                    team_number: {
+                        show: false,
+                        show_image: false,
+                        nickname: "",
+                        avatar: "",
+                    },
 
                     create_account_start_over() {
                         this.$refs.create_display_name.value = '';
@@ -152,10 +170,45 @@
                         this.$refs.create_verification_code.value = '';
                         this.$refs.create_password.value = '';
                         this.create_account_page = 1;
+
+                        this.team_number.show = false;
                     },
 
                     create_account() {
 
+                    },
+
+                    async display_team_number(e) {
+                        var current_season = await fetch(`https://www.thebluealliance.com/api/v3/status`, {
+                            method: "GET",
+                            headers: {
+                                "X-TBA-Auth-Key": "{{ TBA_API_KEY }}"
+                                }
+                            });
+                            
+                            if (current_season.ok) {
+                                let current_season_data = await current_season.json()
+
+                                try {
+                                    var response = await fetch(`https://www.thebluealliance.com/api/v3/team/frc${e.target.value}`, {
+                                        method: "GET",
+                                        headers: {
+                                            "X-TBA-Auth-Key": "{{ TBA_API_KEY }}"
+                                            }
+                                    });
+                                        
+                                    if (response.ok) {
+                                        let data = await response.json();
+                                        this.team_number.nickname = data.nickname;
+                                        this.team_number.avatar = `https://www.thebluealliance.com/avatar/${current_season_data.current_season}/frc${e.target.value}.png`;
+                                        this.team_number.show = true;
+                                        this.team_number.show_image = true;
+
+                                    } else if (response.status == 404) {
+                                        this.team_number.show = false;
+                                    }
+                                } catch {}
+                            }
                     },
 
                     init() {
