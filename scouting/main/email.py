@@ -28,7 +28,15 @@ def send_welcome(to, username):
     msg.attach_alternative(html_content, "text/html")
 
     if settings.EMAIL_ENABLED:
-        msg.send()
+        try:
+            msg.send()
+            return True
+
+        except Exception as e:
+            print(f"Unable to send email: {e}")
+            return False
+    else:
+        return False
 
 
 def send_verify(to, username, verification_code):
@@ -66,4 +74,12 @@ def send_verify(to, username, verification_code):
     msg.attach_alternative(html_content, "text/html")
 
     if settings.EMAIL_ENABLED:
-        msg.send()
+        try:
+            msg.send()
+            return True
+
+        except Exception as e:
+            print(f"Unable to send email: {e}")
+            return False
+    else:
+        return False
