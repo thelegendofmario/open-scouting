@@ -1,3 +1,4 @@
 from django.contrib import admin
+from authentication.models import VerificationCode
 
-# Register your models here.
+admin.site.register(VerificationCode)
