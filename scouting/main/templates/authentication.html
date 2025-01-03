@@ -23,9 +23,9 @@
                 </p>
 
                 <input class="ui_input"
-                       placeholder="Username"
+                       placeholder="Email"
                        type="text"
-                       x-ref="sign_in_username">
+                       x-ref="sign_in_email">
                 <input class="ui_input"
                        placeholder="Password"
                        type="password"
@@ -62,14 +62,14 @@
                            x-ref="create_team_number"
                            @input.debounce.250ms="display_team_number">
 
-                    <div class="flex flex-row items-center justify-center mt-2"
+                    <div class="flex flex-row items-center justify-center mt-2 mr-4"
                          x-show="team_number.show"
                          x-transition>
                         <img :src="team_number.avatar"
                              @error="team_number.show_image = false"
                              x-show="team_number.show_image"
                              x-transition>
-                        <p class="dark:text-white text-black text-sans text-md ml-4"
+                        <p class="dark:text-white text-black text-sans text-md"
                            x-text="team_number.nickname"></p>
                     </div>
 
