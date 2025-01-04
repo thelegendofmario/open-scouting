@@ -4,7 +4,7 @@ from django.conf import settings
 from django.utils import timezone
 from django.contrib.auth.models import User
 
-import email
+from . import email
 from authentication.models import Profile, VerificationCode
 
 import random
@@ -57,7 +57,7 @@ def send_verification_code(request):
     Required Headers:
         uuid - The uuid of the user generated on the client
         email - The email the user provided which the verification code should be sent to
-        display_name - The provided display name of the user
+        display-name - The provided display name of the user
 
     Returns:
         expires - The expiration date and time of the code
@@ -77,7 +77,7 @@ def send_verification_code(request):
         code_object.save()
 
         email.send_verify(
-            [request.headers["email"]], request.headers["display_name"], code
+            [request.headers["email"]], request.headers["display-name"], code
         )
 
         return JsonResponse(
@@ -98,7 +98,7 @@ def check_verification_code(request):
 
     Required Headers:
         code - The verification code provided from the client
-        user_uuid - The uuid of the user generated on the client
+        user-uuid - The uuid of the user generated on the client
 
     Returns:
         valid - Whether or not the verification code is valid
@@ -107,7 +107,7 @@ def check_verification_code(request):
 
     if request.method == "POST":
         code_object = VerificationCode.objects.filter(
-            code=request.headers["code"], user_uuid=request.headers["user_uuid"]
+            code=request.headers["code"], user_uuid=request.headers["user-uuid"]
         ).first()
 
         if code_object:
@@ -119,7 +119,7 @@ def check_verification_code(request):
                 return JsonResponse({"valid": False, "reason": "expired"}, safe=False)
         else:
             return JsonResponse(
-                {"valid": False, "reason": "does_not_exist"}, safe=False
+                {"valid": False, "reason": "does_not_exist"}, safe=False, status=400
             )
     else:
         return HttpResponse("Request is not a POST request!", status=501)
@@ -131,11 +131,14 @@ def create_account(request):
 
     Required Headers:
         uuid - The uuid of the user
-        display_name - The provided display name of the user
-        team_number
+        display-name - The provided display name of the user
+        team-number - The team number of the user
         email - The email the user provided
         password - The password the user is setting
     """
+
+    # TODO: Ensure the user's email has been verified before creating the account
+    # Check for a verified verification code uuid and then delete it here
 
     if request.method == "POST":
         user = User.objects.create_user(
@@ -143,13 +146,13 @@ def create_account(request):
             request.headers["email"],
             request.headers["password"],
         )
-        user.first_name = request.headers["display_name"]
+        user.first_name = request.headers["display-name"]
         user.save()
 
         profile = Profile(
             user=user,
-            display_name=request.headers["display_name"],
-            team_number=request.headers["team_number"],
+            display_name=request.headers["display-name"],
+            team_number=request.headers["team-number"],
         )
         profile.save()
 

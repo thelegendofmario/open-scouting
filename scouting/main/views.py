@@ -7,7 +7,6 @@ from django.utils import timezone
 from main.models import Data, Event
 from . import season_fields
 from . import demo_data
-from . import email
 
 import json
 from datetime import datetime
