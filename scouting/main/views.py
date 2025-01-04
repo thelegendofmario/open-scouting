@@ -14,7 +14,7 @@ import uuid
 from urllib.parse import unquote
 
 # TODO: This is a duplicate of a similar array in models.py, I don't know if there's a good way to make these into one array
-YEARS = ["2024"]
+YEARS = ["2024", "2025"]
 
 DATE_FORMAT = "%Y-%m-%d"
 
@@ -23,6 +23,8 @@ DATE_FORMAT = "%Y-%m-%d"
 def get_season_data_from_year(year):
     if year == "2024":
         return season_fields.crescendo
+    elif year == "2025":
+        return season_fields.reefscape
     else:
         return None
 
@@ -31,6 +33,8 @@ def get_season_data_from_year(year):
 def get_demo_data_from_year(year):
     if year == "2024":
         return demo_data.crescendo
+    elif year == "2025":
+        return demo_data.reefscape
     else:
         return None
 
