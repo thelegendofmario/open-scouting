@@ -137,10 +137,21 @@
                      x-show="create_account_page == 4"
                      x-transition:enter.delay.300ms>
                     <p class="dark:text-white text-black text-sans text-center text-md">Create password</p>
+                    <p class="dark:text-white text-black text-sans text-center text-sm">
+                        Secure passwords are longer than 8 characters, contain numbers and symbols, and have capital and lowercase letters.
+                    </p>
+
                     <input class="ui_input"
                            placeholder="Password"
                            type="password"
-                           x-ref="create_password">
+                           x-ref="create_password"
+                           @input="check_password_field_and_strength()">
+
+                    <p class="dark:text-white text-black text-sans text-center text-md"
+                       x-text="password_strength"
+                       x-ref="create_password_strength"
+                       x-show="password_strength"
+                       x-transition></p>
 
                     <div class="flex flex-row">
                         <button class="ui_button mx-1" @click="create_account_start_over()">
@@ -182,7 +193,7 @@
             function auth() {
                 return {
                     sign_in: true,
-                    create_account_page: 1,
+                    create_account_page: 4,
                     user: {
                         uuid: "",
                         display_name: "",
@@ -196,6 +207,7 @@
                         nickname: "",
                         avatar: "",
                     },
+                    password_strength: "",
 
                     create_account_start_over() {
                         this.$refs.create_display_name.value = '';
@@ -323,12 +335,49 @@
                         }
                     },
 
-                    check_password_field() {
+                    check_password_field_and_strength() {
                         if (this.$refs.create_password.value) {
-                            this.$refs.create_password_next.disabled = false;
+                            this.$refs.create_create_account.disabled = false;
                         } else {
-                            this.$refs.create_password_next.disabled = true;
+                            this.$refs.create_create_account.disabled = true;
                         }
+
+                        let password_strength = 0;
+
+                        if (this.$refs.create_password.value.length >= 8) {
+                            password_strength += 1;
+                        }
+
+                        if (this.$refs.create_password.value.match(/[A-Z]/)) {
+                            password_strength += 1;
+                        }
+
+                        if (this.$refs.create_password.value.match(/[0-9]/)) {
+                            password_strength += 1;
+                        }
+
+                        if (this.$refs.create_password.value.match(/[!@#$%^&*(),.?":{}|<>\-_=+]/)) {
+                            password_strength += 1;
+                        }
+
+                        if (this.$refs.create_password.value == "") {
+                            this.password_strength = "";
+                        }
+
+                        if (password_strength == 0) {
+                            this.password_strength = "Poor Password";
+                        } else if (password_strength == 1) {
+                            this.password_strength = "Weak Password";
+                        } else if (password_strength == 2) {
+                            this.password_strength = "Okay Password";
+                        } else if (password_strength == 3) {
+                            this.password_strength = "Strong Password";
+                        } else if (password_strength == 4) {
+                            this.password_strength = "Very Strong Password";
+                        } else {
+                            this.password_strength = "";
+                        }
+
                     },
 
                     async create_account() {

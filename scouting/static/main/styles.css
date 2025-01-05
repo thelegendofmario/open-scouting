@@ -1216,6 +1216,10 @@ video {
   font-weight: 300;
 }
 
+.lowercase {
+  text-transform: lowercase;
+}
+
 .capitalize {
   text-transform: capitalize;
 }
