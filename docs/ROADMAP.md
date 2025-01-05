@@ -4,6 +4,19 @@ This document describes the roadmap for Open Scouting, and roughly when each fea
 ---
 
 ## To-Do
+
+### `v0.0.6-alpha`
+- [ ] [#16](https://github.com/nfoert/open-scouting/issues/16) - Show data in the table differently depending on the kind of field
+- [ ] [#23](https://github.com/nfoert/open-scouting/issues/23) - URL Parameter support on `/index`
+- [ ] [#20](https://github.com/nfoert/open-scouting/issues/20) - Allow the user to create an account
+- [ ] [#13](https://github.com/nfoert/open-scouting/issues/13) - Save the username and team number to Data
+
+---
+## Completed
+### `v0.0.5-alpha`
+- [x] [#41](https://github.com/nfoert/open-scouting/issues/41) - Implement a way to show a server message
+- [x] Implement 2025 season fields and examples
+
 ### `v0.0.4-alpha`
 - [x] [#9](https://github.com/nfoert/open-scouting/issues/9) - Create a wiki page for how season_fields.py should be formatted
 - [x] [#7](https://github.com/nfoert/open-scouting/issues/7) - Add a field for additional notes
@@ -13,14 +26,6 @@ This document describes the roadmap for Open Scouting, and roughly when each fea
 - [x] [#38](https://github.com/nfoert/open-scouting/issues/38) - Add demo mode
 - [x] [#39](https://github.com/nfoert/open-scouting/issues/39) - Non-ASCII characters in event name breaks data submission
 
-### `v0.0.5-alpha`
-- [ ] [#16](https://github.com/nfoert/open-scouting/issues/16) - Show data in the table differently depending on the kind of field
-- [ ] [#23](https://github.com/nfoert/open-scouting/issues/23) - URL Parameter support on `/index`
-- [ ] [#20](https://github.com/nfoert/open-scouting/issues/20) - Allow the user to create an account
-- [ ] [#13](https://github.com/nfoert/open-scouting/issues/13) - Save the username and team number to Data
-
----
-## Completed
 ### `v0.0.3-alpha`
 - [x] [#24](https://github.com/nfoert/open-scouting/issues/24) - Implement a collapsible menu
   - [x] [#14](https://github.com/nfoert/open-scouting/issues/14) - Add a dark mode toggle

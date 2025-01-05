@@ -158,3 +158,263 @@ crescendo = [
         ],
     },
 ]
+
+reefscape = [
+    {
+        "section": "Main",
+        "simple_name": "main",
+        "fields": [
+            {
+                "name": "Team Number",
+                "simple_name": "team_number",
+                "type": "large_integer",
+                "required": True,
+            },
+            {
+                "name": "Match Number",
+                "simple_name": "match_number",
+                "type": "large_integer",
+                "required": True,
+            },
+        ],
+    },
+    {
+        "section": "Auton",
+        "simple_name": "auton",
+        "fields": [
+            {
+                "name": "Coral Scored in Reef",
+                "simple_name": "auton_coral_scored",
+                "type": "integer",
+                "default": 0,
+                "minimum": 0,
+                "maximum": 20,
+                "required": False,
+            },
+            {
+                "name": "Algae Scored in Net",
+                "simple_name": "auton_algae_scored_in_net",
+                "type": "integer",
+                "default": 0,
+                "minimum": 0,
+                "maximum": 20,
+                "required": False,
+            },
+            {
+                "name": "Algae Scored in Processor",
+                "simple_name": "auton_algae_scored_in_processor",
+                "type": "integer",
+                "default": 0,
+                "minimum": 0,
+                "maximum": 20,
+                "required": False,
+            },
+        ],
+    },
+    {
+        "section": "Teleop",
+        "simple_name": "teleop",
+        "fields": [
+            {
+                "name": "Coral Scored in Reef",
+                "simple_name": "coral_scored",
+                "type": "integer",
+                "default": 0,
+                "minimum": 0,
+                "maximum": 20,
+                "required": False,
+            },
+            {
+                "name": "Algae Scored in Net",
+                "simple_name": "algae_scored_in_net",
+                "type": "integer",
+                "default": 0,
+                "minimum": 0,
+                "maximum": 20,
+                "required": False,
+            },
+            {
+                "name": "Algae Scored in Processor",
+                "simple_name": "algae_scored_in_processor",
+                "type": "integer",
+                "default": 0,
+                "minimum": 0,
+                "maximum": 20,
+                "required": False,
+            },
+        ],
+    },
+    # TODO: These fields could be used if more information might want to be collected
+    # {
+    #     "section": "Teleop",
+    #     "simple_name": "teleop",
+    #     "fields": [
+    #         {
+    #             "section": "Coral",
+    #             "simple_name": "coral",
+    #             "fields": [
+    #                 {
+    #                     "name": "Coral Scored Level 1",
+    #                     "simple_name": "coral_scored_level_1",
+    #                     "type": "integer",
+    #                     "default": 0,
+    #                     "minimum": 0,
+    #                     "maximum": 20,
+    #                     "required": False,
+    #                 },
+    #                 {
+    #                     "name": "Coral Scored Level 2",
+    #                     "simple_name": "coral_scored_level_2",
+    #                     "type": "integer",
+    #                     "default": 0,
+    #                     "minimum": 0,
+    #                     "maximum": 20,
+    #                     "required": False,
+    #                 },
+    #                 {
+    #                     "name": "Coral Scored Level 3",
+    #                     "simple_name": "coral_scored_level_3",
+    #                     "type": "integer",
+    #                     "default": 0,
+    #                     "minimum": 0,
+    #                     "maximum": 20,
+    #                     "required": False,
+    #                 },
+    #                 {
+    #                     "name": "Coral Scored Level 4",
+    #                     "simple_name": "coral_scored_level_4",
+    #                     "type": "integer",
+    #                     "default": 0,
+    #                     "minimum": 0,
+    #                     "maximum": 20,
+    #                     "required": False,
+    #                 },
+    #                 {
+    #                     "name": "Coral Missed",
+    #                     "simple_name": "coral_missed",
+    #                     "type": "integer",
+    #                     "default": 0,
+    #                     "minimum": 0,
+    #                     "maximum": 20,
+    #                     "required": False,
+    #                 },
+    #             ],
+    #         },
+    #         {
+    #             "section": "Algae",
+    #             "simple_name": "algae",
+    #             "fields": [
+    #                 {
+    #                     "section": "Net",
+    #                     "simple_name": "algae_net",
+    #                     "fields": [
+    #                         {
+    #                             "name": "Algae Scored in Net",
+    #                             "simple_name": "algae_scored_in_net",
+    #                             "type": "integer",
+    #                             "default": 0,
+    #                             "minimum": 0,
+    #                             "maximum": 20,
+    #                             "required": False,
+    #                         },
+    #                         {
+    #                             "name": "Algae Missed in Net",
+    #                             "simple_name": "algae_missed_in_net",
+    #                             "type": "integer",
+    #                             "default": 0,
+    #                             "minimum": 0,
+    #                             "maximum": 20,
+    #                             "required": False,
+    #                         },
+    #                     ],
+    #                 },
+    #                 {
+    #                     "section": "Processor",
+    #                     "simple_name": "algae_processor",
+    #                     "fields": [
+    #                         {
+    #                             "name": "Algae Scored in Processor",
+    #                             "simple_name": "algae_scored_in_processor",
+    #                             "type": "integer",
+    #                             "default": 0,
+    #                             "minimum": 0,
+    #                             "maximum": 20,
+    #                             "required": False,
+    #                         },
+    #                         {
+    #                             "name": "Algae Missed in Processor",
+    #                             "simple_name": "algae_missed_in_processor",
+    #                             "type": "integer",
+    #                             "default": 0,
+    #                             "minimum": 0,
+    #                             "maximum": 20,
+    #                             "required": False,
+    #                         },
+    #                     ],
+    #                 },
+    #             ],
+    #         },
+    #     ],
+    # },
+    {
+        "section": "Extra Information",
+        "simple_name": "extra_information",
+        "fields": [
+            {
+                "name": "Moved during Auton",
+                "simple_name": "auton_moved",
+                "type": "boolean",
+                "required": False,
+            },
+            {
+                "name": "Coral Levels",
+                "simple_name": "coral_levels",
+                "type": "multiple_choice",
+                "choices": ["N/A", "Level 1", "Level 2", "Level 3", "Level 4"],
+                "required": False,
+            },
+            {
+                "name": "Feeder Station Pickup",
+                "simple_name": "feeder_pickup",
+                "type": "boolean",
+                "required": False,
+            },
+            {
+                "section": "Barge",
+                "simple_name": "barge",
+                "fields": [
+                    {
+                        "name": "Park in Barge Zone",
+                        "simple_name": "park_in_barge_zone",
+                        "type": "boolean",
+                        "required": False,
+                    },
+                    {
+                        "name": "Climb on Shallow Cage",
+                        "simple_name": "climb_shallow",
+                        "type": "boolean",
+                        "required": False,
+                    },
+                    {
+                        "name": "Climb on Deep Cage",
+                        "simple_name": "climb_deep",
+                        "type": "boolean",
+                        "required": False,
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        "section": "Additional Notes",
+        "simple_name": "additional_notes",
+        "fields": [
+            {
+                "name": "Additional Notes or Comments",
+                "simple_name": "notes",
+                "type": "text",
+                "required": False,
+            },
+        ],
+    },
+]

@@ -460,11 +460,12 @@
                             if (this.check_fields()) {
                                 let report_uuid = crypto.randomUUID();
 
-                                const openRequest = indexedDB.open("scouting_data", 2);
+                                const openRequest = indexedDB.open("scouting_data", 3);
 
                                 openRequest.onupgradeneeded = (event) => {
                                     const db = event.target.result;
-                                    const objectStore = db.createObjectStore("backups", { keyPath: "uuid" });
+                                    db.createObjectStore("offline_reports", { keyPath: "uuid" });
+                                    db.createObjectStore("backups", { keyPath: "uuid" });
                                 };
 
                                 openRequest.onsuccess = (event) => {
@@ -522,11 +523,12 @@
                                 } else {
                                     console.log("You're offline, report will be saved offline.")
 
-                                    const openRequest = indexedDB.open("scouting_data", 2);
+                                    const openRequest = indexedDB.open("scouting_data", 3);
 
                                     openRequest.onupgradeneeded = (event) => {
                                         const db = event.target.result;
-                                        const objectStore = db.createObjectStore("offline_reports", { keyPath: "uuid" });
+                                        db.createObjectStore("offline_reports", { keyPath: "uuid" });
+                                        db.createObjectStore("backups", { keyPath: "uuid" });
                                     };
 
                                     openRequest.onsuccess = (event) => {

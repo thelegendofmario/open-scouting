@@ -14,7 +14,7 @@ import uuid
 from urllib.parse import unquote
 
 # TODO: This is a duplicate of a similar array in models.py, I don't know if there's a good way to make these into one array
-YEARS = ["2024"]
+YEARS = ["2024", "2025"]
 
 DATE_FORMAT = "%Y-%m-%d"
 
@@ -23,6 +23,8 @@ DATE_FORMAT = "%Y-%m-%d"
 def get_season_data_from_year(year):
     if year == "2024":
         return season_fields.crescendo
+    elif year == "2025":
+        return season_fields.reefscape
     else:
         return None
 
@@ -31,6 +33,8 @@ def get_season_data_from_year(year):
 def get_demo_data_from_year(year):
     if year == "2024":
         return demo_data.crescendo
+    elif year == "2025":
+        return demo_data.reefscape
     else:
         return None
 
@@ -40,6 +44,7 @@ def index(request):
         "SERVER_IP": settings.SERVER_IP,
         "TBA_API_KEY": settings.TBA_API_KEY,
         "YEARS": json.dumps(YEARS),
+        "SERVER_MESSAGE": settings.SERVER_MESSAGE,
     }
 
     return render(request, "index.html", context)
@@ -56,6 +61,7 @@ def contribute(request):
     context = {
         "SERVER_IP": settings.SERVER_IP,
         "TBA_API_KEY": settings.TBA_API_KEY,
+        "SERVER_MESSAGE": settings.SERVER_MESSAGE,
         "season_fields": json.dumps(
             get_season_data_from_year(request.GET.get("year", "unknown"))
         ),
@@ -81,6 +87,7 @@ def data(request):
     context = {
         "SERVER_IP": settings.SERVER_IP,
         "TBA_API_KEY": settings.TBA_API_KEY,
+        "SERVER_MESSAGE": settings.SERVER_MESSAGE,
         "username": request.GET.get("username", "unknown"),
         "event_name": request.GET.get("event_name", "unknown"),
         "event_code": request.GET.get("event_code", "unknown"),
@@ -105,6 +112,7 @@ def submit(request):
                 name=unquote(request.headers["event_name"]),
                 event_code=request.headers["event_code"],
                 custom=True,
+                year=request.headers["year"],
             )
 
             data = Data(
@@ -120,7 +128,9 @@ def submit(request):
             return HttpResponse(request, "Success")
 
         else:
-            events = Event.objects.filter(event_code=request.headers["event_code"])
+            events = Event.objects.filter(
+                event_code=request.headers["event_code"], year=request.headers["year"]
+            )
             if len(events) == 0:
                 event = Event(
                     year=request.headers["year"],
@@ -175,11 +185,15 @@ def get_data(request):
                     name=unquote(request.headers["event_name"]),
                     event_code=request.headers["event_code"],
                     custom=True,
+                    year=request.headers["year"],
                 )
                 event = events[0]
 
             else:
-                events = Event.objects.filter(event_code=request.headers["event_code"])
+                events = Event.objects.filter(
+                    event_code=request.headers["event_code"],
+                    year=request.headers["year"],
+                )
                 if len(events) == 0:
                     event = Event(
                         year=request.headers["year"],
@@ -191,6 +205,9 @@ def get_data(request):
                     event.save()
                 else:
                     event = events[0]
+
+            print(event)
+            print(event.year)
 
             data = Data.objects.filter(
                 year=request.headers["year"],

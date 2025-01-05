@@ -115,11 +115,12 @@
 
             check_for_offline_reports() {
                 if (globalThis.offline == false) {
-                    const openRequest = indexedDB.open("scouting_data", 2);
+                    const openRequest = indexedDB.open("scouting_data", 3);
 
                     openRequest.onupgradeneeded = (event) => {
                         const db = event.target.result;
-                        const objectStore = db.createObjectStore("offline_reports", { keyPath: "uuid" });
+                        db.createObjectStore("offline_reports", { keyPath: "uuid" });
+                        db.createObjectStore("backups", { keyPath: "uuid" });
                     };
 
                     openRequest.onsuccess = (event) => {
@@ -154,11 +155,12 @@
             },
 
             upload_offline_reports() {
-                const openRequest = indexedDB.open("scouting_data", 2);
+                const openRequest = indexedDB.open("scouting_data", 3);
 
                 openRequest.onupgradeneeded = (event) => {
                     const db = event.target.result;
-                    const objectStore = db.createObjectStore("offline_reports", { keyPath: "uuid" });
+                    db.createObjectStore("offline_reports", { keyPath: "uuid" });
+                    db.createObjectStore("backups", { keyPath: "uuid" });
                 };
 
                 openRequest.onsuccess = (event) => {
