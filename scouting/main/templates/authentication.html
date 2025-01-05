@@ -115,6 +115,14 @@
                            x-text="'We sent a verification code to ' + user.email + '. Please check your email for a message from {{ EMAIL_HOST_USER }} and enter the verification code below'">
                         </p>
                     </p>
+
+                    <div class="flex flex-row dark:bg-red-500/50 dark:border-red-400/70 border-2 rounded-lg bg-red-400/50 border-red-500/70 my-4"
+                         x-show="verification_code_error"
+                         x-transition>
+                        <p class="dark:text-red-400 text-red-500 text-sans text-center text-md m-2"
+                           x-text="verification_code_error"></p>
+                    </div>
+
                     <input class="ui_input"
                            placeholder="Verification Code"
                            type="text"
@@ -146,6 +154,13 @@
                     <p class="dark:text-white text-black text-sans text-center text-sm">
                         Secure passwords are longer than 8 characters, contain numbers and symbols, and have capital and lowercase letters.
                     </p>
+
+                    <div class="flex flex-row dark:bg-green-700/50 dark:border-green-500/70 border-2 rounded-lg bg-green-400/50 border-green-600/70 my-4"
+                         x-show="verification_code_success"
+                         x-transition>
+                        <p class="dark:text-green-500 text-green-600 text-sans text-center text-md m-2"
+                           x-text="verification_code_success"></p>
+                    </div>
 
                     <div class="flex flex-row items-center justify-center">
                         <input class="ui_input"
@@ -221,6 +236,8 @@
                         avatar: "",
                     },
                     password_strength: "",
+                    verification_code_error: "",
+                    verification_code_success: "",
 
                     create_account_start_over() {
                         this.$refs.create_display_name.value = '';
@@ -235,12 +252,12 @@
                         this.user.uuid = "";
                         this.user.email = "";
 
+                        this.password_strength = "";
+                        this.verification_code_error = "";
+                        this.verification_code_success = "";
+
                         this.check_display_name_and_team_number()
                         this.check_email()
-                    },
-
-                    create_account() {
-
                     },
 
                     async display_team_number(e) {
@@ -316,7 +333,7 @@
 
                         if (response.ok) {
                             response.json().then(async (json) => {
-                                this.create_account_page = 3
+                                this.create_account_page = 3;
                             });
                         } else {
                             response.text().then(async (text) => {
@@ -338,12 +355,18 @@
                         if (response.ok) {
                             response.json().then(async (json) => {
                                 console.log("Verification code is valid");
+                                this.verification_code_success = "Your email has been verified!";
                                 this.create_account_page = 4;
                             });
                         } else {
                             response.json().then(async (json) => {
-                                // TODO: Show error in client
-                                console.log(json);
+                                if (json.reason == "expired") {
+                                    this.verification_code_error = "The verification code has expired. Use the 'Resend Code' to send a new one.";
+
+                                } else if (json.reason == "does_not_exist") {
+                                    this.verification_code_error = "The verification code is incorrect!"
+                                    
+                                }
                             });
                         }
                     },
