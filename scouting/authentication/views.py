@@ -4,6 +4,7 @@ from django.conf import settings
 from django.utils import timezone
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
+from django.db.utils import IntegrityError
 
 from . import email
 from authentication.models import Profile, VerificationCode
@@ -145,38 +146,45 @@ def create_account(request):
         ).first()
 
         if code_verified:
-            code_verified.delete()
+            try:
+                code_verified.delete()
 
-            user = User.objects.create_user(
-                request.headers["email"],
-                request.headers["email"],
-                request.headers["password"],
-            )
-            user.first_name = request.headers["display-name"]
-            user.save()
+                user = User.objects.create_user(
+                    request.headers["email"],
+                    request.headers["email"],
+                    request.headers["password"],
+                )
+                user.first_name = request.headers["display-name"]
+                user.save()
 
-            profile = Profile(
-                user=user,
-                display_name=request.headers["display-name"],
-                team_number=request.headers["team-number"],
-            )
-            profile.save()
+                profile = Profile(
+                    user=user,
+                    display_name=request.headers["display-name"],
+                    team_number=request.headers["team-number"],
+                )
+                profile.save()
 
-            email.send_welcome(
-                [request.headers["email"]], request.headers["display-name"]
-            )
+                email.send_welcome(
+                    [request.headers["email"]], request.headers["display-name"]
+                )
 
-            user = authenticate(
-                request,
-                username=request.headers["email"],
-                password=request.headers["password"],
-            )
-            if user is not None:
-                login(request, user)
+                user = authenticate(
+                    request,
+                    username=request.headers["email"],
+                    password=request.headers["password"],
+                )
+                if user is not None:
+                    login(request, user)
 
-                return HttpResponse("success", status=200)
-            else:
-                return HttpResponse("invalid login", status=401)
+                    return HttpResponse("success", status=200)
+                else:
+                    return HttpResponse("invalid login", status=401)
+
+            except IntegrityError:
+                return HttpResponse("username_exists", status=401)
+
+            except Exception:
+                return HttpResponse("error", status=500)
         else:
             return HttpResponse("invalid verification code", status=401)
 

@@ -111,12 +111,12 @@
                      x-transition:enter.delay.300ms>
                     <p class="dark:text-white text-black text-sans text-center text-md">Verify email</p>
                     <p class="dark:text-white text-black text-sans text-center text-sm">
-                        <p class="dark:text-white text-black text-sans text-center text-sm"
+                        <p class="dark:text-white text-black text-sans text-center text-sm mx-2"
                            x-text="'We sent a verification code to ' + user.email + '. Please check your email for a message from {{ EMAIL_HOST_USER }} and enter the verification code below'">
                         </p>
                     </p>
 
-                    <div class="flex flex-row dark:bg-red-500/50 dark:border-red-400/70 border-2 rounded-lg bg-red-400/50 border-red-500/70 my-4"
+                    <div class="flex flex-row dark:bg-red-500/50 dark:border-red-400/70 border-2 rounded-lg bg-red-400/50 border-red-500/70 my-4 mx-2"
                          x-show="verification_code_error"
                          x-transition>
                         <p class="dark:text-red-400 text-red-500 text-sans text-center text-md m-2"
@@ -151,15 +151,22 @@
                      x-show="create_account_page == 4"
                      x-transition:enter.delay.300ms>
                     <p class="dark:text-white text-black text-sans text-center text-md">Create password</p>
-                    <p class="dark:text-white text-black text-sans text-center text-sm">
+                    <p class="dark:text-white text-black text-sans text-center text-sm mx-2">
                         Secure passwords are longer than 8 characters, contain numbers and symbols, and have capital and lowercase letters.
                     </p>
 
-                    <div class="flex flex-row dark:bg-green-700/50 dark:border-green-500/70 border-2 rounded-lg bg-green-400/50 border-green-600/70 my-4"
+                    <div class="flex flex-row dark:bg-green-700/50 dark:border-green-500/70 border-2 rounded-lg bg-green-400/50 border-green-600/70 my-4 mx-2"
                          x-show="verification_code_success"
                          x-transition>
                         <p class="dark:text-green-500 text-green-600 text-sans text-center text-md m-2"
                            x-text="verification_code_success"></p>
+                    </div>
+
+                    <div class="flex flex-row dark:bg-red-500/50 dark:border-red-400/70 border-2 rounded-lg bg-red-400/50 border-red-500/70 my-4 mx-2"
+                         x-show="create_account_error"
+                         x-transition>
+                        <p class="dark:text-red-400 text-red-500 text-sans text-center text-md m-2"
+                           x-text="create_account_error"></p>
                     </div>
 
                     <div class="flex flex-row items-center justify-center">
@@ -238,6 +245,7 @@
                     password_strength: "",
                     verification_code_error: "",
                     verification_code_success: "",
+                    create_account_error: "",
 
                     create_account_start_over() {
                         this.$refs.create_display_name.value = '';
@@ -448,8 +456,16 @@
                             });
                         } else {
                             response.text().then(async (text) => {
-                                // TODO: Show error in client
-                                console.log(text);
+                                this.verification_code_success = "";
+
+                                if (text == "username_exists") {
+                                    this.create_account_error = "A user with that username already exists. Reload this page or press 'Start Over' to create an account with a different username";
+                                } else if (text == "error") {
+                                    this.create_account_error = "There was an issue creating your account"
+                                } else {
+                                    this.create_account_error = "There was an unknown issue creating your account"
+
+                                }
                             });
                         }
                     },
