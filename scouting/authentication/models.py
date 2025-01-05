@@ -13,3 +13,4 @@ class VerificationCode(models.Model):
     created = models.DateTimeField(null=True, blank=True)
     expires = models.DateTimeField(null=True, blank=True)
     user_uuid = models.UUIDField(null=True, blank=True)
+    verified = models.BooleanField(default=False)

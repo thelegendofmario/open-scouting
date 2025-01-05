@@ -113,7 +113,8 @@ def check_verification_code(request):
 
         if code_object:
             if timezone.now() < code_object.expires:
-                code_object.delete()
+                code_object.verified = True
+                code_object.save()
                 return JsonResponse({"valid": True, "reason": "valid"}, safe=False)
 
             else:
@@ -138,38 +139,46 @@ def create_account(request):
         password - The password the user is setting
     """
 
-    # TODO: Ensure the user's email has been verified before creating the account
-    # Check for a verified verification code uuid and then delete it here
-
     if request.method == "POST":
-        user = User.objects.create_user(
-            request.headers["email"],
-            request.headers["email"],
-            request.headers["password"],
-        )
-        user.first_name = request.headers["display-name"]
-        user.save()
+        code_verified = VerificationCode.objects.filter(
+            user_uuid=request.headers["uuid"], verified=True
+        ).first()
 
-        profile = Profile(
-            user=user,
-            display_name=request.headers["display-name"],
-            team_number=request.headers["team-number"],
-        )
-        profile.save()
+        if code_verified:
+            code_verified.delete()
 
-        email.send_welcome([request.headers["email"]], request.headers["display-name"])
+            user = User.objects.create_user(
+                request.headers["email"],
+                request.headers["email"],
+                request.headers["password"],
+            )
+            user.first_name = request.headers["display-name"]
+            user.save()
 
-        user = authenticate(
-            request,
-            username=request.headers["email"],
-            password=request.headers["password"],
-        )
-        if user is not None:
-            login(request, user)
+            profile = Profile(
+                user=user,
+                display_name=request.headers["display-name"],
+                team_number=request.headers["team-number"],
+            )
+            profile.save()
 
-            return HttpResponse("success", status=200)
+            email.send_welcome(
+                [request.headers["email"]], request.headers["display-name"]
+            )
+
+            user = authenticate(
+                request,
+                username=request.headers["email"],
+                password=request.headers["password"],
+            )
+            if user is not None:
+                login(request, user)
+
+                return HttpResponse("success", status=200)
+            else:
+                return HttpResponse("invalid login", status=401)
         else:
-            return HttpResponse("invalid login", status=401)
+            return HttpResponse("invalid verification code", status=401)
 
     else:
         return HttpResponse("Request is not a POST request!", status=501)
