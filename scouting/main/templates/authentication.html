@@ -141,11 +141,18 @@
                         Secure passwords are longer than 8 characters, contain numbers and symbols, and have capital and lowercase letters.
                     </p>
 
-                    <input class="ui_input"
-                           placeholder="Password"
-                           type="password"
-                           x-ref="create_password"
-                           @input="check_password_field_and_strength()">
+                    <div class="flex flex-row items-center justify-center">
+                        <input class="ui_input"
+                               placeholder="Password"
+                               type="password"
+                               x-ref="create_password"
+                               @input="check_password_field_and_strength()">
+
+                        <input class="ml-4" @click="check_password_visibility()" type="checkbox">
+                        <p class="dark:text-white text-black text-sans text-md ml-2"
+                           x-ref="create_password_visibility_label"
+                           @click="check_password_visibility()">Show</p>
+                    </div>
 
                     <p class="dark:text-white text-black text-sans text-center text-md"
                        x-text="password_strength"
@@ -378,6 +385,16 @@
                             this.password_strength = "";
                         }
 
+                    },
+
+                    check_password_visibility() {
+                        if (this.$refs.create_password.type == "password") {
+                            this.$refs.create_password.type = "text";
+                            this.$refs.create_password_visibility_label.innerText = "Hide";
+                        } else {
+                            this.$refs.create_password.type = "password";
+                            this.$refs.create_password_visibility_label.innerText = "Show";
+                        }
                     },
 
                     async create_account() {
