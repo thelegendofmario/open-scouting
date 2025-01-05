@@ -1,4 +1,4 @@
-from django.shortcuts import render, HttpResponse
+from django.shortcuts import render, HttpResponse, redirect
 from django.http import JsonResponse
 from django.conf import settings
 from django.utils import timezone
@@ -8,6 +8,7 @@ from django.db.utils import IntegrityError
 
 from . import email
 from authentication.models import Profile, VerificationCode
+from main.views import index
 
 import random
 from datetime import timedelta
@@ -21,21 +22,51 @@ def generate_verification_code(length=6):
 
 
 def auth(request):
-    context = {
-        "SERVER_IP": settings.SERVER_IP,
-        "TBA_API_KEY": settings.TBA_API_KEY,
-        "SERVER_MESSAGE": settings.SERVER_MESSAGE,
-        "EMAIL_HOST_USER": settings.EMAIL_HOST_USER,
-    }
+    if request.user.is_authenticated:
+        response = index(request)
+        return response
 
-    return render(request, "authentication.html", context)
+    else:
+        context = {
+            "SERVER_IP": settings.SERVER_IP,
+            "TBA_API_KEY": settings.TBA_API_KEY,
+            "SERVER_MESSAGE": settings.SERVER_MESSAGE,
+            "EMAIL_HOST_USER": settings.EMAIL_HOST_USER,
+        }
+
+        return render(request, "authentication.html", context)
 
 
 def sign_in(request):
     """
     Signs the user in using the provided email and password and authenticates the session
+
+    Required Headers:
+        email - The email of the user
+        password - The password of the user
+
+    Returns:
+        Redirects to the home page if the user is authenticated and returns 'error' otherwise
     """
-    pass
+
+    if request.method == "POST":
+        try:
+            user = authenticate(
+                request,
+                username=request.headers["email"],
+                password=request.headers["password"],
+            )
+
+            if user is not None:
+                login(request, user)
+                return HttpResponse("success", status=200)
+            else:
+                return HttpResponse("incorrect_credentials", status=401)
+        except Exception:
+            return HttpResponse("error", status=500)
+
+    else:
+        return HttpResponse("Request is not a POST request!", status=501)
 
 
 def forgot_password(request):

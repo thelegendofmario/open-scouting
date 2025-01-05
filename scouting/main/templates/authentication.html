@@ -22,15 +22,27 @@
                     <i class="ph-bold ph-user-circle-check"></i> Sign in
                 </p>
 
+                <div class="flex flex-row dark:bg-red-500/50 dark:border-red-400/70 border-2 rounded-lg bg-red-400/50 border-red-500/70 my-4 mx-2"
+                     x-show="sign_in_error"
+                     x-transition>
+                    <p class="dark:text-red-400 text-red-500 text-sans text-center text-md m-2"
+                       x-text="sign_in_error"></p>
+                </div>
+
                 <input class="ui_input"
                        placeholder="Email"
                        type="text"
-                       x-ref="sign_in_email">
+                       x-ref="sign_in_email"
+                       @input="check_sign_in_fields()">
                 <input class="ui_input"
                        placeholder="Password"
                        type="password"
-                       x-ref="sign_in_password">
-                <button class="ui_button">
+                       x-ref="sign_in_password"
+                       @input="check_sign_in_fields()">
+                <button class="ui_button"
+                        x-ref="sign_in_button"
+                        @click="sign_in_request()"
+                        disabled>
                     <i class="ph-bold ph-check-circle"></i> Sign in
                 </button>
 
@@ -255,6 +267,7 @@
                     verification_code_success: "",
                     create_account_error: "",
                     sending_email: false,
+                    sign_in_error: "",
 
                     create_account_start_over() {
                         this.$refs.create_display_name.value = '';
@@ -476,6 +489,44 @@
                                     this.create_account_error = "There was an issue creating your account"
                                 } else {
                                     this.create_account_error = "There was an unknown issue creating your account"
+
+                                }
+                            });
+                        }
+                    },
+
+                    check_sign_in_fields() {
+                        if (this.$refs.sign_in_email.value && this.$refs.sign_in_password.value) {
+                            this.$refs.sign_in_button.disabled = false;
+                        } else {
+                            this.$refs.sign_in_button.disabled = true;
+                        }
+                    },
+
+                    async sign_in_request() {
+                        var response = await fetch("{{ SERVER_IP }}/authentication/sign_in", {
+                        method: "POST",
+                        headers: {
+                                "X-CSRFToken": "{{ csrf_token }}",
+                                "email": this.$refs.sign_in_email.value,
+                                "password": this.$refs.sign_in_password.value,
+                            }
+                        });
+
+                        if (response.ok) {
+                            response.text().then(async (text) => {
+                                this.go_to_index();
+                            });
+                        } else {
+                            response.text().then(async (text) => {
+                                if (text == "incorrect_credentials") {
+                                    this.sign_in_error = "Your username or password is incorrect";
+
+                                } else if (text == "error") {
+                                    this.sign_in_error = "There was an issue signing you in";
+
+                                } else {
+                                    this.sign_in_error = "There was an unknown issue signing you in";
 
                                 }
                             });
