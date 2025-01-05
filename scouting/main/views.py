@@ -112,6 +112,7 @@ def submit(request):
                 name=unquote(request.headers["event_name"]),
                 event_code=request.headers["event_code"],
                 custom=True,
+                year=request.headers["year"],
             )
 
             data = Data(
@@ -127,7 +128,9 @@ def submit(request):
             return HttpResponse(request, "Success")
 
         else:
-            events = Event.objects.filter(event_code=request.headers["event_code"])
+            events = Event.objects.filter(
+                event_code=request.headers["event_code"], year=request.headers["year"]
+            )
             if len(events) == 0:
                 event = Event(
                     year=request.headers["year"],
@@ -182,11 +185,15 @@ def get_data(request):
                     name=unquote(request.headers["event_name"]),
                     event_code=request.headers["event_code"],
                     custom=True,
+                    year=request.headers["year"],
                 )
                 event = events[0]
 
             else:
-                events = Event.objects.filter(event_code=request.headers["event_code"])
+                events = Event.objects.filter(
+                    event_code=request.headers["event_code"],
+                    year=request.headers["year"],
+                )
                 if len(events) == 0:
                     event = Event(
                         year=request.headers["year"],
@@ -198,6 +205,9 @@ def get_data(request):
                     event.save()
                 else:
                     event = events[0]
+
+            print(event)
+            print(event.year)
 
             data = Data.objects.filter(
                 year=request.headers["year"],
