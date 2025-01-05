@@ -131,6 +131,12 @@
                             <i class="ph-bold ph-arrow-circle-right"></i> Verify
                         </button>
                     </div>
+
+                    <button class="ui_button mx-1"
+                            @click="send_verification_code()"
+                            x-ref="create_verify_next">
+                        <i class="ph-bold ph-arrow-clockwise"></i> Resend Code
+                    </button>
                 </div>
 
                 <div class="flex flex-col items-center my-8"
@@ -200,7 +206,7 @@
             function auth() {
                 return {
                     sign_in: true,
-                    create_account_page: 4,
+                    create_account_page: 1,
                     user: {
                         uuid: "",
                         display_name: "",
