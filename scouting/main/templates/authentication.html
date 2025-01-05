@@ -48,7 +48,7 @@
                     <i class="ph-bold ph-user-circle-plus"></i> Create Account
                 </p>
 
-                <div class="flex flex-col items-center my-4"
+                <div class="flex flex-col items-center my-8"
                      x-show="create_account_page == 1"
                      x-transition:enter.delay.300ms>
                     <p class="dark:text-white text-black text-sans text-center text-md">Enter display name and team number</p>
@@ -83,7 +83,7 @@
                     </button>
                 </div>
 
-                <div class="flex flex-col items-center my-4"
+                <div class="flex flex-col items-center my-8"
                      x-show="create_account_page == 2"
                      x-transition:enter.delay.300ms>
                     <p class="dark:text-white text-black text-sans text-center text-md">Enter email</p>
@@ -106,13 +106,13 @@
                     </div>
                 </div>
 
-                <div class="flex flex-col items-center my-4"
+                <div class="flex flex-col items-center my-8"
                      x-show="create_account_page == 3"
                      x-transition:enter.delay.300ms>
                     <p class="dark:text-white text-black text-sans text-center text-md">Verify email</p>
                     <p class="dark:text-white text-black text-sans text-center text-sm">
                         <p class="dark:text-white text-black text-sans text-center text-sm"
-                           x-text="'We sent a verification code to' + user.email + '. Please check your email for a message from {{ EMAIL_HOST_USER }} and enter the verification code below'">
+                           x-text="'We sent a verification code to ' + user.email + '. Please check your email for a message from {{ EMAIL_HOST_USER }} and enter the verification code below'">
                         </p>
                     </p>
                     <input class="ui_input"
@@ -133,7 +133,7 @@
                     </div>
                 </div>
 
-                <div class="flex flex-col items-center my-4"
+                <div class="flex flex-col items-center my-8"
                      x-show="create_account_page == 4"
                      x-transition:enter.delay.300ms>
                     <p class="dark:text-white text-black text-sans text-center text-md">Create password</p>
@@ -150,6 +150,22 @@
                                 @click="create_account()"
                                 x-ref="create_create_account">
                             <i class="ph-bold ph-check-circle"></i> Create Account
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex flex-col items-center my-8"
+                     x-show="create_account_page == 5"
+                     x-transition:enter.delay.300ms>
+                    <p class="dark:text-white text-black text-sans text-center text-md">Your account has been successfully created!</p>
+                    <p class="dark:text-white text-black text-sans text-center text-6xl my-2">
+                        <i class="ph-bold ph-check-circle"></i>
+                    </p>
+                    <p class="dark:text-white text-black text-sans text-center text-sm">You will be redirected in a few moments, or you can press the button below</p>
+
+                    <div class="flex flex-row">
+                        <button class="ui_button mx-1" @click="go_to_index()">
+                            <i class="ph-bold ph-house"></i> Go to Home
                         </button>
                     </div>
                 </div>
@@ -190,6 +206,9 @@
                         this.create_account_page = 1;
 
                         this.team_number.show = false;
+
+                        this.user.uuid = "";
+                        this.user.email = "";
 
                         this.check_display_name_and_team_number()
                         this.check_email()
@@ -257,6 +276,7 @@
                     },
 
                     async send_verification_code() {
+                        this.user.email = this.$refs.create_email.value;
                         this.user.uuid = crypto.randomUUID();
 
                         var response = await fetch("{{ SERVER_IP }}/authentication/send_verification_code", {
@@ -327,7 +347,9 @@
                         if (response.ok) {
                             response.text().then(async (text) => {
                                 console.log("Account has been created!");
-                                // TODO: Show success in client
+                                
+                                this.create_account_page = 5;
+                                setTimeout(this.go_to_index(), 10000);
                             });
                         } else {
                             response.text().then(async (text) => {
@@ -335,6 +357,10 @@
                                 console.log(text);
                             });
                         }
+                    },
+
+                    go_to_index() {
+                        window.location.href = "{{ SERVER_IP }}/";
                     },
 
                     init() {

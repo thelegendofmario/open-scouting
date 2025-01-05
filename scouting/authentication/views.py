@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from django.conf import settings
 from django.utils import timezone
 from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, login
 
 from . import email
 from authentication.models import Profile, VerificationCode
@@ -156,7 +157,19 @@ def create_account(request):
         )
         profile.save()
 
-        return HttpResponse("success", status=200)
+        email.send_welcome([request.headers["email"]], request.headers["display-name"])
+
+        user = authenticate(
+            request,
+            username=request.headers["email"],
+            password=request.headers["password"],
+        )
+        if user is not None:
+            login(request, user)
+
+            return HttpResponse("success", status=200)
+        else:
+            return HttpResponse("invalid login", status=401)
 
     else:
         return HttpResponse("Request is not a POST request!", status=501)
