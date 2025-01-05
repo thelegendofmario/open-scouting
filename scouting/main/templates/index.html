@@ -290,7 +290,12 @@
                         },
 
                         init() {
-                            this.get_year_data();
+                            setTimeout(() => {
+                                this.selected_year = this.$refs.year.value;
+
+                                this.get_year_data();
+                            }, 100)
+                            
                         }
                     };
                 }
