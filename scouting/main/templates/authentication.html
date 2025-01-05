@@ -67,7 +67,8 @@
                     <div class="flex flex-row items-center justify-center mt-2 mr-4"
                          x-show="team_number.show"
                          x-transition>
-                        <img :src="team_number.avatar"
+                        <img class="mr-2"
+                             :src="team_number.avatar"
                              @error="team_number.show_image = false"
                              x-show="team_number.show_image"
                              x-transition>
@@ -98,11 +99,18 @@
                             <i class="ph-bold ph-arrow-circle-left"></i> Start Over
                         </button>
                         <button class="ui_button mx-1"
-                                @click="send_verification_code()"
+                                @click="send_verification_code(); sending_email = true"
                                 x-ref="create_email_next"
                                 disabled>
                             <i class="ph-bold ph-arrow-circle-right"></i> Next
                         </button>
+                    </div>
+
+                    <div class="flex flex-row items-center justify-center"
+                         x-show="sending_email"
+                         x-transition>
+                        <i class="ph-bold ph-circle-notch animate-spin ori dark:text-white text-black text-sans text-md"></i>
+                        <p class="dark:text-white text-black text-sans text-md ml-2">Sending Verification Code...</p>
                     </div>
                 </div>
 
@@ -246,6 +254,7 @@
                     verification_code_error: "",
                     verification_code_success: "",
                     create_account_error: "",
+                    sending_email: false,
 
                     create_account_start_over() {
                         this.$refs.create_display_name.value = '';
@@ -263,6 +272,7 @@
                         this.password_strength = "";
                         this.verification_code_error = "";
                         this.verification_code_success = "";
+                        this.sending_email = false;
 
                         this.check_display_name_and_team_number()
                         this.check_email()
@@ -328,6 +338,8 @@
                     async send_verification_code() {
                         this.user.email = this.$refs.create_email.value;
                         this.user.uuid = crypto.randomUUID();
+
+                        this.$refs.create_email_next.disabled = true;
 
                         var response = await fetch("{{ SERVER_IP }}/authentication/send_verification_code", {
                         method: "POST",
