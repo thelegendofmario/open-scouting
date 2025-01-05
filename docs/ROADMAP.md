@@ -4,9 +4,6 @@ This document describes the roadmap for Open Scouting, and roughly when each fea
 ---
 
 ## To-Do
-### `v0.0.5-alpha`
-- [x] [#41](https://github.com/nfoert/open-scouting/issues/41) - Implement a way to show a server message
-- [ ] Implement 2025 season fields and examples
 
 ### `v0.0.6-alpha`
 - [ ] [#16](https://github.com/nfoert/open-scouting/issues/16) - Show data in the table differently depending on the kind of field
@@ -16,6 +13,10 @@ This document describes the roadmap for Open Scouting, and roughly when each fea
 
 ---
 ## Completed
+### `v0.0.5-alpha`
+- [x] [#41](https://github.com/nfoert/open-scouting/issues/41) - Implement a way to show a server message
+- [x] Implement 2025 season fields and examples
+
 ### `v0.0.4-alpha`
 - [x] [#9](https://github.com/nfoert/open-scouting/issues/9) - Create a wiki page for how season_fields.py should be formatted
 - [x] [#7](https://github.com/nfoert/open-scouting/issues/7) - Add a field for additional notes
