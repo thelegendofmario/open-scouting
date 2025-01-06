@@ -36,14 +36,30 @@ def get_demo_data_from_year(year):
 
 
 def index(request):
-    context = {
-        "SERVER_IP": settings.SERVER_IP,
-        "TBA_API_KEY": settings.TBA_API_KEY,
-        "YEARS": json.dumps(YEARS),
-        "SERVER_MESSAGE": settings.SERVER_MESSAGE,
-    }
+    if request.user.is_authenticated:
+        context = {
+            "SERVER_IP": settings.SERVER_IP,
+            "TBA_API_KEY": settings.TBA_API_KEY,
+            "YEARS": json.dumps(YEARS),
+            "SERVER_MESSAGE": settings.SERVER_MESSAGE,
+            "authenticated": json.dumps(True),
+            "username": request.user.username,
+            "display_name": request.user.profile.display_name,
+            "team_number": request.user.profile.team_number,
+        }
 
-    return render(request, "index.html", context)
+        return render(request, "index.html", context)
+
+    else:
+        context = {
+            "SERVER_IP": settings.SERVER_IP,
+            "TBA_API_KEY": settings.TBA_API_KEY,
+            "YEARS": json.dumps(YEARS),
+            "SERVER_MESSAGE": settings.SERVER_MESSAGE,
+            "authenticated": json.dumps(False),
+        }
+
+        return render(request, "index.html", context)
 
 
 def contribute(request):
