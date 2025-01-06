@@ -156,8 +156,8 @@
                  x-show="page == 1"
                  x-transition>
 
-                <div x-show="!authenticated" class="w-full">
-                    <button class="ui_button" @click="sign_in()">
+                <div x-show="!authenticated">
+                    <button class="ui_button w-full" @click="sign_in()">
                         <i class="ph-bold ph-user-circle"></i> Sign In
                     </button>
                 </div>
@@ -166,8 +166,8 @@
                     <div class="flex flex-row dark:bg-slate-800 dark:border-slate-700 bg-slate-200 border-slate-300 border-2 rounded-2xl p-2 justify-between items-center align-middle">
                         <p class="dark:text-white text-black font-sans text-md font-bold p-2"
                            x-text="'Continue as ' + display_name"></p>
-                        <button class="ui_button mx-1" @click="continue_with_account()">
-                            <i class="ph-bold ph-arrow-circle-right"></i> Continue
+                        <button class="ui_button_icon mx-1" @click="continue_with_account()">
+                            <i class="ph-bold ph-check-circle"></i>
                         </button>
                         <button class="ui_button_icon mx-1" @click="sign_out()">
                             <i class="ph-bold ph-sign-out"></i>
@@ -255,7 +255,22 @@
                             this.page = 2;
                         },
 
-                        sign_out() {},
+                        async sign_out() {
+                            var response = await fetch("{{ SERVER_IP }}/authentication/sign_out", {
+                            method: "POST",
+                            headers: {
+                                    "X-CSRFToken": "{{ csrf_token }}",
+                                }
+                            });
+
+                            if (response.ok) {
+                                response.text().then(async (text) => {
+                                    window.location.reload();
+                                });
+                            } else {
+                                console.log("Error signing out");
+                            }
+                        },
 
                         init() {}
                     };

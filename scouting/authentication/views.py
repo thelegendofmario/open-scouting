@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from django.conf import settings
 from django.utils import timezone
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.db.utils import IntegrityError
 
 from . import email
@@ -65,6 +65,17 @@ def sign_in(request):
         except Exception:
             return HttpResponse("error", status=500)
 
+    else:
+        return HttpResponse("Request is not a POST request!", status=501)
+
+
+def sign_out(request):
+    """
+    Signs the user out of the session
+    """
+    if request.method == "POST":
+        logout(request)
+        return HttpResponse("success", status=200)
     else:
         return HttpResponse("Request is not a POST request!", status=501)
 
