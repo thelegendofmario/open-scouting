@@ -1,0 +1,547 @@
+{% extends "base.html" %}
+{% load static %}
+{% block head_title %}Open Scouting | Contribute{% endblock %}
+
+{% block head_scripts %}{% endblock %}
+
+{% block stylesheets %}{% endblock %}
+
+{% block body %}
+    <div class="flex h-screen justify-center items-center flex-col w-screen">
+        <img class="w-full md:w-1/2 xl:w-2/6 px-10 hidden dark:block"
+             src="{% static '/main/images/logo_light.png' %}">
+        <img class="w-full md:w-1/2 xl:w-2/6 px-10 dark:hidden block"
+             src="{% static '/main/images/logo_dark.png' %}">
+        <p class="dark:text-white text-black text-sans text-center text-lg">Sign in or create an account</p>
+
+        <div class="mt-4" x-data="auth()">
+            <div class="flex flex-col items-center"
+                 x-show="sign_in"
+                 x-transition:enter.delay.300ms>
+                <p class="dark:text-white text-black text-sans text-center text-2xl mb-2">
+                    <i class="ph-bold ph-user-circle-check"></i> Sign in
+                </p>
+
+                <div class="flex flex-row dark:bg-red-500/50 dark:border-red-400/70 border-2 rounded-lg bg-red-400/50 border-red-500/70 my-4 mx-2"
+                     x-show="sign_in_error"
+                     x-transition>
+                    <p class="dark:text-red-400 text-red-500 text-sans text-center text-md m-2"
+                       x-text="sign_in_error"></p>
+                </div>
+
+                <input class="ui_input"
+                       placeholder="Email"
+                       type="text"
+                       x-ref="sign_in_email"
+                       @input="check_sign_in_fields()">
+                <input class="ui_input"
+                       placeholder="Password"
+                       type="password"
+                       x-ref="sign_in_password"
+                       @input="check_sign_in_fields()">
+                <button class="ui_button"
+                        x-ref="sign_in_button"
+                        @click="sign_in_request()"
+                        disabled>
+                    <i class="ph-bold ph-check-circle"></i> Sign in
+                </button>
+
+                <div class="h-1 w-16 mb-2 dark:bg-slate-700 border-1 dark:border-slate-600 bg-slate-300 border-slate-400 rounded-full"></div>
+                <p class="dark:text-white text-black text-sans text-center text-md">Or...</p>
+                <button class="ui_button" @click="sign_in = false">
+                    <i class="ph-bold ph-user-circle-plus"></i> Create Account
+                </button>
+            </div>
+
+            <div class="flex flex-col items-center"
+                 x-show="!sign_in"
+                 x-transition:enter.delay.300ms>
+                <p class="dark:text-white text-black text-sans text-center text-2xl">
+                    <i class="ph-bold ph-user-circle-plus"></i> Create Account
+                </p>
+
+                <div class="flex flex-col items-center my-8"
+                     x-show="create_account_page == 1"
+                     x-transition:enter.delay.300ms>
+                    <p class="dark:text-white text-black text-sans text-center text-md">Enter display name and team number</p>
+                    <input class="ui_input"
+                           placeholder="Display Name"
+                           type="text"
+                           x-ref="create_display_name"
+                           @input="check_display_name_and_team_number()">
+                    <input class="ui_input"
+                           placeholder="Team Number"
+                           type="text"
+                           x-ref="create_team_number"
+                           @input.debounce.250ms="display_team_number"
+                           @input="check_display_name_and_team_number()">
+
+                    <div class="flex flex-row items-center justify-center mt-2 mr-4"
+                         x-show="team_number.show"
+                         x-transition>
+                        <img class="mr-2"
+                             :src="team_number.avatar"
+                             @error="team_number.show_image = false"
+                             x-show="team_number.show_image"
+                             x-transition>
+                        <p class="dark:text-white text-black text-sans text-md"
+                           x-text="team_number.nickname"></p>
+                    </div>
+
+                    <button class="ui_button mx-1"
+                            @click="create_account_page = 2"
+                            x-ref="create_display_name_team_number_next"
+                            disabled>
+                        <i class="ph-bold ph-arrow-circle-right"></i> Next
+                    </button>
+                </div>
+
+                <div class="flex flex-col items-center my-8"
+                     x-show="create_account_page == 2"
+                     x-transition:enter.delay.300ms>
+                    <p class="dark:text-white text-black text-sans text-center text-md">Enter email</p>
+                    <input class="ui_input"
+                           placeholder="Email"
+                           type="text"
+                           x-ref="create_email"
+                           @input="check_email()">
+
+                    <div class="flex flex-row">
+                        <button class="ui_button mx-1" @click="create_account_start_over()">
+                            <i class="ph-bold ph-arrow-circle-left"></i> Start Over
+                        </button>
+                        <button class="ui_button mx-1"
+                                @click="send_verification_code(); sending_email = true"
+                                x-ref="create_email_next"
+                                disabled>
+                            <i class="ph-bold ph-arrow-circle-right"></i> Next
+                        </button>
+                    </div>
+
+                    <div class="flex flex-row items-center justify-center"
+                         x-show="sending_email"
+                         x-transition>
+                        <i class="ph-bold ph-circle-notch animate-spin ori dark:text-white text-black text-sans text-md"></i>
+                        <p class="dark:text-white text-black text-sans text-md ml-2">Sending Verification Code...</p>
+                    </div>
+                </div>
+
+                <div class="flex flex-col items-center my-8"
+                     x-show="create_account_page == 3"
+                     x-transition:enter.delay.300ms>
+                    <p class="dark:text-white text-black text-sans text-center text-md">Verify email</p>
+                    <p class="dark:text-white text-black text-sans text-center text-sm">
+                        <p class="dark:text-white text-black text-sans text-center text-sm mx-2"
+                           x-text="'We sent a verification code to ' + user.email + '. Please check your email for a message from {{ EMAIL_HOST_USER }} and enter the verification code below'">
+                        </p>
+                    </p>
+
+                    <div class="flex flex-row dark:bg-red-500/50 dark:border-red-400/70 border-2 rounded-lg bg-red-400/50 border-red-500/70 my-4 mx-2"
+                         x-show="verification_code_error"
+                         x-transition>
+                        <p class="dark:text-red-400 text-red-500 text-sans text-center text-md m-2"
+                           x-text="verification_code_error"></p>
+                    </div>
+
+                    <input class="ui_input"
+                           placeholder="Verification Code"
+                           type="text"
+                           x-ref="create_verification_code"
+                           @input="check_verification_code_fields()">
+
+                    <div class="flex flex-row">
+                        <button class="ui_button mx-1" @click="create_account_start_over()">
+                            <i class="ph-bold ph-arrow-circle-left"></i> Start Over
+                        </button>
+                        <button class="ui_button mx-1"
+                                @click="check_verification_code()"
+                                x-ref="create_verify_next">
+                            <i class="ph-bold ph-arrow-circle-right"></i> Verify
+                        </button>
+                    </div>
+
+                    <button class="ui_button mx-1"
+                            @click="send_verification_code()"
+                            x-ref="create_verify_next">
+                        <i class="ph-bold ph-arrow-clockwise"></i> Resend Code
+                    </button>
+                </div>
+
+                <div class="flex flex-col items-center my-8"
+                     x-show="create_account_page == 4"
+                     x-transition:enter.delay.300ms>
+                    <p class="dark:text-white text-black text-sans text-center text-md">Create password</p>
+                    <p class="dark:text-white text-black text-sans text-center text-sm mx-2">
+                        Secure passwords are longer than 8 characters, contain numbers and symbols, and have capital and lowercase letters.
+                    </p>
+
+                    <div class="flex flex-row dark:bg-green-700/50 dark:border-green-500/70 border-2 rounded-lg bg-green-400/50 border-green-600/70 my-4 mx-2"
+                         x-show="verification_code_success"
+                         x-transition>
+                        <p class="dark:text-green-500 text-green-600 text-sans text-center text-md m-2"
+                           x-text="verification_code_success"></p>
+                    </div>
+
+                    <div class="flex flex-row dark:bg-red-500/50 dark:border-red-400/70 border-2 rounded-lg bg-red-400/50 border-red-500/70 my-4 mx-2"
+                         x-show="create_account_error"
+                         x-transition>
+                        <p class="dark:text-red-400 text-red-500 text-sans text-center text-md m-2"
+                           x-text="create_account_error"></p>
+                    </div>
+
+                    <div class="flex flex-row items-center justify-center">
+                        <input class="ui_input"
+                               placeholder="Password"
+                               type="password"
+                               x-ref="create_password"
+                               @input="check_password_field_and_strength()">
+
+                        <input class="ml-4" @click="check_password_visibility()" type="checkbox">
+                        <p class="dark:text-white text-black text-sans text-md ml-2"
+                           x-ref="create_password_visibility_label"
+                           @click="check_password_visibility()">Show</p>
+                    </div>
+
+                    <p class="dark:text-white text-black text-sans text-center text-md"
+                       x-text="password_strength"
+                       x-ref="create_password_strength"
+                       x-show="password_strength"
+                       x-transition></p>
+
+                    <div class="flex flex-row">
+                        <button class="ui_button mx-1" @click="create_account_start_over()">
+                            <i class="ph-bold ph-arrow-circle-left"></i> Start Over
+                        </button>
+                        <button class="ui_button mx-1"
+                                @click="create_account()"
+                                x-ref="create_create_account">
+                            <i class="ph-bold ph-check-circle"></i> Create Account
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex flex-col items-center my-8"
+                     x-show="create_account_page == 5"
+                     x-transition:enter.delay.300ms>
+                    <p class="dark:text-white text-black text-sans text-center text-md">Your account has been successfully created!</p>
+                    <p class="dark:text-white text-black text-sans text-center text-6xl my-2">
+                        <i class="ph-bold ph-check-circle"></i>
+                    </p>
+                    <p class="dark:text-white text-black text-sans text-center text-sm">You will be redirected in a few moments, or you can press the button below</p>
+
+                    <div class="flex flex-row">
+                        <button class="ui_button mx-1" @click="go_to_index()">
+                            <i class="ph-bold ph-house"></i> Go to Home
+                        </button>
+                    </div>
+                </div>
+
+                <div class="h-1 w-16 mb-2 dark:bg-slate-700 border-1 dark:border-slate-600 bg-slate-300 border-slate-400 rounded-full"></div>
+                <p class="dark:text-white text-black text-sans text-center text-md">Or...</p>
+                <button class="ui_button" @click="sign_in = true">
+                    <i class="ph-bold ph-user-circle-check"></i> Sign in
+                </button>
+            </div>
+        </div>
+
+        <script>
+            function auth() {
+                return {
+                    sign_in: true,
+                    create_account_page: 1,
+                    user: {
+                        uuid: "",
+                        display_name: "",
+                        team_number: "",
+                        email: "",
+                        password: "",
+                    },
+                    team_number: {
+                        show: false,
+                        show_image: false,
+                        nickname: "",
+                        avatar: "",
+                    },
+                    password_strength: "",
+                    verification_code_error: "",
+                    verification_code_success: "",
+                    create_account_error: "",
+                    sending_email: false,
+                    sign_in_error: "",
+
+                    create_account_start_over() {
+                        this.$refs.create_display_name.value = '';
+                        this.$refs.create_team_number.value = '';
+                        this.$refs.create_email.value = '';
+                        this.$refs.create_verification_code.value = '';
+                        this.$refs.create_password.value = '';
+                        this.create_account_page = 1;
+
+                        this.team_number.show = false;
+
+                        this.user.uuid = "";
+                        this.user.email = "";
+
+                        this.password_strength = "";
+                        this.verification_code_error = "";
+                        this.verification_code_success = "";
+                        this.sending_email = false;
+
+                        this.check_display_name_and_team_number()
+                        this.check_email()
+                    },
+
+                    async display_team_number(e) {
+                        var current_season = await fetch(`https://www.thebluealliance.com/api/v3/status`, {
+                            method: "GET",
+                            headers: {
+                                "X-TBA-Auth-Key": "{{ TBA_API_KEY }}"
+                                }
+                            });
+                            
+                            if (current_season.ok) {
+                                let current_season_data = await current_season.json()
+
+                                try {
+                                    var response = await fetch(`https://www.thebluealliance.com/api/v3/team/frc${e.target.value}`, {
+                                        method: "GET",
+                                        headers: {
+                                            "X-TBA-Auth-Key": "{{ TBA_API_KEY }}"
+                                            }
+                                    });
+                                        
+                                    if (response.ok) {
+                                        let data = await response.json();
+                                        this.team_number.nickname = data.nickname;
+                                        this.team_number.avatar = `https://www.thebluealliance.com/avatar/${current_season_data.current_season}/frc${e.target.value}.png`;
+                                        this.team_number.show = true;
+                                        this.team_number.show_image = true;
+
+                                    } else if (response.status == 404) {
+                                        this.team_number.show = false;
+                                    }
+                                } catch {}
+                            }
+                    },
+
+                    check_display_name_and_team_number() {
+                        if (this.$refs.create_display_name.value && this.$refs.create_team_number.value) {
+                            this.$refs.create_display_name_team_number_next.disabled = false;
+                        } else {
+                            this.$refs.create_display_name_team_number_next.disabled = true;
+                        }
+                    },
+
+                    check_email() {
+                        if (this.$refs.create_email.value && this.$refs.create_email.value.includes("@") && this.$refs.create_email.value.includes(".")) {
+                            this.$refs.create_email_next.disabled = false;
+                        } else {
+                            this.$refs.create_email_next.disabled = true;
+                        }
+                    },
+
+                    check_verification_code_fields() {
+                        if (this.$refs.create_verification_code.value) {
+                            this.$refs.create_verify_next.disabled = false;
+                        } else {
+                            this.$refs.create_verify_next.disabled = true;
+                        }
+                    },
+
+                    async send_verification_code() {
+                        this.user.email = this.$refs.create_email.value;
+                        this.user.uuid = crypto.randomUUID();
+
+                        this.$refs.create_email_next.disabled = true;
+
+                        var response = await fetch("{{ SERVER_IP }}/authentication/send_verification_code", {
+                        method: "POST",
+                        headers: {
+                                "X-CSRFToken": "{{ csrf_token }}",
+                                "uuid": this.user.uuid,
+                                "email": this.$refs.create_email.value,
+                                "display-name": this.$refs.create_display_name.value,
+                            }
+                        });
+
+                        if (response.ok) {
+                            response.json().then(async (json) => {
+                                this.create_account_page = 3;
+                            });
+                        } else {
+                            response.text().then(async (text) => {
+                                console.log("Unable to send verification code")
+                            });
+                        }
+                    },
+
+                    async check_verification_code() {
+                        var response = await fetch("{{ SERVER_IP }}/authentication/check_verification_code", {
+                        method: "POST",
+                        headers: {
+                                "X-CSRFToken": "{{ csrf_token }}",
+                                "code": this.$refs.create_verification_code.value,
+                                "user-uuid": this.user.uuid
+                            }
+                        });
+
+                        if (response.ok) {
+                            response.json().then(async (json) => {
+                                console.log("Verification code is valid");
+                                this.verification_code_success = "Your email has been verified!";
+                                this.create_account_page = 4;
+                            });
+                        } else {
+                            response.json().then(async (json) => {
+                                if (json.reason == "expired") {
+                                    this.verification_code_error = "The verification code has expired. Use the 'Resend Code' to send a new one.";
+
+                                } else if (json.reason == "does_not_exist") {
+                                    this.verification_code_error = "The verification code is incorrect!"
+                                    
+                                }
+                            });
+                        }
+                    },
+
+                    check_password_field_and_strength() {
+                        if (this.$refs.create_password.value) {
+                            this.$refs.create_create_account.disabled = false;
+                        } else {
+                            this.$refs.create_create_account.disabled = true;
+                        }
+
+                        let password_strength = 0;
+
+                        if (this.$refs.create_password.value.length >= 8) {
+                            password_strength += 1;
+                        }
+
+                        if (this.$refs.create_password.value.match(/[A-Z]/)) {
+                            password_strength += 1;
+                        }
+
+                        if (this.$refs.create_password.value.match(/[0-9]/)) {
+                            password_strength += 1;
+                        }
+
+                        if (this.$refs.create_password.value.match(/[!@#$%^&*(),.?":{}|<>\-_=+]/)) {
+                            password_strength += 1;
+                        }
+
+                        if (this.$refs.create_password.value == "") {
+                            this.password_strength = "";
+                        }
+
+                        if (password_strength == 0) {
+                            this.password_strength = "Poor Password";
+                        } else if (password_strength == 1) {
+                            this.password_strength = "Weak Password";
+                        } else if (password_strength == 2) {
+                            this.password_strength = "Okay Password";
+                        } else if (password_strength == 3) {
+                            this.password_strength = "Strong Password";
+                        } else if (password_strength == 4) {
+                            this.password_strength = "Very Strong Password";
+                        } else {
+                            this.password_strength = "";
+                        }
+
+                    },
+
+                    check_password_visibility() {
+                        if (this.$refs.create_password.type == "password") {
+                            this.$refs.create_password.type = "text";
+                            this.$refs.create_password_visibility_label.innerText = "Hide";
+                        } else {
+                            this.$refs.create_password.type = "password";
+                            this.$refs.create_password_visibility_label.innerText = "Show";
+                        }
+                    },
+
+                    async create_account() {
+                        var response = await fetch("{{ SERVER_IP }}/authentication/create_account", {
+                        method: "POST",
+                        headers: {
+                                "X-CSRFToken": "{{ csrf_token }}",
+                                "uuid": this.user.uuid,
+                                "display-name": this.$refs.create_display_name.value,
+                                "team-number": this.$refs.create_team_number.value,
+                                "email": this.$refs.create_email.value,
+                                "password": this.$refs.create_password.value,
+                            }
+                        });
+
+                        if (response.ok) {
+                            response.text().then(async (text) => {
+                                console.log("Account has been created!");
+                                
+                                this.create_account_page = 5;
+                                setTimeout(this.go_to_index(), 10000);
+                            });
+                        } else {
+                            response.text().then(async (text) => {
+                                this.verification_code_success = "";
+
+                                if (text == "username_exists") {
+                                    this.create_account_error = "A user with that username already exists. Reload this page or press 'Start Over' to create an account with a different username";
+                                } else if (text == "error") {
+                                    this.create_account_error = "There was an issue creating your account"
+                                } else {
+                                    this.create_account_error = "There was an unknown issue creating your account"
+
+                                }
+                            });
+                        }
+                    },
+
+                    check_sign_in_fields() {
+                        if (this.$refs.sign_in_email.value && this.$refs.sign_in_password.value) {
+                            this.$refs.sign_in_button.disabled = false;
+                        } else {
+                            this.$refs.sign_in_button.disabled = true;
+                        }
+                    },
+
+                    async sign_in_request() {
+                        var response = await fetch("{{ SERVER_IP }}/authentication/sign_in", {
+                        method: "POST",
+                        headers: {
+                                "X-CSRFToken": "{{ csrf_token }}",
+                                "email": this.$refs.sign_in_email.value,
+                                "password": this.$refs.sign_in_password.value,
+                            }
+                        });
+
+                        if (response.ok) {
+                            response.text().then(async (text) => {
+                                this.go_to_index();
+                            });
+                        } else {
+                            response.text().then(async (text) => {
+                                if (text == "incorrect_credentials") {
+                                    this.sign_in_error = "Your username or password is incorrect";
+
+                                } else if (text == "error") {
+                                    this.sign_in_error = "There was an issue signing you in";
+
+                                } else {
+                                    this.sign_in_error = "There was an unknown issue signing you in";
+
+                                }
+                            });
+                        }
+                    },
+
+                    go_to_index() {
+                        window.location.href = "{{ SERVER_IP }}/";
+                    },
+
+                    init() {
+
+                    }
+                }
+            }
+        </script>
+    </div>
+{% endblock body %}

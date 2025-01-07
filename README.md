@@ -83,6 +83,8 @@ Now run the server using the following command, or run the `Start server` task i
 python manage.py runserver
 ```
 
+Now, navigate to the `./admin` page (usually `http://127.0.0.1:8000/admin`), add view the `User` models. Find the superuser you just created, scroll down, and fill out all the fields for the profile object to prevent any errors
+
 Additionally, you should start the Tailwind CSS builder with the following command, or use the `Build CSS` task in Visual Studio Code
 ```bash
 npm run build:css
@@ -100,6 +102,15 @@ Set the following global environment variables:
 - `DATABASE_URL` -> `${db.DATABASE_URL}` (This works on DigitalOcean, this may not work on every hosting provider)
 
 Additionally, if you wish to show a custom message to the user on each page (demonstration server, currently undergoing maintenance), set the `SERVER_MESSAGE` environment variable to the message you wish to display.
+
+If you wish to send emails with the server, set the following environment variables:
+- `EMAIL_ENABLED` -> `True`
+- `EMAIL_BACKEND` -> `django.core.mail.backends.smtp.EmailBackend`
+- `EMAIL_HOST` -> `<your email host>`
+- `EMAIL_HOST_USER` -> `<your email host username>`
+- `EMAIL_HOST_PASSWORD` -> `<your email host password>`
+- `EMAIL_PORT` -> `<your email host port>`
+- `EMAIL_USE_TLS` -> `<True if your email host uses TLS>`
 
 ## Development
 ### djlint
