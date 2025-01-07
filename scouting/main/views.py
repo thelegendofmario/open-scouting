@@ -126,41 +126,81 @@ def submit(request):
                 custom=True,
             )
 
-            data = Data(
-                uuid=request.headers["uuid"],
-                year=request.headers["year"],
-                event=unquote(request.headers["event_name"]),
-                event_code=request.headers["event_code"],
-                data=json.loads(request.headers["data"]),
-                created=timezone.now(),
-                event_model=events[0],
-            )
-            data.save()
+            if request.user.is_authenticated:
+                data = Data(
+                    uuid=request.headers["uuid"],
+                    year=request.headers["year"],
+                    event=unquote(request.headers["event_name"]),
+                    event_code=request.headers["event_code"],
+                    data=json.loads(request.headers["data"]),
+                    created=timezone.now(),
+                    event_model=events[0],
+                )
+                data.save()
+
+            else:
+                data = Data(
+                    uuid=request.headers["uuid"],
+                    year=request.headers["year"],
+                    event=unquote(request.headers["event_name"]),
+                    event_code=request.headers["event_code"],
+                    data=json.loads(request.headers["data"]),
+                    created=timezone.now(),
+                    event_model=events[0],
+                    user_created=request.user,
+                )
+                data.save()
+
             return HttpResponse(request, "Success")
 
         else:
             events = Event.objects.filter(event_code=request.headers["event_code"])
             if len(events) == 0:
-                event = Event(
-                    year=request.headers["year"],
-                    name=unquote(request.headers["event_name"]),
-                    event_code=request.headers["event_code"],
-                    created=timezone.now(),
-                )
-                event.save()
+                if request.user.is_authenticated:
+                    event = Event(
+                        year=request.headers["year"],
+                        name=unquote(request.headers["event_name"]),
+                        event_code=request.headers["event_code"],
+                        created=timezone.now(),
+                        user_created=request.user,
+                    )
+                    event.save()
+                else:
+                    event = Event(
+                        year=request.headers["year"],
+                        name=unquote(request.headers["event_name"]),
+                        event_code=request.headers["event_code"],
+                        created=timezone.now(),
+                    )
+                    event.save()
             else:
                 event = events[0]
 
-            data = Data(
-                uuid=request.headers["uuid"],
-                year=request.headers["year"],
-                event=unquote(request.headers["event_name"]),
-                event_code=request.headers["event_code"],
-                data=json.loads(request.headers["data"]),
-                created=timezone.now(),
-                event_model=event,
-            )
-            data.save()
+            if request.user.is_authenticated:
+                data = Data(
+                    uuid=request.headers["uuid"],
+                    year=request.headers["year"],
+                    event=unquote(request.headers["event_name"]),
+                    event_code=request.headers["event_code"],
+                    data=json.loads(request.headers["data"]),
+                    created=timezone.now(),
+                    event_model=event,
+                    user_created=request.user,
+                )
+                data.save()
+
+            else:
+                data = Data(
+                    uuid=request.headers["uuid"],
+                    year=request.headers["year"],
+                    event=unquote(request.headers["event_name"]),
+                    event_code=request.headers["event_code"],
+                    data=json.loads(request.headers["data"]),
+                    created=timezone.now(),
+                    event_model=event,
+                )
+                data.save()
+
             return HttpResponse(request, "Success")
     else:
         return HttpResponse(request, "Request is not a POST request!", status=501)
@@ -200,14 +240,25 @@ def get_data(request):
             else:
                 events = Event.objects.filter(event_code=request.headers["event_code"])
                 if len(events) == 0:
-                    event = Event(
-                        year=request.headers["year"],
-                        name=unquote(request.headers["event_name"]),
-                        event_code=request.headers["event_code"],
-                        custom=False,
-                        created=timezone.now(),
-                    )
-                    event.save()
+                    if request.user.is_authenticated:
+                        event = Event(
+                            year=request.headers["year"],
+                            name=unquote(request.headers["event_name"]),
+                            event_code=request.headers["event_code"],
+                            custom=False,
+                            created=timezone.now(),
+                            user_created=request.user,
+                        )
+                        event.save()
+                    else:
+                        event = Event(
+                            year=request.headers["year"],
+                            name=unquote(request.headers["event_name"]),
+                            event_code=request.headers["event_code"],
+                            custom=False,
+                            created=timezone.now(),
+                        )
+                        event.save()
                 else:
                     event = events[0]
 
@@ -279,15 +330,29 @@ def create_custom_event(request):
             "event_code": UUID,
         }
 
-        event = Event(
-            year=data["year"],
-            name=request.headers["name"],
-            created=timezone.now(),
-            event_code=UUID,
-            custom=True,
-            custom_data=data,
-        )
-        event.save()
+        if request.user.is_authenticated:
+            event = Event(
+                year=data["year"],
+                name=request.headers["name"],
+                created=timezone.now(),
+                event_code=UUID,
+                custom=True,
+                custom_data=data,
+                user_created=request.user,
+            )
+            event.save()
+
+        else:
+            event = Event(
+                year=data["year"],
+                name=request.headers["name"],
+                created=timezone.now(),
+                event_code=UUID,
+                custom=True,
+                custom_data=data,
+            )
+            event.save()
+
         return HttpResponse(request, "Success")
     else:
         return HttpResponse(request, "Request is not a POST request!", status=501)
@@ -327,15 +392,28 @@ def check_local_backup_reports(request):
                 reports_found += 1
             else:
                 reports_not_found += 1
-                new_data = Data(
-                    uuid=report["uuid"],
-                    year=report["year"],
-                    event=report["event_name"],
-                    event_code=report["event_code"],
-                    data=report["data"],
-                    created=timezone.now(),
-                )
-                new_data.save()
+
+                if request.user.is_authenticated:
+                    new_data = Data(
+                        uuid=report["uuid"],
+                        year=report["year"],
+                        event=report["event_name"],
+                        event_code=report["event_code"],
+                        data=report["data"],
+                        created=timezone.now(),
+                        user_created=request.user,
+                    )
+                    new_data.save()
+                else:
+                    new_data = Data(
+                        uuid=report["uuid"],
+                        year=report["year"],
+                        event=report["event_name"],
+                        event_code=report["event_code"],
+                        data=report["data"],
+                        created=timezone.now(),
+                    )
+                    new_data.save()
 
         data = {"reports_found": reports_found, "reports_not_found": reports_not_found}
 
@@ -365,15 +443,28 @@ def upload_offline_reports(request):
                 reports_found += 1
             else:
                 reports_not_found += 1
-                new_data = Data(
-                    uuid=report["uuid"],
-                    year=report["year"],
-                    event=report["event_name"],
-                    event_code=report["event_code"],
-                    data=report["data"],
-                    created=timezone.now(),
-                )
-                new_data.save()
+
+                if request.user.is_authenticated:
+                    new_data = Data(
+                        uuid=report["uuid"],
+                        year=report["year"],
+                        event=report["event_name"],
+                        event_code=report["event_code"],
+                        data=report["data"],
+                        created=timezone.now(),
+                        user_created=request.user,
+                    )
+                    new_data.save()
+                else:
+                    new_data = Data(
+                        uuid=report["uuid"],
+                        year=report["year"],
+                        event=report["event_name"],
+                        event_code=report["event_code"],
+                        data=report["data"],
+                        created=timezone.now(),
+                    )
+                    new_data.save()
 
         data = {"reports_found": reports_found, "reports_not_found": reports_not_found}
 

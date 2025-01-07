@@ -83,6 +83,8 @@ Now run the server using the following command, or run the `Start server` task i
 python manage.py runserver
 ```
 
+Now, navigate to the `./admin` page (usually `http://127.0.0.1:8000/admin`), add view the `User` models. Find the superuser you just created, scroll down, and fill out all the fields for the profile object to prevent any errors
+
 Additionally, you should start the Tailwind CSS builder with the following command, or use the `Build CSS` task in Visual Studio Code
 ```bash
 npm run build:css

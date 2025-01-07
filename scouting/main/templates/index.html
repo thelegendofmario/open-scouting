@@ -175,7 +175,7 @@
                     </div>
                 </div>
 
-                <button class="ui_button" @click="open = !open">
+                <button class="ui_button" @click="open = !open" x-show="!authenticated">
                     <i class="ph-bold ph-user-circle-dashed"></i> Continue without account
                 </button>
 
