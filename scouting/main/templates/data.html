@@ -2,7 +2,12 @@
 {% load static %}
 {% block head_title %}Open Scouting{% endblock %}
 
-{% block head_scripts %}{% endblock %}
+{% block head_scripts %}
+    <link href="https://unpkg.com/tabulator-tables@6.3.0/dist/css/tabulator.min.css"
+          rel="stylesheet">
+    <script type="text/javascript"
+            src="https://unpkg.com/tabulator-tables@6.3.0/dist/js/tabulator.min.js"></script>
+{% endblock %}
 
 {% block stylesheets %}{% endblock %}
 
@@ -66,29 +71,7 @@
              x-data="dataTable()"
              x-init="init()"
              x-transition>
-            <div x-show="!offline && !no_data"
-                 class="dark:border-slate-600 border-slate-300 border-1 dark:bg-slate-800 bg-slate-200 width-screen">
-                <table class="min-w-full border-2 dark:border-slate-600 border-slate-300 table-auto">
-                    <thead>
-                        <tr class="px-2">
-                            <template x-for="header in headers" :key="header">
-                                <th class="dark:text-white text-black font-bold font-sans px-4 py-2 text-left dark:hover:bg-slate-700 dark:bg-slate-800 hover:bg-slate-300 bg-slate-200 transition-colors capitalize border-l-1 border-r-1 dark:border-slate-700 border-slate-300 whitespace-nowrap"
-                                    x-text="generate_header_text(header)"></th>
-                            </template>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <template x-for="entry in entries">
-                            <tr class="px-2 dark:hover:bg-slate-700 dark:bg-slate-800 hover:bg-slate-300 bg-slate-200 transition-colors rounded-md dark:border-slate-600 border-slate-300 border-2">
-                                <template x-for="header in headers">
-                                    <td class="px-4 py-2 dark:text-white text-black font-sans border-l-1 border-r-1 dark:border-slate-700 border-slate-300"
-                                        x-text="entry.data.find(field => field.name === header)?.value || ''"></td>
-                                </template>
-                            </tr>
-                        </template>
-                    </tbody>
-                </table>
-            </div>
+            <div x-show="!offline && !no_data" class="width-screen" x-ref="table"></div>
 
             <div class="flex flex-row w-screen items-center justify-center"
                  x-show="offline"
@@ -117,7 +100,29 @@
                 offline: false,
 
                 generate_header_text(header_text) {
-                    return header_text.replaceAll("_", " ");
+                    return header_text.replaceAll("_", " ").split(' ')
+                        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                        .join(' ');
+                },
+
+                convert_headers_to_tabulator(headers) {
+                    let new_headers = [];
+
+                    for (header in headers) {
+                        new_headers.push({title: this.generate_header_text(headers[header]), field: headers[header]});
+                    }
+
+                    return new_headers;
+                },
+
+                convert_entries_to_tabulator(entries) {
+                    let new_entries = [];
+
+                    for (entry in entries) {
+                        new_entries.push(entries[entry].data);
+                    }
+
+                    return new_entries;
                 },
 
                 init() {
@@ -143,6 +148,24 @@
                                 this.no_data = true;
                             }
                         }
+
+                        console.log(this.headers)
+                        console.log(this.convert_entries_to_tabulator(this.entries))
+
+                        var tabledata = [
+                            {id:1, name:"Oli Bob", age:"12", col:"red", dob:""},
+                            {id:2, name:"Mary May", age:"1", col:"blue", dob:"14/05/1982"},
+                            {id:3, name:"Christine Lobowski", age:"42", col:"green", dob:"22/05/1982"},
+                            {id:4, name:"Brendon Philips", age:"125", col:"orange", dob:"01/08/1980"},
+                            {id:5, name:"Margret Marmajuke", age:"16", col:"yellow", dob:"31/01/1999"},
+                        ];
+
+                        var table = new Tabulator(this.$refs.table, {
+                            height: 205,
+                            data: this.entries,
+                            layout: "fitColumns",
+                            columns: this.headers
+                        });
                     }))
                     .then(data => console.log(data))
                     .catch(error => console.error(error));
@@ -152,6 +175,8 @@
                     } else {
                         this.offline = true;
                     }
+                    
+                    
                 }
             }
         }

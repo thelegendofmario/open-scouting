@@ -273,9 +273,6 @@ def get_data(request):
                 else:
                     event = events[0]
 
-            print(event)
-            print(event.year)
-
             data = Data.objects.filter(
                 year=request.headers["year"],
                 event=unquote(request.headers["event_name"]),
@@ -285,14 +282,23 @@ def get_data(request):
 
             data_json = []
             for item in data:
-                item_data = {"created": item.created.isoformat(), "data": item.data}
+                item_data = {}
+                for key in item.data:
+                    item_data[key["name"]] = key["value"]
+
+                item_data["created"] = item.created
                 data_json.append(item_data)
 
             all_names = []
             for entry in data:
                 for item in entry.data:
-                    if item["name"] not in all_names:
-                        all_names.append(item["name"])
+                    if item["name"] not in [name["field"] for name in all_names]:
+                        all_names.append(
+                            {
+                                "field": item["name"],
+                                "title": item["name"].replace("_", " ").title(),
+                            }
+                        )
 
             return JsonResponse(
                 {"data": data_json, "data_headers": list(all_names), "demo": False},
