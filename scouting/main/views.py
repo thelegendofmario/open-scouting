@@ -289,16 +289,11 @@ def get_data(request):
                 item_data["created"] = item.created
                 data_json.append(item_data)
 
-            all_names = []
-            for entry in data:
-                for item in entry.data:
-                    if item["name"] not in [name["field"] for name in all_names]:
-                        all_names.append(
-                            {
-                                "field": item["name"],
-                                "title": item["name"].replace("_", " ").title(),
-                            }
-                        )
+            all_names = season_fields.create_tabulator_headers(
+                season_fields.collect_field_names(
+                    get_season_data_from_year(request.headers["year"])
+                )
+            )
 
             return JsonResponse(
                 {"data": data_json, "data_headers": list(all_names), "demo": False},
