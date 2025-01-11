@@ -1508,6 +1508,8 @@ video {
 
 .tabulator-headers .tabulator-col-content {
   background-color: rgb(241 245 249 / 0.8);
+  font-size: 0.75rem;
+  line-height: 1rem;
   --tw-text-opacity: 1;
   color: rgb(0 0 0 / var(--tw-text-opacity));
 }
@@ -1517,14 +1519,6 @@ video {
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity));
 }
-
-/* .tabulator-col-content {
-    @apply dark:bg-slate-700/80 bg-slate-100/80 text-black dark:text-white;
-} */
-
-/* .tabulator-row {
-    @apply dark:bg-slate-600/80 bg-slate-200/80 text-black dark:text-white;
-} */
 
 .tabulator-row-even .tabulator-cell {
   background-color: rgb(241 245 249 / 0.8);
@@ -1550,9 +1544,14 @@ video {
   color: rgb(255 255 255 / var(--tw-text-opacity));
 }
 
-/* .tabulator-row:hover {
-    @apply !dark:bg-slate-800 !bg-slate-300;
-} */
+.tabulator-row:hover {
+  --tw-bg-opacity: 1 !important;
+  background-color: rgb(203 213 225 / var(--tw-bg-opacity)) !important;
+}
+
+.tabulator-row:hover:where(.dark, .dark *) {
+  background-color: rgb(51 65 85 / 0.8) !important;
+}
 
 .hover\:scale-105:hover {
   --tw-scale-x: 1.05;

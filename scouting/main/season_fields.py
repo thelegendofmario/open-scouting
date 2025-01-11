@@ -41,6 +41,8 @@ def create_tabulator_headers(data):
             new_item["title"] = item["name"]  # Rename "name" to "title"
         if "simple_name" in item:
             new_item["field"] = item["simple_name"]  # Rename "simple_name" to "field"
+
+        new_item["formatter"] = "adaptable"
         # Do not include the "order" field
         processed.append(new_item)
     return processed

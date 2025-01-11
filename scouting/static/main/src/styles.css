@@ -24,7 +24,7 @@
 }
 
 .tabulator-headers .tabulator-col-content {
-    @apply dark:bg-slate-700/80 bg-slate-100/80 text-black dark:text-white;
+    @apply dark:bg-slate-700/80 bg-slate-100/80 text-black dark:text-white text-xs;
 }
 
 .tabulator-row-even .tabulator-cell {
@@ -32,9 +32,9 @@
 }
 
 .tabulator-row-odd .tabulator-cell {
-    @apply dark:bg-slate-600/90 bg-slate-200/90 text-black dark:text-white;
+    @apply dark:bg-slate-600/80 bg-slate-200/80 text-black dark:text-white;
 }
 
 .tabulator-row:hover {
-    @apply !dark:bg-slate-700 !bg-slate-300;
+    @apply dark:!bg-slate-700/80 !bg-slate-300;
 }
