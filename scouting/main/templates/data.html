@@ -140,6 +140,41 @@
                                 this.no_data = true;
                             }
                         }
+                        
+                        var menu_icon = function(cell, formatterParams, onRendered) {
+                            return "<i class='ph-bold ph-info'></i>";
+                        };
+
+                        var menu_click = function(e, component, onRendered) {
+                            //e - the mouse/touch event that triggered the popup
+                            //component - column/row/cell component that triggered this popup
+                            //onRendered - function to call when the formatter has been rendered
+
+                            let div = document.createElement("div");
+                            div.classList = "flex flex-col dark:bg-slate-700 bg-slate-200 border-2 dark:border-slate-600 border-slate-300 rounded-2xl p-4";
+
+                            let div_header = document.createElement("p");
+                            div_header.innerText = "Data Info";
+                            div_header.classList = "dark:text-white text-black text-lg text-bold text-sans";
+
+                            let div_info = document.createElement("p");
+                            div_info.classList = "dark:text-white text-black text-md text-sans";
+
+                            let date = new Date(component.getData().created);
+
+                            if (component.getData().username_created && component.getData().team_number_created) {
+                                div_info.innerText = `Created by ${component.getData().username_created} on team ${component.getData().team_number_created} on ${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`;
+                            } else {
+                                div_info.innerText = `Created on ${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`;
+                            }
+
+                            div.appendChild(div_header);
+                            div.appendChild(div_info);
+
+                            return div;
+                        };
+
+                        this.headers.unshift({title:"Info", hozAlign:"center", formatter:menu_icon, width:20, clickPopup:menu_click});
 
                         var table = new Tabulator(this.$refs.table, {
                             height: "100%",

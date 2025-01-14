@@ -299,6 +299,9 @@ def get_data(request):
                     item_data[key["name"]] = key["value"]
 
                 item_data["created"] = item.created
+                item_data["username_created"] = item.username_created
+                item_data["team_number_created"] = item.team_number_created
+
                 data_json.append(item_data)
 
             all_names = season_fields.create_tabulator_headers(
