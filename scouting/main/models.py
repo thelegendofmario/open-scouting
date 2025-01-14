@@ -18,6 +18,8 @@ class Data(models.Model):
     user_created = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True
     )
+    username_created = models.CharField(max_length=999, blank=True)
+    team_number_created = models.CharField(max_length=6, blank=True)
 
     def __str__(self):
         return f"Data from {self.event} in {str(self.year)}"

@@ -134,6 +134,7 @@
                             const { load_page } = event.detail;
 
                             let username = this.username;
+                            let team_number = this.team_number;
                             let event_name = this.event_name;
                             let event_code = this.event_code;
                             let load_page_var = load_page;
@@ -142,7 +143,7 @@
                             let demo = this.demo;
 
                             window.dispatchEvent(new CustomEvent('header_data', {
-                                detail: { username, event_name, event_code, load_page, custom, year, demo }
+                                detail: { username, team_number, event_name, event_code, load_page, custom, year, demo }
                             }));
                         });
                     }
@@ -666,15 +667,15 @@
                             } else if (page == "contribute_separately") {
                                 
                                 if (!this.custom) {
-                                    window.location.href = `{{ SERVER_IP }}/contribute?username=${encodeURIComponent(this.username)}&event_name=${encodeURIComponent(this.event_name)}&event_code=${this.event_code}&year=${this.year}&`;
+                                    window.location.href = `{{ SERVER_IP }}/contribute?username=${encodeURIComponent(this.username)}&team_number=${encodeURIComponent(this.team_number)}&event_name=${encodeURIComponent(this.event_name)}&event_code=${this.event_code}&year=${this.year}&`;
                                 } else {
-                                    window.location.href = `{{ SERVER_IP }}/contribute?username=${encodeURIComponent(this.username)}&event_name=${encodeURIComponent(this.event_name)}&event_code=${this.event_code}&year=${this.year}&custom=true&`;
+                                    window.location.href = `{{ SERVER_IP }}/contribute?username=${encodeURIComponent(this.username)}&team_number=${encodeURIComponent(this.team_number)}&event_name=${encodeURIComponent(this.event_name)}&event_code=${this.event_code}&year=${this.year}&custom=true&`;
                                 }
                             } else if (page == "view_data") {
                                 if (!this.custom) {
-                                    window.location.href = `{{ SERVER_IP }}/data?username=${encodeURIComponent(this.username)}&event_name=${encodeURIComponent(this.event_name)}&event_code=${this.event_code}&year=${this.year}&`;
+                                    window.location.href = `{{ SERVER_IP }}/data?username=${encodeURIComponent(this.username)}&team_number=${encodeURIComponent(this.team_number)}&event_name=${encodeURIComponent(this.event_name)}&event_code=${this.event_code}&year=${this.year}&`;
                                 } else {
-                                    window.location.href = `{{ SERVER_IP }}/data?username=${encodeURIComponent(this.username)}&event_name=${encodeURIComponent(this.event_name)}&event_code=${this.event_code}&year=${this.year}&custom=true&`;
+                                    window.location.href = `{{ SERVER_IP }}/data?username=${encodeURIComponent(this.username)}&team_number=${encodeURIComponent(this.team_number)}&event_name=${encodeURIComponent(this.event_name)}&event_code=${this.event_code}&year=${this.year}&custom=true&`;
                                 }
                             }
                         } else {
@@ -696,9 +697,10 @@
 
                         window.addEventListener('header_data', (event) => {
                             event.stopImmediatePropagation();
-                            const { username, event_name, event_code, load_page, custom, year, demo } = event.detail;
+                            const { username, team_number, event_name, event_code, load_page, custom, year, demo } = event.detail;
 
                             this.username = username;
+                            this.team_number = team_number;
                             this.event_name = event_name;
                             this.event_code = event_code;
                             this.custom = custom;

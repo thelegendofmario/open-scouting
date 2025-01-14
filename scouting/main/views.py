@@ -68,6 +68,7 @@ def index(request):
 
 def contribute(request):
     request.session["username"] = request.GET.get("username", "unknown")
+    request.session["team_number"] = request.GET.get("team_number", "unknown")
     request.session["event_name"] = request.GET.get("event_name", "unknown")
     request.session["event_code"] = request.GET.get("event_code", "unknown")
     request.session["custom"] = request.GET.get("custom", "unknown")
@@ -82,6 +83,7 @@ def contribute(request):
             get_season_data_from_year(request.GET.get("year", "unknown"))
         ),
         "username": request.GET.get("username", "unknown"),
+        "team_number": request.GET.get("team_number", "unknown"),
         "event_name": request.GET.get("event_name", "unknown"),
         "event_code": request.GET.get("event_code", "unknown"),
         "custom": request.GET.get("custom", "unknown"),
@@ -94,6 +96,7 @@ def contribute(request):
 
 def data(request):
     request.session["username"] = request.GET.get("username", "unknown")
+    request.session["team_number"] = request.GET.get("team_number", "unknown")
     request.session["event_name"] = request.GET.get("event_name", "unknown")
     request.session["event_code"] = request.GET.get("event_code", "unknown")
     request.session["custom"] = request.GET.get("custom", "unknown")
@@ -105,6 +108,7 @@ def data(request):
         "TBA_API_KEY": settings.TBA_API_KEY,
         "SERVER_MESSAGE": settings.SERVER_MESSAGE,
         "username": request.GET.get("username", "unknown"),
+        "team_number": request.GET.get("team_number", "unknown"),
         "event_name": request.GET.get("event_name", "unknown"),
         "event_code": request.GET.get("event_code", "unknown"),
         "custom": request.GET.get("custom", "unknown"),
@@ -140,6 +144,8 @@ def submit(request):
                     data=json.loads(request.headers["data"]),
                     created=timezone.now(),
                     event_model=events[0],
+                    username_created=request.user.username,
+                    team_number_created=request.user.profile.team_number,
                 )
                 data.save()
 
@@ -153,6 +159,8 @@ def submit(request):
                     created=timezone.now(),
                     event_model=events[0],
                     user_created=request.user,
+                    username_created=request.session["username"],
+                    team_number_created=request.session["team_number"],
                 )
                 data.save()
 
@@ -193,6 +201,8 @@ def submit(request):
                     created=timezone.now(),
                     event_model=event,
                     user_created=request.user,
+                    username_created=request.user.username,
+                    team_number_created=request.user.profile.team_number,
                 )
                 data.save()
 
@@ -205,6 +215,8 @@ def submit(request):
                     data=json.loads(request.headers["data"]),
                     created=timezone.now(),
                     event_model=event,
+                    username_created=request.session["username"],
+                    team_number_created=request.session["team_number"],
                 )
                 data.save()
 
@@ -417,6 +429,8 @@ def check_local_backup_reports(request):
                         data=report["data"],
                         created=timezone.now(),
                         user_created=request.user,
+                        username_created=request.user.username,
+                        team_number_created=request.user.profile.team_number,
                     )
                     new_data.save()
                 else:
@@ -427,6 +441,8 @@ def check_local_backup_reports(request):
                         event_code=report["event_code"],
                         data=report["data"],
                         created=timezone.now(),
+                        username_created=request.user.username,
+                        team_number_created=request.user.profile.team_number,
                     )
                     new_data.save()
 
@@ -468,6 +484,8 @@ def upload_offline_reports(request):
                         data=report["data"],
                         created=timezone.now(),
                         user_created=request.user,
+                        username_created=request.user.username,
+                        team_number_created=request.user.profile.team_number,
                     )
                     new_data.save()
                 else:
@@ -478,6 +496,8 @@ def upload_offline_reports(request):
                         event_code=report["event_code"],
                         data=report["data"],
                         created=timezone.now(),
+                        username_created=request.user.username,
+                        team_number_created=request.user.profile.team_number,
                     )
                     new_data.save()
 
