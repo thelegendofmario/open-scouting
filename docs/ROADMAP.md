@@ -6,10 +6,10 @@ This document describes the roadmap for Open Scouting, and roughly when each fea
 ## To-Do
 
 ### `v0.0.6-alpha`
-- [ ] [#16](https://github.com/nfoert/open-scouting/issues/16) - Show data in the table differently depending on the kind of field
+- [x] [#16](https://github.com/nfoert/open-scouting/issues/16) - Show data in the table differently depending on the kind of field
 - [ ] [#23](https://github.com/nfoert/open-scouting/issues/23) - URL Parameter support on `/index`
 - [x] [#20](https://github.com/nfoert/open-scouting/issues/20) - Allow the user to create an account
-- [ ] [#13](https://github.com/nfoert/open-scouting/issues/13) - Save the username and team number to Data
+- [x] [#13](https://github.com/nfoert/open-scouting/issues/13) - Save the username and team number to Data
 
 ---
 ## Completed
