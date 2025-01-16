@@ -146,6 +146,22 @@
                                 detail: { username, team_number, event_name, event_code, load_page, custom, year, demo }
                             }));
                         });
+
+                        window.addEventListener('get_link_data', (event) => {
+                            event.stopImmediatePropagation();
+
+                            let username = this.username;
+                            let team_number = this.team_number;
+                            let event_name = this.event_name;
+                            let event_code = this.event_code;
+                            let custom = this.custom_event;
+                            let year = this.year;
+                            let demo = this.demo;
+
+                            window.dispatchEvent(new CustomEvent('link_data', {
+                                detail: { username, team_number, event_name, event_code, custom, year, demo }
+                            }));
+                        });
                     }
                 }
             }
@@ -253,6 +269,8 @@
                             window.dispatchEvent(new CustomEvent('header_username', {
                                 detail: { username, team_number }
                             }));
+
+                            // TODO: Check if url params for year and event are set and skip to the last page if so
                             this.page = 2;
                         },
 
@@ -646,6 +664,23 @@
                     <i class="ph-bold ph-database"></i> View All Data
                 </button>
                 <p class="dark:text-white text-black opacity-80 text-sm text-center">View all data for this event</p>
+
+                <p class="text-center dark:text-white text-black font-sans text-xl mb-1 mt-6">
+                    <i class="ph-bold ph-export"></i> Share a link to this event
+                </p>
+                <p class="dark:text-white text-black opacity-80 text-sm text-center mb-6">Sharing a link allows scouts to easily get to the correct event to quickly begin scouting</p>
+
+                <button class="ui_button" @click="get_link_data()">
+                    <i class="ph-bold ph-link"></i> Copy Link
+                </button>
+
+                <div class="flex flex-col dark:bg-green-800/70 bg-green-400/70 dark:border-green-700 border-green-500 border-2 rounded-lg w-full px-6 py-4"
+                     x-show="link"
+                     x-transition>
+                    <p class="dark:text-white text-black text-lg text-bold">
+                        <i class="ph-bold ph-check-circle"></i> Link copied!
+                    </p>
+                </div>
             </div>
         </div>
 
@@ -653,11 +688,16 @@
             function index() {
                 return {
                     page: 1,
+                    link: "",
 
                     get_header_data(load_page) {
                         window.dispatchEvent(new CustomEvent('get_header_data', {
                             detail: { load_page }
                         }));
+                    },
+
+                    get_link_data() {
+                        window.dispatchEvent(new CustomEvent('get_link_data'));
                     },
 
                     load_page(page) {
@@ -690,6 +730,18 @@
                         }
                     },
 
+                    async copy_event_link() {
+                        let link_to_event = `{{ SERVER_IP }}/?year=${this.year}&event_name=${encodeURIComponent(this.event_name)}&event_code=${this.event_code}`;
+
+                        try {
+                            await navigator.clipboard.writeText(link_to_event);
+                            this.link = link_to_event;
+
+                        } catch (err) {
+                            console.error('Failed to copy: ', err);
+                        }
+                    },
+
                     init() {
                         window.addEventListener('start_over', (event) => {
                             this.page = 1
@@ -707,6 +759,20 @@
                             this.year = year;
                             this.demo = demo;
                             this.load_page(load_page);
+                        });
+
+                        window.addEventListener('link_data', (event) => {
+                            event.stopImmediatePropagation();
+                            const { username, team_number, event_name, event_code, custom, year, demo } = event.detail;
+
+                            this.username = username;
+                            this.team_number = team_number;
+                            this.event_name = event_name;
+                            this.event_code = event_code;
+                            this.custom = custom;
+                            this.year = year;
+                            this.demo = demo;
+                            this.copy_event_link();
                         });
                     }
                 }
