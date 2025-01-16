@@ -2,7 +2,12 @@
 {% load static %}
 {% block head_title %}Open Scouting{% endblock %}
 
-{% block head_scripts %}{% endblock %}
+{% block head_scripts %}
+    <link href="https://unpkg.com/tabulator-tables@6.3.0/dist/css/tabulator.min.css"
+          rel="stylesheet">
+    <script type="text/javascript"
+            src="https://unpkg.com/tabulator-tables@6.3.0/dist/js/tabulator.min.js"></script>
+{% endblock %}
 
 {% block stylesheets %}{% endblock %}
 
@@ -67,28 +72,8 @@
              x-init="init()"
              x-transition>
             <div x-show="!offline && !no_data"
-                 class="dark:border-slate-600 border-slate-300 border-1 dark:bg-slate-800 bg-slate-200 width-screen">
-                <table class="min-w-full border-2 dark:border-slate-600 border-slate-300 table-auto">
-                    <thead>
-                        <tr class="px-2">
-                            <template x-for="header in headers" :key="header">
-                                <th class="dark:text-white text-black font-bold font-sans px-4 py-2 text-left dark:hover:bg-slate-700 dark:bg-slate-800 hover:bg-slate-300 bg-slate-200 transition-colors capitalize border-l-1 border-r-1 dark:border-slate-700 border-slate-300 whitespace-nowrap"
-                                    x-text="generate_header_text(header)"></th>
-                            </template>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <template x-for="entry in entries">
-                            <tr class="px-2 dark:hover:bg-slate-700 dark:bg-slate-800 hover:bg-slate-300 bg-slate-200 transition-colors rounded-md dark:border-slate-600 border-slate-300 border-2">
-                                <template x-for="header in headers">
-                                    <td class="px-4 py-2 dark:text-white text-black font-sans border-l-1 border-r-1 dark:border-slate-700 border-slate-300"
-                                        x-text="entry.data.find(field => field.name === header)?.value || ''"></td>
-                                </template>
-                            </tr>
-                        </template>
-                    </tbody>
-                </table>
-            </div>
+                 class="width-screen mx-2 h-50 h-full max-h-[80vh] overflow-y-auto"
+                 x-ref="table"></div>
 
             <div class="flex flex-row w-screen items-center justify-center"
                  x-show="offline"
@@ -117,7 +102,19 @@
                 offline: false,
 
                 generate_header_text(header_text) {
-                    return header_text.replaceAll("_", " ");
+                    return header_text.replaceAll("_", " ").split(' ')
+                        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                        .join(' ');
+                },
+
+                convert_entries_to_tabulator(entries) {
+                    let new_entries = [];
+
+                    for (entry in entries) {
+                        new_entries.push(entries[entry].data);
+                    }
+
+                    return new_entries;
                 },
 
                 init() {
@@ -143,6 +140,48 @@
                                 this.no_data = true;
                             }
                         }
+                        
+                        var menu_icon = function(cell, formatterParams, onRendered) {
+                            return "<i class='ph-bold ph-info'></i>";
+                        };
+
+                        var menu_click = function(e, component, onRendered) {
+                            //e - the mouse/touch event that triggered the popup
+                            //component - column/row/cell component that triggered this popup
+                            //onRendered - function to call when the formatter has been rendered
+
+                            let div = document.createElement("div");
+                            div.classList = "flex flex-col dark:bg-slate-700 bg-slate-200 border-2 dark:border-slate-600 border-slate-300 rounded-2xl p-4";
+
+                            let div_header = document.createElement("p");
+                            div_header.innerText = "Data Info";
+                            div_header.classList = "dark:text-white text-black text-lg text-bold text-sans";
+
+                            let div_info = document.createElement("p");
+                            div_info.classList = "dark:text-white text-black text-md text-sans";
+
+                            let date = new Date(component.getData().created);
+
+                            if (component.getData().username_created && component.getData().team_number_created) {
+                                div_info.innerText = `Created by ${component.getData().username_created} on team ${component.getData().team_number_created} on ${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`;
+                            } else {
+                                div_info.innerText = `Created on ${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`;
+                            }
+
+                            div.appendChild(div_header);
+                            div.appendChild(div_info);
+
+                            return div;
+                        };
+
+                        this.headers.unshift({title:"Info", hozAlign:"center", formatter:menu_icon, width:20, clickPopup:menu_click});
+
+                        var table = new Tabulator(this.$refs.table, {
+                            height: "100%",
+                            data: this.entries,
+                            layout: "fitColumns",
+                            columns: this.headers
+                        });
                     }))
                     .then(data => console.log(data))
                     .catch(error => console.error(error));
@@ -152,6 +191,8 @@
                     } else {
                         this.offline = true;
                     }
+                    
+                    
                 }
             }
         }

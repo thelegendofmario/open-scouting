@@ -1,4 +1,56 @@
+def collect_field_names(data):
+    result = []
+
+    def traverse(item):
+        # If it's a dictionary, process it
+        if isinstance(item, dict):
+            # Collect "simple_name" and "name" if "section" is not a key in the same dictionary
+            if "simple_name" in item and "section" not in item:
+                entry = {"simple_name": item["simple_name"]}
+                if "name" in item:
+                    entry["name"] = item["name"]
+                if "order" in item:  # Include the order if available
+                    entry["order"] = item["order"]
+                result.append(entry)
+            elif "name" in item and "section" not in item:
+                entry = {"name": item["name"]}
+                if "order" in item:  # Include the order if available
+                    entry["order"] = item["order"]
+                result.append(entry)
+            # Traverse "fields" if present
+            if "fields" in item and isinstance(item["fields"], list):
+                for field in item["fields"]:
+                    traverse(field)
+        # If it's a list, traverse each element
+        elif isinstance(item, list):
+            for element in item:
+                traverse(element)
+
+    traverse(data)
+    # Remove duplicates
+    unique_results = [dict(entry) for entry in {frozenset(e.items()) for e in result}]
+    # Sort by order if it exists, else default to 0
+    return sorted(unique_results, key=lambda x: x.get("order", 0))
+
+
+def create_tabulator_headers(data):
+    processed = []
+    for item in data:
+        new_item = {}
+        if "name" in item:
+            new_item["title"] = item["name"]  # Rename "name" to "title"
+        if "simple_name" in item:
+            new_item["field"] = item["simple_name"]  # Rename "simple_name" to "field"
+
+        new_item["formatter"] = "adaptable"
+        # Do not include the "order" field
+        processed.append(new_item)
+    return processed
+
+
+# ----------
 # 2024
+# ----------
 crescendo = [
     {
         "section": "Main",
@@ -9,12 +61,14 @@ crescendo = [
                 "simple_name": "team_number",
                 "type": "large_integer",
                 "required": True,
+                "order": 1,
             },
             {
                 "name": "Match Number",
                 "simple_name": "match_number",
                 "type": "large_integer",
                 "required": True,
+                "order": 2,
             },
         ],
     },
@@ -30,6 +84,7 @@ crescendo = [
                 "minimum": 0,
                 "maximum": 30,
                 "required": False,
+                "order": 3,
             },
             {
                 "name": "Amp Shot",
@@ -39,6 +94,7 @@ crescendo = [
                 "minimum": 0,
                 "maximum": 30,
                 "required": False,
+                "order": 4,
             },
         ],
     },
@@ -58,6 +114,7 @@ crescendo = [
                         "minimum": 0,
                         "maximum": 30,
                         "required": False,
+                        "order": 5,
                     },
                     {
                         "name": "Speaker Misses",
@@ -67,6 +124,7 @@ crescendo = [
                         "minimum": 0,
                         "maximum": 30,
                         "required": False,
+                        "order": 6,
                     },
                 ],
             },
@@ -82,6 +140,7 @@ crescendo = [
                         "minimum": 0,
                         "maximum": 30,
                         "required": False,
+                        "order": 7,
                     },
                     {
                         "name": "Amp Misses",
@@ -91,6 +150,7 @@ crescendo = [
                         "minimum": 0,
                         "maximum": 30,
                         "required": False,
+                        "order": 8,
                     },
                 ],
             },
@@ -105,6 +165,7 @@ crescendo = [
                 "simple_name": "left_starting_zone",
                 "type": "boolean",
                 "required": False,
+                "order": 9,
             },
             {
                 "name": "Shoot Distance",
@@ -112,36 +173,42 @@ crescendo = [
                 "type": "multiple_choice",
                 "choices": ["N/A", "Close", "Mid Field", "Far"],
                 "required": False,
+                "order": 10,
             },
             {
                 "name": "Floor Pickup",
                 "simple_name": "floor_pickup",
                 "type": "boolean",
                 "required": False,
+                "order": 11,
             },
             {
                 "name": "Climb",
                 "simple_name": "climb",
                 "type": "boolean",
                 "required": False,
+                "order": 12,
             },
             {
                 "name": "Scored Trap",
                 "simple_name": "scored_trap",
                 "type": "boolean",
                 "required": False,
+                "order": 13,
             },
             {
                 "name": "Feeder Station Pickup",
                 "simple_name": "feeder_station_pickup",
                 "type": "boolean",
                 "required": False,
+                "order": 14,
             },
             {
                 "name": "Moved During Auto",
                 "simple_name": "moved_during_auto",
                 "type": "boolean",
                 "required": False,
+                "order": 15,
             },
         ],
     },
@@ -154,11 +221,15 @@ crescendo = [
                 "simple_name": "notes",
                 "type": "text",
                 "required": False,
+                "order": 16,
             },
         ],
     },
 ]
 
+# ----------
+# 2025
+# ----------
 reefscape = [
     {
         "section": "Main",
@@ -169,12 +240,14 @@ reefscape = [
                 "simple_name": "team_number",
                 "type": "large_integer",
                 "required": True,
+                "order": 1,
             },
             {
                 "name": "Match Number",
                 "simple_name": "match_number",
                 "type": "large_integer",
                 "required": True,
+                "order": 2,
             },
         ],
     },
@@ -190,6 +263,7 @@ reefscape = [
                 "minimum": 0,
                 "maximum": 20,
                 "required": False,
+                "order": 3,
             },
             {
                 "name": "Algae Scored in Net",
@@ -199,6 +273,7 @@ reefscape = [
                 "minimum": 0,
                 "maximum": 20,
                 "required": False,
+                "order": 4,
             },
             {
                 "name": "Algae Scored in Processor",
@@ -208,6 +283,7 @@ reefscape = [
                 "minimum": 0,
                 "maximum": 20,
                 "required": False,
+                "order": 5,
             },
         ],
     },
@@ -223,6 +299,7 @@ reefscape = [
                 "minimum": 0,
                 "maximum": 20,
                 "required": False,
+                "order": 6,
             },
             {
                 "name": "Algae Scored in Net",
@@ -232,6 +309,7 @@ reefscape = [
                 "minimum": 0,
                 "maximum": 20,
                 "required": False,
+                "order": 7,
             },
             {
                 "name": "Algae Scored in Processor",
@@ -241,6 +319,7 @@ reefscape = [
                 "minimum": 0,
                 "maximum": 20,
                 "required": False,
+                "order": 8,
             },
         ],
     },
@@ -365,6 +444,7 @@ reefscape = [
                 "simple_name": "auton_moved",
                 "type": "boolean",
                 "required": False,
+                "order": 9,
             },
             {
                 "name": "Coral Levels",
@@ -372,12 +452,14 @@ reefscape = [
                 "type": "multiple_choice",
                 "choices": ["N/A", "Level 1", "Level 2", "Level 3", "Level 4"],
                 "required": False,
+                "order": 10,
             },
             {
                 "name": "Feeder Station Pickup",
                 "simple_name": "feeder_pickup",
                 "type": "boolean",
                 "required": False,
+                "order": 11,
             },
             {
                 "section": "Barge",
@@ -388,18 +470,21 @@ reefscape = [
                         "simple_name": "park_in_barge_zone",
                         "type": "boolean",
                         "required": False,
+                        "order": 12,
                     },
                     {
                         "name": "Climb on Shallow Cage",
                         "simple_name": "climb_shallow",
                         "type": "boolean",
                         "required": False,
+                        "order": 13,
                     },
                     {
                         "name": "Climb on Deep Cage",
                         "simple_name": "climb_deep",
                         "type": "boolean",
                         "required": False,
+                        "order": 14,
                     },
                 ],
             },
@@ -414,6 +499,7 @@ reefscape = [
                 "simple_name": "notes",
                 "type": "text",
                 "required": False,
+                "order": 15,
             },
         ],
     },

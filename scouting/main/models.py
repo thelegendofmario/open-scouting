@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 
 YEARS = [(2024, "2024"), (2025, "2025")]
 
@@ -14,6 +15,11 @@ class Data(models.Model):
     event_model = models.ForeignKey(
         "Event", on_delete=models.SET_NULL, null=True, blank=True
     )
+    user_created = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True
+    )
+    username_created = models.CharField(max_length=999, blank=True)
+    team_number_created = models.CharField(max_length=6, blank=True)
 
     def __str__(self):
         return f"Data from {self.event} in {str(self.year)}"
@@ -29,6 +35,9 @@ class Event(models.Model):
     created = models.DateTimeField(null=True, blank=True)
     custom = models.BooleanField(default=False)
     custom_data = models.JSONField(default=dict, blank=True)
+    user_created = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True
+    )
 
     def __str__(self):
         if self.custom:
