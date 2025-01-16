@@ -76,7 +76,7 @@
                         var response = await fetch("{{ SERVER_IP }}/check_local_backup_reports", {
                         method: "POST",
                         headers: {
-                                "data": JSON.stringify(encodeURIComponent(report_list)),
+                                "data": encodeURIComponent(JSON.stringify(report_list)),
                             }
                         });
 

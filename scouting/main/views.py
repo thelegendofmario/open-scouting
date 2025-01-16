@@ -39,6 +39,17 @@ def get_demo_data_from_year(year):
         return None
 
 
+def decode_json_strings(obj):
+    if isinstance(obj, dict):  # If the object is a dictionary
+        return {key: decode_json_strings(value) for key, value in obj.items()}
+    elif isinstance(obj, list):  # If the object is a list
+        return [decode_json_strings(item) for item in obj]
+    elif isinstance(obj, str):  # If the object is a string
+        return unquote(obj)
+    else:  # If it's neither a dictionary, list, nor string, return as is
+        return obj
+
+
 def index(request):
     if request.user.is_authenticated:
         context = {
@@ -409,7 +420,7 @@ def check_local_backup_reports(request):
         reports_found = 0
         reports_not_found = 0
 
-        reports_list = unquote(json.loads(request.headers["data"]))
+        reports_list = json.loads(unquote(request.headers["data"]))
 
         for report in reports_list:
             data = Data.objects.filter(
@@ -423,14 +434,53 @@ def check_local_backup_reports(request):
             else:
                 reports_not_found += 1
 
+                if report["custom"] == "true":
+                    events = Event.objects.filter(
+                        name=unquote(report["event_name"]),
+                        event_code=report["event_code"],
+                        custom=True,
+                        year=request.headers["year"],
+                    )
+                    event = events[0]
+
+                else:
+                    events = Event.objects.filter(
+                        event_code=report["event_code"],
+                        year=report["year"],
+                    )
+
+                    if len(events) == 0:
+                        if request.user.is_authenticated:
+                            event = Event(
+                                year=report["year"],
+                                name=unquote(report["event_name"]),
+                                event_code=report["event_code"],
+                                custom=False,
+                                created=timezone.now(),
+                                user_created=request.user,
+                            )
+                            event.save()
+                        else:
+                            event = Event(
+                                year=report["year"],
+                                name=unquote(report["event_name"]),
+                                event_code=report["event_code"],
+                                custom=False,
+                                created=timezone.now(),
+                            )
+                            event.save()
+                    else:
+                        event = events[0]
+
                 if request.user.is_authenticated:
                     new_data = Data(
                         uuid=report["uuid"],
                         year=report["year"],
-                        event=report["event_name"],
+                        event=unquote(report["event_name"]),
                         event_code=report["event_code"],
                         data=report["data"],
                         created=timezone.now(),
+                        event_model=event,
                         user_created=request.user,
                         username_created=request.user.username,
                         team_number_created=request.user.profile.team_number,
@@ -440,10 +490,11 @@ def check_local_backup_reports(request):
                     new_data = Data(
                         uuid=report["uuid"],
                         year=report["year"],
-                        event=report["event_name"],
+                        event=unquote(report["event_name"]),
                         event_code=report["event_code"],
                         data=report["data"],
                         created=timezone.now(),
+                        event_model=event,
                         username_created=request.user.username,
                         team_number_created=request.user.profile.team_number,
                     )
@@ -464,7 +515,7 @@ def upload_offline_reports(request):
         reports_found = 0
         reports_not_found = 0
 
-        reports_list = unquote(json.loads(request.headers["data"]))
+        reports_list = json.loads(unquote(request.headers["data"]))
 
         for report in reports_list:
             data = Data.objects.filter(
@@ -478,14 +529,53 @@ def upload_offline_reports(request):
             else:
                 reports_not_found += 1
 
+                if report["custom"] == "true":
+                    events = Event.objects.filter(
+                        name=unquote(report["event_name"]),
+                        event_code=report["event_code"],
+                        custom=True,
+                        year=request.headers["year"],
+                    )
+                    event = events[0]
+
+                else:
+                    events = Event.objects.filter(
+                        event_code=report["event_code"],
+                        year=report["year"],
+                    )
+
+                    if len(events) == 0:
+                        if request.user.is_authenticated:
+                            event = Event(
+                                year=report["year"],
+                                name=unquote(report["event_name"]),
+                                event_code=report["event_code"],
+                                custom=False,
+                                created=timezone.now(),
+                                user_created=request.user,
+                            )
+                            event.save()
+                        else:
+                            event = Event(
+                                year=report["year"],
+                                name=unquote(report["event_name"]),
+                                event_code=report["event_code"],
+                                custom=False,
+                                created=timezone.now(),
+                            )
+                            event.save()
+                    else:
+                        event = events[0]
+
                 if request.user.is_authenticated:
                     new_data = Data(
                         uuid=report["uuid"],
                         year=report["year"],
-                        event=report["event_name"],
+                        event=unquote(report["event_name"]),
                         event_code=report["event_code"],
                         data=report["data"],
                         created=timezone.now(),
+                        event_model=event,
                         user_created=request.user,
                         username_created=request.user.username,
                         team_number_created=request.user.profile.team_number,
@@ -495,10 +585,11 @@ def upload_offline_reports(request):
                     new_data = Data(
                         uuid=report["uuid"],
                         year=report["year"],
-                        event=report["event_name"],
+                        event=unquote(report["event_name"]),
                         event_code=report["event_code"],
                         data=report["data"],
                         created=timezone.now(),
+                        event_model=event,
                         username_created=request.user.username,
                         team_number_created=request.user.profile.team_number,
                     )
