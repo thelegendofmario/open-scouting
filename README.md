@@ -36,7 +36,6 @@
 - Create custom events if events aren't listed on TBA
 - Keep backups of scouting reports locally
 - Dark/light mode theme support
-- The site works fully offline if there's no internet connection at all
 - Manually go offline in case of bad connection
 
 ## Development Installation
@@ -120,8 +119,8 @@ djlint scouting --reformat
 ```
 
 ### ruff
-This project uses [`ruff`](https://docs.astral.sh/ruff/) to lint and format the code.
-You can run the following command to lint and format the code.
+This project uses [`ruff`](https://docs.astral.sh/ruff/) to lint and format the python code.
+You can run the following command to run the linter once
 ```bash
 ruff check cardie --fix
 ```

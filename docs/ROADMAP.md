@@ -8,7 +8,13 @@ This document describes the roadmap for Open Scouting, and roughly when each fea
 ### `v0.0.7-alpha`
 - [ ] [#44](https://github.com/nfoert/open-scouting/issues/44) - Backups database store isn't getting created correctly
 - [ ] [#30](https://github.com/nfoert/open-scouting/issues/30) - Add tests
-- [ ] Test and try to break the application and find as many bugs as possible 
+- [ ] Test and try to break the application and find as many bugs as possible
+
+### `v0.0.8-alpha`
+- [ ] [#5](https://github.com/nfoert/open-scouting/issues/5) - Be able to collect pit scouting data
+
+### `v0.0.9-alpha`
+- [ ] [#19](https://github.com/nfoert/open-scouting/issues/19) - More ways to view data
 
 ---
 ## Completed
