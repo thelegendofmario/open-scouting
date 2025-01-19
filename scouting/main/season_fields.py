@@ -44,6 +44,8 @@ def create_tabulator_headers(data):
 
         new_item["formatter"] = "adaptable"
         new_item["hozAlign"] = "center"
+        new_item["minWidth"] = 100
+        new_item["headerWordWrap"] = True
 
         processed.append(new_item)
     return processed

@@ -23,8 +23,12 @@
     @apply dark:bg-slate-800/90 bg-slate-200/90 rounded-md border-2 dark:border-slate-600 border-slate-200 text-black dark:text-white;    
 }
 
+.tabulator-headers .tabulator-col {
+    @apply dark:!bg-slate-700 !bg-slate-200 text-black dark:text-white;
+}
+
 .tabulator-headers .tabulator-col-content {
-    @apply dark:bg-slate-800/90 bg-slate-200/90 text-black dark:text-white text-xs;
+    @apply dark:bg-slate-700/90 bg-slate-200/90 text-black dark:text-white text-xs;
 }
 
 .tabulator-row-even .tabulator-cell {
