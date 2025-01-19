@@ -6,7 +6,7 @@ This document describes the roadmap for Open Scouting, and roughly when each fea
 ## To-Do
 
 ### `v0.0.7-alpha`
-- [ ] [#44](https://github.com/nfoert/open-scouting/issues/44) - Backups database store isn't getting created correctly
+- [x] [#44](https://github.com/nfoert/open-scouting/issues/44) - Backups database store isn't getting created correctly
 - [ ] [#30](https://github.com/nfoert/open-scouting/issues/30) - Add tests
 - [ ] Test and try to break the application and find as many bugs as possible
 

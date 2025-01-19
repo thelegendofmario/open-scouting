@@ -349,7 +349,7 @@
             <script>
                 function year_select() {
                     return {
-                        YEARS: JSON.parse(`{{ YEARS|safe }}`),
+                        YEARS: JSON.parse(`{{ YEARS|safe }}`).reverse(),
                         selected_year: new Date().getFullYear(),
                         number_of_events: 0,
 
