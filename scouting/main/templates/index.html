@@ -395,11 +395,11 @@
                  x-data="events()"
                  x-show="page == 3"
                  x-transition>
-                <p class="text-center dark:text-white text-black font-sans text-2xl">
+                <p class="text-center dark:text-white text-black font-sans text-2xl mt-4">
                     <i class="ph-bold ph-calendar-blank"></i> Select event
                 </p>
-                <div class="flex flex-row mt-2">
-                    <input class="bg-slate-700 border-2 border-slate-700 dark:text-white text-black rounded-lg"
+                <div class="flex flex-row mt-2 justify-center align-middle items-center">
+                    <input class="bg-slate-700 border-2 border-slate-700 dark:text-white text-black rounded-lg my-4"
                            type="checkbox"
                            x-ref="show_past_events"
                            @input="update_filters()">
@@ -412,7 +412,7 @@
                        x-ref="event_search"
                        @input="update_filters()">
 
-                <div>
+                <div class="my-4">
                     <button class="dark:bg-slate-700 bg-slate-200 border-2 dark:border-slate-600 border-slate-300 text-black dark:text-white rounded-t-md px-4 py-2 ml-4 disabled:opacity-50 hover:enabled:px-5 active:enabled:px-3 transition-all whitespace-nowrap"
                             :disabled="!show_custom_events"
                             @click="show_custom_events = false">
