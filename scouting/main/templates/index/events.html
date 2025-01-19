@@ -1,0 +1,260 @@
+<div class="flex flex-col justify-center items-center"
+     x-data="events()"
+     x-show="page == 3"
+     x-transition>
+    <p class="text-center dark:text-white text-black font-sans text-2xl mt-4">
+        <i class="ph-bold ph-calendar-blank"></i> Select event
+    </p>
+    <div class="flex flex-row mt-2 justify-center align-middle items-center">
+        <input class="bg-slate-700 border-2 border-slate-700 dark:text-white text-black rounded-lg my-4"
+               type="checkbox"
+               x-ref="show_past_events"
+               @input="update_filters()">
+        <p class="dark:text-white text-black ml-2">Show past events</p>
+        <!-- TODO: Be able to see data from previous years -->
+    </div>
+
+    <input class="ui_input"
+           placeholder="Search for an event..."
+           x-ref="event_search"
+           @input="update_filters()">
+
+    <div class="my-4">
+        <button class="dark:bg-slate-700 bg-slate-200 border-2 dark:border-slate-600 border-slate-300 text-black dark:text-white rounded-t-md px-4 py-2 ml-4 disabled:opacity-50 hover:enabled:px-5 active:enabled:px-3 transition-all whitespace-nowrap"
+                :disabled="!show_custom_events"
+                @click="show_custom_events = false">
+            <i class="ph-bold ph-check-circle"></i>
+            <span class="dark:text-white text-black">TBA Events</span>
+            <span class="dark:text-white text-black bg-slate-200 dark:bg-slate-600 py-1 px-3 rounded-full border-slate-300 dark:border-slate-700 max-w-4 aspect-square my-2 text-sm border-2"
+                  x-text="filtered_events.length"></span>
+        </button>
+
+        <button class="dark:bg-slate-700 bg-slate-200 border-2 dark:border-slate-600 border-slate-300 text-black dark:text-white rounded-t-md px-4 py-2 disabled:opacity-50 hover:enabled:px-5 active:enabled:px-3 transition-all whitespace-nowrap"
+                :disabled="show_custom_events"
+                @click="show_custom_events = true">
+            <i class="ph-bold ph-star"></i>
+            <span class="dark:text-white text-black">Custom Events</span>
+            <span class="dark:text-white text-black bg-slate-200 dark:bg-slate-600 py-1 px-3 rounded-full border-slate-300 dark:border-slate-700 max-w-4 aspect-square my-2 text-sm border-2"
+                  x-text="custom_filtered_events.length"></span>
+        </button>
+
+        <div class="h-[50vh] overflow-y-auto dark:bg-slate-700 bg-slate-200 dark:border-slate-600 border-slate-300 border-1 mx-2 p-2 rounded-md">
+            <div x-show="!show_custom_events">
+                <template x-for="(event, index) in filtered_events" :key="index">
+                    <div class="p-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-300 border-slate-400 m-1 rounded-lg flex flex-row justify-between">
+                        <div class="flex flex-col">
+                            <p class="dark:text-white text-black font-sans" x-text="event.name"></p>
+                            <div class="flex flex-row">
+                                <p class="dark:text-white text-black font-sans font-bold text-sm"
+                                   x-text="event.event_type_string"></p>
+                                <p class="dark:text-white text-black font-sans text-sm mx-1">-</p>
+                                <p class="dark:text-white text-black font-sans text-sm"
+                                   x-text="event.city"></p>
+                                <p class="dark:text-white text-black font-sans text-sm mr-1">,</p>
+                                <p class="dark:text-white text-black font-sans text-sm"
+                                   x-text="event.country"></p>
+                            </div>
+                            <div class="flex flex-row">
+                                <p class="dark:text-white text-black font-sans font-light"
+                                   x-text="event.start_date"></p>
+                                <p class="dark:text-white text-black font-sans font-light mx-1">-</p>
+                                <p class="dark:text-white text-black font-sans font-light"
+                                   x-text="event.end_date"></p>
+                            </div>
+                        </div>
+                        <div class="flex flex-col">
+                            <button class="ui_button_icon"
+                                    @click="select_event(event.name, event.event_code)">
+                                <i class="ph-bold ph-check-circle"></i>
+                            </button>
+                        </div>
+                    </div>
+                </template>
+
+                <p class="dark:text-white text-black text-center text-lg"
+                   x-show="no_events"
+                   x-transition>
+                    <i class="ph-bold ph-smiley-sad"></i> No events found
+                </p>
+                <button class="ui_button w-full" @click="create_custom_event()">
+                    <i class="ph-bold ph-plus"></i> Create a custom Event
+                </button>
+            </div>
+
+            <div x-show="show_custom_events">
+                <template x-for="(event, index) in custom_filtered_events" :key="index">
+                    <div class="p-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-300 border-slate-400 m-1 rounded-lg flex flex-row justify-between">
+                        <div class="flex flex-col">
+                            <p class="dark:text-white text-black font-sans" x-text="event.name"></p>
+                            <div class="flex flex-row">
+                                <!-- <p class="dark:text-white text-black font-sans font-bold text-sm" x-text="event.event_type_string"></p><p class="dark:text-white text-black font-sans text-sm mx-1">-</p> -->
+                                <p class="dark:text-white text-black font-sans font-bold text-sm"
+                                   x-text="event.type || 'Custom Event'"></p>
+                                <p class="dark:text-white text-black font-sans text-sm mx-1">-</p>
+                                <p class="dark:text-white text-black font-sans text-sm"
+                                   x-text="event.location"></p>
+                            </div>
+                            <div class="flex flex-row">
+                                <p class="dark:text-white text-black font-sans font-light"
+                                   x-text="event.start_date"></p>
+                                <p class="dark:text-white text-black font-sans font-light mx-1">-</p>
+                                <p class="dark:text-white text-black font-sans font-light"
+                                   x-text="event.end_date"></p>
+                            </div>
+                        </div>
+                        <div class="flex flex-col">
+                            <button class="ui_button_icon"
+                                    @click="select_custom_event(event.name, event.event_code)">
+                                <i class="ph-bold ph-check-circle"></i>
+                            </button>
+                        </div>
+                    </div>
+                </template>
+
+                <p class="dark:text-white text-black text-center text-lg"
+                   x-show="no_custom_events"
+                   x-transition>
+                    <i class="ph-bold ph-smiley-sad"></i> No events found
+                </p>
+                <button class="ui_button w-full" @click="create_custom_event()">
+                    <i class="ph-bold ph-plus"></i> Create a custom Event
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+                function events() {
+                    return {
+                        events: [],
+                        custom_events: [],
+                        filtered_events: [],
+                        custom_filtered_events: [],
+                        no_events: true,
+                        no_custom_events: true,
+                        show_custom_events: false,
+                        year: new Date().getFullYear(),
+
+                        async get_events() {
+                            var response = await fetch(`https://www.thebluealliance.com/api/v3/events/${this.year}`, {
+                            method: "GET",
+                            headers: {
+                                "X-TBA-Auth-Key": "{{ TBA_API_KEY }}"
+                                }
+                            });
+                    
+                            let data = await response.json();
+                            this.events = data;
+                            this.update_filters();
+
+                            var response = await fetch("{{ SERVER_IP }}/get_custom_events", {
+                                method: "POST",
+                                headers: {
+                                    "year": this.year
+                                }
+                            });
+                    
+                            let custom_data = JSON.parse(await response.json());
+                            this.custom_events = custom_data;
+
+                            this.update_filters();
+                        },
+
+                        update_filters() {
+                            if (this.$refs.show_past_events.checked == false) {
+                                let today = new Date();
+
+                                this.filtered_events = this.events.filter(event => {
+                                    let eventDate = new Date(event.end_date);
+                                    return eventDate >= today;
+                                });
+
+                                this.custom_filtered_events = this.custom_events.filter(event => {
+                                    let eventDate = new Date(event.end_date);
+                                    return eventDate >= today;
+                                });
+
+                            } else {
+                                this.filtered_events = this.events;
+                                this.custom_filtered_events = this.custom_events;
+                            }
+
+                            let search = this.$refs.event_search.value.toLowerCase();
+
+                            if (search != "") {
+                                this.filtered_events = this.filtered_events.filter(event => {
+                                    let name = event.name ? event.name.toLowerCase() : '';
+                                    let city = event.city ? event.city.toLowerCase() : '';
+                                    let country = event.country ? event.country.toLowerCase() : '';
+                                    let location_name = event.location_name ? event.location_name.toLowerCase() : '';
+
+                                    return (
+                                        name.includes(search) ||
+                                        city.includes(search) ||
+                                        country.includes(search) ||
+                                        location_name.includes(search)
+                                    );
+                                });
+
+                                this.custom_filtered_events = this.custom_filtered_events.filter(event => {
+                                    let name = event.name ? event.name.toLowerCase() : '';
+                                    let location = event.location ? event.location.toLowerCase() : '';
+
+                                    return (
+                                        name.includes(search) ||
+                                        location.includes(search)
+                                    );
+                                });
+                            }
+
+                            if (this.filtered_events.length == 0) {
+                                this.no_events = true;
+                            } else {
+                                this.no_events = false;
+                            }
+
+                            if (this.custom_filtered_events.length == 0) {
+                                this.no_custom_events = true;
+                            } else {
+                                this.no_custom_events = false;
+                            }
+                        },
+
+                        select_event(event_name, event_code) {
+                            window.dispatchEvent(new CustomEvent('header_event', {
+                                detail: { event_name, event_code }
+                            }));
+                            this.page = 4;
+                        },
+
+                        select_custom_event(event_name, event_code ) {
+                            window.dispatchEvent(new CustomEvent('header_custom_event', {
+                                detail: { event_name, event_code }
+                            }));
+                            this.page = 4;
+                        },
+
+                        create_custom_event() {
+                            window.dispatchEvent(new CustomEvent('open_create_custom_event'));
+                        },
+
+                        init() {
+                            this.get_events();
+
+                            window.addEventListener('refresh_event_list', (event) => {
+                                event.stopImmediatePropagation();
+                                this.get_events();
+                            });
+
+                            window.addEventListener('header_year', (event) => {
+                                const { year } = event.detail;
+                                this.year = year;
+
+                                this.get_events();
+                            });
+                        }
+                    }
+                }
+</script>
