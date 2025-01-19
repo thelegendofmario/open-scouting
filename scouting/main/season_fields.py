@@ -43,7 +43,8 @@ def create_tabulator_headers(data):
             new_item["field"] = item["simple_name"]  # Rename "simple_name" to "field"
 
         new_item["formatter"] = "adaptable"
-        # Do not include the "order" field
+        new_item["hozAlign"] = "center"
+
         processed.append(new_item)
     return processed
 
