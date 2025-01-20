@@ -79,7 +79,7 @@
                            @input.debounce.250ms="display_team_number"
                            @input="check_display_name_and_team_number()">
 
-                    <div class="flex flex-row items-center justify-center mt-2 mr-4"
+                    <div class="flex flex-row items-center justify-center mt-2"
                          x-show="team_number.show"
                          x-transition>
                         <img class="mr-2"
@@ -251,7 +251,7 @@
             function auth() {
                 return {
                     sign_in: true,
-                    create_account_page: 3,
+                    create_account_page: 1,
                     user: {
                         uuid: "",
                         display_name: "",
