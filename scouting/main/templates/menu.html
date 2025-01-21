@@ -47,9 +47,13 @@
     </div>
 
     <div x-show="open"
-         x-transition
          class="flex flex-col fixed bottom-0 z-10 inset-x-0 mx-auto bg-slate-200/80 dark:bg-slate-700/80 border-2 dark:border-slate-600 border-slate-300 rounded-t-2xl backdrop-blur-md w-screen md:w-3/4 lg:w-1/2 h-3/4 md:min-h-1/2 overflow-y-auto p-4"
-         x-transition>
+         x-transition:enter="transform transition ease-out duration-300"
+         x-transition:enter-start="translate-y-full opacity-0"
+         x-transition:enter-end="translate-y-0 opacity-100"
+         x-transition:leave="transform transition ease-out duration-300"
+         x-transition:leave-start="translate-y-0 opacity-100"
+         x-transition:leave-end="translate-y-full opacity-0">
         <div class="flex flex-row justify-between items-center w-full border-b-2 dark:border-slate-600 border-slate-300 px-6 py-4">
             <div class="flex flex-row">
                 <div class="flex flex-row dark:text-white text-black items-center text-xl font-bold"
