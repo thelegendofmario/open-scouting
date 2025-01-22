@@ -9,7 +9,7 @@ This document describes the roadmap for Open Scouting, and roughly when each fea
 - [x] [#44](https://github.com/nfoert/open-scouting/issues/44) - Backups database store isn't getting created correctly
 - [ ] [#30](https://github.com/nfoert/open-scouting/issues/30) - Add tests
 - [ ] [#46](https://github.com/nfoert/open-scouting/issues/46) - Authentication status isn't updated on index page due to caching
-- [ ] Test and try to break the application and find as many bugs as possible
+- [x] Test and try to break the application and find as many bugs as possible
 - [ ] Add privacy policy
 
 ### `v0.0.8-alpha`
