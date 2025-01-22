@@ -31,6 +31,7 @@ def get_season_data_from_year(year):
 
 # TODO: Move to respective .py files instead
 def get_demo_data_from_year(year):
+    year = str(year)
     if year == "2024":
         return demo_data.crescendo
     elif year == "2025":
@@ -292,7 +293,28 @@ def get_data(request):
                     custom=True,
                     year=request.headers["year"],
                 )
-                event = events[0]
+
+                if len(events) == 0:
+                    if request.user.is_authenticated:
+                        event = Event(
+                            name=unquote(request.headers["event_name"]),
+                            event_code=request.headers["event_code"],
+                            custom=True,
+                            year=request.headers["year"],
+                            user_created=request.user,
+                        )
+                    else:
+                        event = Event(
+                            name=unquote(request.headers["event_name"]),
+                            event_code=request.headers["event_code"],
+                            custom=True,
+                            year=request.headers["year"],
+                        )
+
+                    event.save()
+
+                else:
+                    event = events[0]
 
             else:
                 events = Event.objects.filter(

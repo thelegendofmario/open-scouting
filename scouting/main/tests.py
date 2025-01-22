@@ -3,6 +3,7 @@ from authentication.models import User, Profile
 from main.models import Data, Event
 
 import uuid
+import json
 
 
 class IndexPageTest(TestCase):
@@ -179,3 +180,58 @@ class SubmitTest(TestCase):
         self.assertEqual(data.data, {})
         self.assertEqual(data.event_model.custom, False)
         self.assertEqual(data.user_created, self.user)
+
+
+class GetDataTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+        self.user = User.objects.create_user("test", "test", "test")
+        self.user.save()
+
+        profile = Profile(user=self.user, display_name="test", team_number="1234")
+        profile.save()
+
+    def test_get_data_demo(self):
+        headers = {
+            "HTTP_EVENT_NAME": "test",
+            "HTTP_EVENT_CODE": "test",
+            "HTTP_CUSTOM": "false",
+            "HTTP_YEAR": 2024,
+            "HTTP_DEMO": "true",
+        }
+
+        response = self.client.post("/get_data", **headers)
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(response["Content-Type"], "application/json")
+        response_json = json.loads(response.content)
+        self.assertIn("demo", response_json)
+
+    def test_get_data_custom(self):
+        headers = {
+            "HTTP_EVENT_NAME": "test",
+            "HTTP_EVENT_CODE": "test",
+            "HTTP_CUSTOM": "true",
+            "HTTP_YEAR": 2024,
+            "HTTP_DEMO": "false",
+        }
+
+        response = self.client.post("/get_data", **headers)
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(response["Content-Type"], "application/json")
+
+    def test_get_data_normal(self):
+        headers = {
+            "HTTP_EVENT_NAME": "test",
+            "HTTP_EVENT_CODE": "test",
+            "HTTP_CUSTOM": "false",
+            "HTTP_YEAR": 2024,
+            "HTTP_DEMO": "false",
+        }
+
+        response = self.client.post("/get_data", **headers)
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(response["Content-Type"], "application/json")
