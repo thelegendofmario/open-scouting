@@ -146,6 +146,28 @@ def submit(request):
                 year=request.headers["year"],
             )
 
+            if len(events) == 0:
+                if request.user.is_authenticated:
+                    event = Event(
+                        name=unquote(request.headers["event_name"]),
+                        event_code=request.headers["event_code"],
+                        custom=True,
+                        year=request.headers["year"],
+                        user_created=request.user,
+                    )
+                else:
+                    event = Event(
+                        name=unquote(request.headers["event_name"]),
+                        event_code=request.headers["event_code"],
+                        custom=True,
+                        year=request.headers["year"],
+                    )
+
+                event.save()
+
+            else:
+                event = events[0]
+
             if request.user.is_authenticated:
                 data = Data(
                     uuid=request.headers["uuid"],
@@ -154,7 +176,7 @@ def submit(request):
                     event_code=request.headers["event_code"],
                     data=json.loads(request.headers["data"]),
                     created=timezone.now(),
-                    event_model=events[0],
+                    event_model=event,
                     user_created=request.user,
                     username_created=request.user.username,
                     team_number_created=request.user.profile.team_number,
@@ -170,7 +192,7 @@ def submit(request):
                     event_code=request.headers["event_code"],
                     data=json.loads(request.headers["data"]),
                     created=timezone.now(),
-                    event_model=events[0],
+                    event_model=event,
                     username_created=request.session["username"],
                     team_number_created=request.session["team_number"],
                     account=False,
