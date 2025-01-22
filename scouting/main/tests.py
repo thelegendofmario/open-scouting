@@ -235,3 +235,80 @@ class GetDataTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
         self.assertEqual(response["Content-Type"], "application/json")
+
+
+class GetCustomEventsTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+    def test_get_custom_events(self):
+        headers = {"HTTP_YEAR": 2024}
+
+        response = self.client.post("/get_custom_events", **headers)
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(response["Content-Type"], "application/json")
+
+
+class CreateCustomEventTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+        self.user = User.objects.create_user("test", "test", "test")
+        self.user.save()
+
+        profile = Profile(user=self.user, display_name="test", team_number="1234")
+        profile.save()
+
+    def test_create_custom_event_anonymous(self):
+        headers = {
+            "HTTP_NAME": "test",
+            "HTTP_YEAR": 2024,
+            "HTTP_DATE_BEGINS": "2024-01-01",
+            "HTTP_DATE_ENDS": "2024-01-01",
+            "HTTP_LOCATION": "test",
+            "HTTP_TYPE": "test",
+        }
+
+        response = self.client.post("/create_custom_event", **headers)
+        self.assertEqual(response.status_code, 200)
+
+        event = Event.objects.first()
+        self.assertEqual(event.year, 2024)
+        self.assertEqual(event.name, "test")
+        self.assertEqual(event.custom, True)
+
+        self.assertEqual(event.custom_data["name"], "test")
+        self.assertEqual(event.custom_data["year"], 2024)
+        self.assertEqual(event.custom_data["date_begins"], "2024-01-01")
+        self.assertEqual(event.custom_data["date_ends"], "2024-01-01")
+        self.assertEqual(event.custom_data["location"], "test")
+        self.assertEqual(event.custom_data["type"], "test")
+
+    def test_create_custom_event_authenticated(self):
+        headers = {
+            "HTTP_NAME": "test",
+            "HTTP_YEAR": 2024,
+            "HTTP_DATE_BEGINS": "2024-01-01",
+            "HTTP_DATE_ENDS": "2024-01-01",
+            "HTTP_LOCATION": "test",
+            "HTTP_TYPE": "test",
+        }
+
+        self.client.login(username="test", password="test")
+
+        response = self.client.post("/create_custom_event", **headers)
+        self.assertEqual(response.status_code, 200)
+
+        event = Event.objects.first()
+        self.assertEqual(event.year, 2024)
+        self.assertEqual(event.name, "test")
+        self.assertEqual(event.custom, True)
+        self.assertEqual(event.user_created, self.user)
+
+        self.assertEqual(event.custom_data["name"], "test")
+        self.assertEqual(event.custom_data["year"], 2024)
+        self.assertEqual(event.custom_data["date_begins"], "2024-01-01")
+        self.assertEqual(event.custom_data["date_ends"], "2024-01-01")
+        self.assertEqual(event.custom_data["location"], "test")
+        self.assertEqual(event.custom_data["type"], "test")
