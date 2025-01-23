@@ -312,3 +312,16 @@ class CreateCustomEventTest(TestCase):
         self.assertEqual(event.custom_data["date_ends"], "2024-01-01")
         self.assertEqual(event.custom_data["location"], "test")
         self.assertEqual(event.custom_data["type"], "test")
+
+
+class GetYearDataTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+    def test_get_year_data(self):
+        headers = {"HTTP_YEAR": 2024}
+
+        response = self.client.post("/get_year_data", **headers)
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(response["Content-Type"], "application/json")
