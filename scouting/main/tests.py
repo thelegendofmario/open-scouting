@@ -325,3 +325,243 @@ class GetYearDataTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
         self.assertEqual(response["Content-Type"], "application/json")
+
+
+class CheckLocalBackupReportsTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+        session = self.client.session
+        session["username"] = "test"
+        session["team_number"] = "1234"
+        session.save()
+
+        self.user = User.objects.create_user("test", "test", "test")
+        self.user.save()
+
+        self.uuid = uuid.uuid4().hex
+
+        profile = Profile(user=self.user, display_name="test", team_number="1234")
+        profile.save()
+
+    def test_check_local_backup_reports_custom_anonymous(self):
+        headers = {
+            "HTTP_DATA": json.dumps(
+                [
+                    {
+                        "uuid": self.uuid,
+                        "event_name": "test",
+                        "event_code": "test",
+                        "year": 2024,
+                        "custom": True,
+                        "data": {},
+                    }
+                ]
+            ),
+        }
+
+        response = self.client.post("/check_local_backup_reports", **headers)
+
+        data = json.loads(response.json())
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "application/json")
+        self.assertEqual(data["reports_not_found"], 1)
+        self.assertEqual(data["reports_found"], 0)
+
+    def test_check_local_backup_reports_custom_authenticated(self):
+        headers = {
+            "HTTP_DATA": json.dumps(
+                [
+                    {
+                        "uuid": self.uuid,
+                        "event_name": "test",
+                        "event_code": "test",
+                        "year": 2024,
+                        "custom": True,
+                        "data": {},
+                    }
+                ]
+            ),
+        }
+
+        self.client.login(username="test", password="test")
+        response = self.client.post("/check_local_backup_reports", **headers)
+
+        data = json.loads(response.json())
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "application/json")
+        self.assertEqual(data["reports_not_found"], 1)
+        self.assertEqual(data["reports_found"], 0)
+
+    def test_check_local_backup_reports_normal_anonymous(self):
+        headers = {
+            "HTTP_DATA": json.dumps(
+                [
+                    {
+                        "uuid": self.uuid,
+                        "event_name": "test",
+                        "event_code": "test",
+                        "year": 2024,
+                        "custom": False,
+                        "data": {},
+                    }
+                ]
+            ),
+        }
+
+        response = self.client.post("/check_local_backup_reports", **headers)
+
+        data = json.loads(response.json())
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "application/json")
+        self.assertEqual(data["reports_not_found"], 1)
+        self.assertEqual(data["reports_found"], 0)
+
+    def test_check_local_backup_reports_normal_authenticated(self):
+        headers = {
+            "HTTP_DATA": json.dumps(
+                [
+                    {
+                        "uuid": self.uuid,
+                        "event_name": "test",
+                        "event_code": "test",
+                        "year": 2024,
+                        "custom": False,
+                        "data": {},
+                    }
+                ]
+            ),
+        }
+
+        self.client.login(username="test", password="test")
+        response = self.client.post("/check_local_backup_reports", **headers)
+
+        data = json.loads(response.json())
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "application/json")
+        self.assertEqual(data["reports_not_found"], 1)
+        self.assertEqual(data["reports_found"], 0)
+
+
+class UploadOfflineReports(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+        session = self.client.session
+        session["username"] = "test"
+        session["team_number"] = "1234"
+        session.save()
+
+        self.user = User.objects.create_user("test", "test", "test")
+        self.user.save()
+
+        self.uuid = uuid.uuid4().hex
+
+        profile = Profile(user=self.user, display_name="test", team_number="1234")
+        profile.save()
+
+    def test_upload_offline_reports_custom_anonymous(self):
+        headers = {
+            "HTTP_DATA": json.dumps(
+                [
+                    {
+                        "uuid": self.uuid,
+                        "event_name": "test",
+                        "event_code": "test",
+                        "year": 2024,
+                        "custom": True,
+                        "data": {},
+                    }
+                ]
+            ),
+        }
+
+        response = self.client.post("/upload_offline_reports", **headers)
+
+        data = json.loads(response.json())
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "application/json")
+        self.assertEqual(data["reports_not_found"], 1)
+        self.assertEqual(data["reports_found"], 0)
+
+    def test_upload_offline_reports_custom_authenticated(self):
+        headers = {
+            "HTTP_DATA": json.dumps(
+                [
+                    {
+                        "uuid": self.uuid,
+                        "event_name": "test",
+                        "event_code": "test",
+                        "year": 2024,
+                        "custom": True,
+                        "data": {},
+                    }
+                ]
+            ),
+        }
+
+        self.client.login(username="test", password="test")
+        response = self.client.post("/upload_offline_reports", **headers)
+
+        data = json.loads(response.json())
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "application/json")
+        self.assertEqual(data["reports_not_found"], 1)
+        self.assertEqual(data["reports_found"], 0)
+
+    def test_upload_offline_reports_normal_anonymous(self):
+        headers = {
+            "HTTP_DATA": json.dumps(
+                [
+                    {
+                        "uuid": self.uuid,
+                        "event_name": "test",
+                        "event_code": "test",
+                        "year": 2024,
+                        "custom": False,
+                        "data": {},
+                    }
+                ]
+            ),
+        }
+
+        response = self.client.post("/upload_offline_reports", **headers)
+
+        data = json.loads(response.json())
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "application/json")
+        self.assertEqual(data["reports_not_found"], 1)
+        self.assertEqual(data["reports_found"], 0)
+
+    def test_upload_offline_reports_normal_authenticated(self):
+        headers = {
+            "HTTP_DATA": json.dumps(
+                [
+                    {
+                        "uuid": self.uuid,
+                        "event_name": "test",
+                        "event_code": "test",
+                        "year": 2024,
+                        "custom": False,
+                        "data": {},
+                    }
+                ]
+            ),
+        }
+
+        self.client.login(username="test", password="test")
+        response = self.client.post("/upload_offline_reports", **headers)
+
+        data = json.loads(response.json())
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "application/json")
+        self.assertEqual(data["reports_not_found"], 1)
+        self.assertEqual(data["reports_found"], 0)
