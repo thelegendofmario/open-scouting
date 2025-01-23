@@ -1,5 +1,9 @@
 from django.test import TestCase, Client
-from authentication.models import User, Profile
+from authentication.models import User, Profile, VerificationCode
+from django.utils import timezone
+
+import uuid
+import json
 
 
 class AuthenticationPageTest(TestCase):
@@ -94,3 +98,108 @@ class SignOutTest(TestCase):
 
 #     def test_change_password_authenticated(self):
 #         pass
+
+
+class SendVerificationCodeTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+        user = User.objects.create_user("test", "test", "test")
+        user.save()
+
+        self.uuid = uuid.uuid4().hex
+
+        profile = Profile(user=user, display_name="test", team_number="1234")
+        profile.save()
+
+    def test_send_verification_code(self):
+        headers = {
+            "HTTP_EMAIL": "test",
+            "HTTP_DISPLAY_NAME": "test",
+            "HTTP_UUID": self.uuid,
+        }
+
+        response = self.client.post("/authentication/send_verification_code", **headers)
+
+        data = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data["user_uuid"], self.uuid)
+
+        verification_code = VerificationCode.objects.first()
+        self.assertEqual(str(verification_code.user_uuid).replace("-", ""), self.uuid)
+
+
+class CheckVerificationCodeTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+        self.uuid = uuid.uuid4().hex
+
+        user = User.objects.create_user("test", "test", "test")
+        user.save()
+
+        profile = Profile(user=user, display_name="test", team_number="1234")
+        profile.save()
+
+        verification_code = VerificationCode.objects.create(
+            code="123456",
+            user_uuid=self.uuid,
+            verified=True,
+            created=timezone.now(),
+            expires=timezone.now() + timezone.timedelta(minutes=10),
+        )
+        verification_code.save()
+
+    def test_check_verification_code(self):
+        headers = {
+            "HTTP_CODE": "123456",
+            "HTTP_USER_UUID": self.uuid,
+        }
+
+        response = self.client.post(
+            "/authentication/check_verification_code", **headers
+        )
+
+        data = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data["valid"], True)
+
+
+class CreateAccountTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+        self.uuid = uuid.uuid4().hex
+
+        verification_code = VerificationCode(
+            code="123456",
+            user_uuid=self.uuid,
+            verified=True,
+            created=timezone.now(),
+            expires=timezone.now() + timezone.timedelta(minutes=10),
+        )
+        verification_code.save()
+
+    def test_create_account(self):
+        headers = {
+            "HTTP_EMAIL": "test",
+            "HTTP_PASSWORD": "test",
+            "HTTP_DISPLAY_NAME": "test",
+            "HTTP_TEAM_NUMBER": "test",
+            "HTTP_UUID": self.uuid,
+        }
+
+        response = self.client.post("/authentication/create_account", **headers)
+
+        self.assertEqual(response.status_code, 200)
+
+        user = User.objects.first()
+        self.assertEqual(user.email, "test")
+        self.assertEqual(user.username, "test")
+
+        profile = Profile.objects.first()
+        self.assertEqual(profile.user, user)
+        self.assertEqual(profile.display_name, "test")
+        self.assertEqual(profile.team_number, "test")
