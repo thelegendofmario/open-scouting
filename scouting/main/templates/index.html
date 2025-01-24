@@ -228,10 +228,10 @@
                     return {
                         open: false,
                         YEARS: JSON.parse(`{{ YEARS|safe }}`),
-                        authenticated: JSON.parse("{{ authenticated }}"),
-                        username: "{{ username }}",
-                        display_name: "{{ display_name }}",
-                        team_number: "{{ team_number }}",
+                        authenticated: false,
+                        username: "",
+                        display_name: "",
+                        team_number: "",
 
                         check() {
                             if (this.$refs.username.value && this.$refs.team_number.value) {
@@ -305,6 +305,14 @@
 
                             if (response.ok) {
                                 response.text().then(async (text) => {
+                                    let auth_json = {
+                                        authenticated: false,
+                                        username: "",
+                                        display_name: "",
+                                        team_number: ""
+                                    }
+
+                                    localStorage.setItem("authenticated", JSON.stringify(auth_json));
                                     window.location.reload();
                                 });
                             } else {
@@ -312,7 +320,74 @@
                             }
                         },
 
-                        init() {}
+                        async check_authentication_status() {
+                            if (globalThis.offline == false) {
+                                // Ask server for status
+                                var response = await fetch("{{ SERVER_IP }}/authentication/get_authentication_status", {
+                                method: "POST",
+                                headers: {
+                                        "X-CSRFToken": "{{ csrf_token }}",
+                                    }
+                                });
+
+                                if (response.ok) {
+                                    response.json().then(async (json) => {
+                                        if (json.authenticated == true) {
+                                            this.authenticated = true;
+                                            let auth_json = {
+                                                authenticated: json.authenticated,
+                                                username: json.username,
+                                                display_name: json.display_name,
+                                                team_number: json.team_number
+                                            }
+
+                                            this.username = json.username;
+                                            this.display_name = json.display_name;
+                                            this.team_number = json.team_number;
+                                            localStorage.setItem("authenticated", JSON.stringify(auth_json));
+                                            
+                                        } else {
+                                            this.authenticated = false;
+                                            let auth_json = {
+                                                authenticated: json.authenticated,
+                                                username: json.username,
+                                                display_name: json.display_name,
+                                                team_number: json.team_number
+                                            }
+
+                                            this.username = json.username;
+                                            this.display_name = json.display_name;
+                                            this.team_number = json.team_number;
+                                            localStorage.setItem("authenticated", JSON.stringify(auth_json));
+                                        }
+                                    });
+                                } else {
+                                    console.log("Error getting authentication status");
+                                    this.authenticated = false;
+                                    let auth_json = {
+                                        authenticated: false,
+                                        username: "",
+                                        display_name: "",
+                                        team_number: ""
+                                    }
+                                    localStorage.setItem("authenticated", JSON.stringify(auth_json));
+                                }
+                                
+                            } else {
+                                // Check local storage for status
+                                if (JSON.parse(localStorage.getItem("authenticated")).authenticated) {
+                                    this.authenticated = true;
+                                } else {
+                                    this.authenticated = false;
+                                }
+                            }
+                        },
+
+                        init() {
+                            setTimeout(() => {
+                                this.check_authentication_status();
+                            }, 100);
+                        }
                     };
                 }
             </script>
