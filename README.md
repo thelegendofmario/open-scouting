@@ -64,10 +64,11 @@ Install the required `npm` libraries
 npm install
 ```
 
-Copy the `.env.example` file to a new file called `.env`.
+Copy the `.env-template` file to a new file called `.env`.
 ```bash
 cp .env-template .env
 ```
+You should add your TBA API key here. If you want to be able to send emails, fill out those variables as well
 
 Next, create a django superuser and make and migrate the models
 ```bash
@@ -92,7 +93,7 @@ npm run build:css
 ### Additional steps for Production installation
 This depends on what server hosting provider you're using. However, there's a couple environment variables you need to set.
 
-Set the following global environment variables:
+Set the following global environment variables (See the `.env-template` file for the complete list of needed environment variables):
 - `DJANGO_ALLOWED_HOSTS` -> `${APP_DOMAIN}` (This works on DigitalOcean, this may not work on every hosting provider)
 - `DJANGO_LOG_LEVEL` -> `WARNING`
 
