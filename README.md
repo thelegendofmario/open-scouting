@@ -36,7 +36,6 @@
 - Create custom events if events aren't listed on TBA
 - Keep backups of scouting reports locally
 - Dark/light mode theme support
-- The site works fully offline if there's no internet connection at all
 - Manually go offline in case of bad connection
 
 ## Development Installation
@@ -65,10 +64,11 @@ Install the required `npm` libraries
 npm install
 ```
 
-Copy the `.env.example` file to a new file called `.env`.
+Copy the `.env-template` file to a new file called `.env`.
 ```bash
 cp .env-template .env
 ```
+You should add your TBA API key here. If you want to be able to send emails, fill out those variables as well
 
 Next, create a django superuser and make and migrate the models
 ```bash
@@ -93,7 +93,7 @@ npm run build:css
 ### Additional steps for Production installation
 This depends on what server hosting provider you're using. However, there's a couple environment variables you need to set.
 
-Set the following global environment variables:
+Set the following global environment variables (See the `.env-template` file for the complete list of needed environment variables):
 - `DJANGO_ALLOWED_HOSTS` -> `${APP_DOMAIN}` (This works on DigitalOcean, this may not work on every hosting provider)
 - `DJANGO_LOG_LEVEL` -> `WARNING`
 
@@ -120,8 +120,8 @@ djlint scouting --reformat
 ```
 
 ### ruff
-This project uses [`ruff`](https://docs.astral.sh/ruff/) to lint and format the code.
-You can run the following command to lint and format the code.
+This project uses [`ruff`](https://docs.astral.sh/ruff/) to lint and format the python code.
+You can run the following command to run the linter once
 ```bash
 ruff check cardie --fix
 ```

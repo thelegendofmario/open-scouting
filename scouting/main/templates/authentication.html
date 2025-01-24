@@ -7,15 +7,18 @@
 {% block stylesheets %}{% endblock %}
 
 {% block body %}
-    <div class="flex h-screen justify-center items-center flex-col w-screen">
-        <img class="w-full md:w-1/2 xl:w-2/6 px-10 hidden dark:block"
-             src="{% static '/main/images/logo_light.png' %}">
-        <img class="w-full md:w-1/2 xl:w-2/6 px-10 dark:hidden block"
-             src="{% static '/main/images/logo_dark.png' %}">
+    <div class="flex h-screen justify-center items-center flex-col w-screen"
+         x-data>
+        <img class="w-full md:w-1/2 xl:w-2/6 px-10 hidden dark:block hover:scale-[1.03] active:scale-95 transition-all"
+             src="{% static '/main/images/logo_light.png' %}"
+             @click="window.location.href = '{{ SERVER_IP }}'">
+        <img class="w-full md:w-1/2 xl:w-2/6 px-10 dark:hidden block hover:scale-[1.03] active:scale-95 transition-all"
+             src="{% static '/main/images/logo_dark.png' %}"
+             @click="window.location.href = '{{ SERVER_IP }}'">
         <p class="dark:text-white text-black text-sans text-center text-lg">Sign in or create an account</p>
 
         <div class="mt-4" x-data="auth()">
-            <div class="flex flex-col items-center"
+            <div class="flex flex-col items-center dark:bg-slate-800 dark:border-slate-700 bg-slate-200 border-slate-300 border-2 rounded-2xl py-6 px-4 mx-2"
                  x-show="sign_in"
                  x-transition:enter.delay.300ms>
                 <p class="dark:text-white text-black text-sans text-center text-2xl mb-2">
@@ -53,7 +56,7 @@
                 </button>
             </div>
 
-            <div class="flex flex-col items-center"
+            <div class="flex flex-col items-center dark:bg-slate-800 dark:border-slate-700 bg-slate-200 border-slate-300 border-2 rounded-2xl py-6 px-4 mx-2"
                  x-show="!sign_in"
                  x-transition:enter.delay.300ms>
                 <p class="dark:text-white text-black text-sans text-center text-2xl">
@@ -76,7 +79,7 @@
                            @input.debounce.250ms="display_team_number"
                            @input="check_display_name_and_team_number()">
 
-                    <div class="flex flex-row items-center justify-center mt-2 mr-4"
+                    <div class="flex flex-row items-center justify-center mt-2"
                          x-show="team_number.show"
                          x-transition>
                         <img class="mr-2"
@@ -131,12 +134,12 @@
                      x-transition:enter.delay.300ms>
                     <p class="dark:text-white text-black text-sans text-center text-md">Verify email</p>
                     <p class="dark:text-white text-black text-sans text-center text-sm">
-                        <p class="dark:text-white text-black text-sans text-center text-sm mx-2"
+                        <p class="dark:text-white text-black text-sans text-center text-sm mx-2 max-w-2xl opacity-80"
                            x-text="'We sent a verification code to ' + user.email + '. Please check your email for a message from {{ EMAIL_HOST_USER }} and enter the verification code below'">
                         </p>
                     </p>
 
-                    <div class="flex flex-row dark:bg-red-500/50 dark:border-red-400/70 border-2 rounded-lg bg-red-400/50 border-red-500/70 my-4 mx-2"
+                    <div class="flex flex-row dark:bg-red-500/50 dark:border-red-400/70 border-2 rounded-lg bg-red-400/50 border-red-500/70 my-4 mx-2 max-w-2xl"
                          x-show="verification_code_error"
                          x-transition>
                         <p class="dark:text-red-400 text-red-500 text-sans text-center text-md m-2"
@@ -175,14 +178,14 @@
                         Secure passwords are longer than 8 characters, contain numbers and symbols, and have capital and lowercase letters.
                     </p>
 
-                    <div class="flex flex-row dark:bg-green-700/50 dark:border-green-500/70 border-2 rounded-lg bg-green-400/50 border-green-600/70 my-4 mx-2"
+                    <div class="flex flex-row dark:bg-green-700/50 dark:border-green-500/70 border-2 rounded-lg bg-green-400/50 border-green-600/70 my-4 mx-2 max-w-2xl"
                          x-show="verification_code_success"
                          x-transition>
                         <p class="dark:text-green-500 text-green-600 text-sans text-center text-md m-2"
                            x-text="verification_code_success"></p>
                     </div>
 
-                    <div class="flex flex-row dark:bg-red-500/50 dark:border-red-400/70 border-2 rounded-lg bg-red-400/50 border-red-500/70 my-4 mx-2"
+                    <div class="flex flex-row dark:bg-red-500/50 dark:border-red-400/70 border-2 rounded-lg bg-red-400/50 border-red-500/70 my-4 mx-2 max-w-2xl"
                          x-show="create_account_error"
                          x-transition>
                         <p class="dark:text-red-400 text-red-500 text-sans text-center text-md m-2"
@@ -196,7 +199,9 @@
                                x-ref="create_password"
                                @input="check_password_field_and_strength()">
 
-                        <input class="ml-4" @click="check_password_visibility()" type="checkbox">
+                        <input class="ui_checkbox ml-4"
+                               @click="check_password_visibility()"
+                               type="checkbox">
                         <p class="dark:text-white text-black text-sans text-md ml-2"
                            x-ref="create_password_visibility_label"
                            @click="check_password_visibility()">Show</p>

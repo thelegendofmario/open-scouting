@@ -19,4 +19,9 @@ urlpatterns = [
         name="check_verification_code",
     ),
     path("create_account", views.create_account, name="create_account"),
+    path(
+        "get_authentication_status",
+        views.get_authentication_status,
+        name="get_authentication_status",
+    ),
 ]

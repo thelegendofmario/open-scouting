@@ -8,6 +8,7 @@
 
 {% block body %}
     <div class="flex h-screen justify-center items-center flex-col w-screen">
+
         <div x-data="header()">
             <div class="flex flex-col justify-center items-center"
                  x-show="basic"
@@ -60,111 +61,111 @@
         </div>
 
         <script>
-            function header() {
-                return {
-                    basic: true,
-                    username: "",
-                    team_number: "",
-                    event_name: "",
-                    event_code: "",
-                    custom_event: false,
-                    year: "",
-                    demo: false,
+    function header() {
+        return {
+            basic: true,
+            username: "",
+            team_number: "",
+            event_name: "",
+            event_code: "",
+            custom_event: false,
+            year: "",
+            demo: false,
 
-                    start_over() {
-                        window.dispatchEvent(new CustomEvent('start_over'));
-                        this.basic = true;
-                        this.username = "";
-                        this.team_number = "";
-                        this.event_name = "";
-                        this.event_code = "";
-                        this.year = "";
-                        this.demo = false;
-                    },
+            start_over() {
+                window.dispatchEvent(new CustomEvent('start_over'));
+                this.basic = true;
+                this.username = "";
+                this.team_number = "";
+                this.event_name = "";
+                this.event_code = "";
+                this.year = "";
+                this.demo = false;
+            },
 
-                    init() {
-                        window.addEventListener('header_username', (event) => {
-                            event.stopImmediatePropagation();
-                            const { username, team_number } = event.detail;
-                            this.username = username;
-                            this.team_number = team_number;
+            init() {
+                window.addEventListener('header_username', (event) => {
+                    event.stopImmediatePropagation();
+                    const { username, team_number } = event.detail;
+                    this.username = username;
+                    this.team_number = team_number;
 
-                            this.basic = false;
-                        });
+                    this.basic = false;
+                });
 
-                        window.addEventListener('header_event', (event) => {
-                            event.stopImmediatePropagation();
-                            const { event_name, event_code } = event.detail;
+                window.addEventListener('header_event', (event) => {
+                    event.stopImmediatePropagation();
+                    const { event_name, event_code } = event.detail;
 
-                            this.event_name = event_name;
-                            this.event_code = event_code;
-                        });
+                    this.event_name = event_name;
+                    this.event_code = event_code;
+                });
 
-                        window.addEventListener('header_year', (event) => {
-                            const { year } = event.detail;
-                            this.year = year;
-                        });
+                window.addEventListener('header_year', (event) => {
+                    const { year } = event.detail;
+                    this.year = year;
+                });
 
-                        window.addEventListener('header_custom_event', (event) => {
-                            event.stopImmediatePropagation();
-                            const { event_name, event_code } = event.detail;
+                window.addEventListener('header_custom_event', (event) => {
+                    event.stopImmediatePropagation();
+                    const { event_name, event_code } = event.detail;
 
-                            this.event_name = event_name;
-                            this.event_code = event_code;
-                            this.custom_event = true;
-                        });
+                    this.event_name = event_name;
+                    this.event_code = event_code;
+                    this.custom_event = true;
+                });
 
-                        window.addEventListener('header_demo', (event) => {
-                            event.stopImmediatePropagation();
-                            const { year } = event.detail;
+                window.addEventListener('header_demo', (event) => {
+                    event.stopImmediatePropagation();
+                    const { year } = event.detail;
 
-                            this.basic = false;
+                    this.basic = false;
 
-                            this.year = year;
-                            this.demo = true;
-                            this.username = "demo";
-                            this.team_number = "0000";
-                            this.event_name = "";
-                            this.event_code = "";
-                            this.custom_event = false;
-                        })
+                    this.year = year;
+                    this.demo = true;
+                    this.username = "demo";
+                    this.team_number = "0000";
+                    this.event_name = "";
+                    this.event_code = "";
+                    this.custom_event = false;
+                })
 
-                        window.addEventListener('get_header_data', (event) => {
-                            event.stopImmediatePropagation();
-                            const { load_page } = event.detail;
+                window.addEventListener('get_header_data', (event) => {
+                    event.stopImmediatePropagation();
+                    const { load_page } = event.detail;
 
-                            let username = this.username;
-                            let team_number = this.team_number;
-                            let event_name = this.event_name;
-                            let event_code = this.event_code;
-                            let load_page_var = load_page;
-                            let custom = this.custom_event;
-                            let year = this.year;
-                            let demo = this.demo;
+                    let username = this.username;
+                    let team_number = this.team_number;
+                    let event_name = this.event_name;
+                    let event_code = this.event_code;
+                    let load_page_var = load_page;
+                    let custom = this.custom_event;
+                    let year = this.year;
+                    let demo = this.demo;
 
-                            window.dispatchEvent(new CustomEvent('header_data', {
-                                detail: { username, team_number, event_name, event_code, load_page, custom, year, demo }
-                            }));
-                        });
+                    window.dispatchEvent(new CustomEvent('header_data', {
+                        detail: { username, team_number, event_name, event_code, load_page, custom, year, demo }
+                    }));
+                });
 
-                        window.addEventListener('get_link_data', (event) => {
-                            event.stopImmediatePropagation();
+                window.addEventListener('get_link_data', (event) => {
+                    event.stopImmediatePropagation();
 
-                            let username = this.username;
-                            let team_number = this.team_number;
-                            let event_name = this.event_name;
-                            let event_code = this.event_code;
-                            let custom = this.custom_event;
-                            let year = this.year;
-                            let demo = this.demo;
+                    let username = this.username;
+                    let team_number = this.team_number;
+                    let event_name = this.event_name;
+                    let event_code = this.event_code;
+                    let custom = this.custom_event;
+                    let year = this.year;
+                    let demo = this.demo;
 
-                            window.dispatchEvent(new CustomEvent('link_data', {
-                                detail: { username, team_number, event_name, event_code, custom, year, demo }
-                            }));
-                        });
-                    }
-                }
+                    window.dispatchEvent(new CustomEvent('link_data', {
+                        detail: { username, team_number, event_name, event_code, custom, year, demo }
+                    }));
+                });
             }
+        }
+    }
         </script>
 
         <div x-data="index()">
@@ -227,10 +228,10 @@
                     return {
                         open: false,
                         YEARS: JSON.parse(`{{ YEARS|safe }}`),
-                        authenticated: JSON.parse("{{ authenticated }}"),
-                        username: "{{ username }}",
-                        display_name: "{{ display_name }}",
-                        team_number: "{{ team_number }}",
+                        authenticated: false,
+                        username: "",
+                        display_name: "",
+                        team_number: "",
 
                         check() {
                             if (this.$refs.username.value && this.$refs.team_number.value) {
@@ -304,6 +305,14 @@
 
                             if (response.ok) {
                                 response.text().then(async (text) => {
+                                    let auth_json = {
+                                        authenticated: false,
+                                        username: "",
+                                        display_name: "",
+                                        team_number: ""
+                                    }
+
+                                    localStorage.setItem("authenticated", JSON.stringify(auth_json));
                                     window.location.reload();
                                 });
                             } else {
@@ -311,7 +320,74 @@
                             }
                         },
 
-                        init() {}
+                        async check_authentication_status() {
+                            if (globalThis.offline == false) {
+                                // Ask server for status
+                                var response = await fetch("{{ SERVER_IP }}/authentication/get_authentication_status", {
+                                method: "POST",
+                                headers: {
+                                        "X-CSRFToken": "{{ csrf_token }}",
+                                    }
+                                });
+
+                                if (response.ok) {
+                                    response.json().then(async (json) => {
+                                        if (json.authenticated == true) {
+                                            this.authenticated = true;
+                                            let auth_json = {
+                                                authenticated: json.authenticated,
+                                                username: json.username,
+                                                display_name: json.display_name,
+                                                team_number: json.team_number
+                                            }
+
+                                            this.username = json.username;
+                                            this.display_name = json.display_name;
+                                            this.team_number = json.team_number;
+                                            localStorage.setItem("authenticated", JSON.stringify(auth_json));
+                                            
+                                        } else {
+                                            this.authenticated = false;
+                                            let auth_json = {
+                                                authenticated: json.authenticated,
+                                                username: json.username,
+                                                display_name: json.display_name,
+                                                team_number: json.team_number
+                                            }
+
+                                            this.username = json.username;
+                                            this.display_name = json.display_name;
+                                            this.team_number = json.team_number;
+                                            localStorage.setItem("authenticated", JSON.stringify(auth_json));
+                                        }
+                                    });
+                                } else {
+                                    console.log("Error getting authentication status");
+                                    this.authenticated = false;
+                                    let auth_json = {
+                                        authenticated: false,
+                                        username: "",
+                                        display_name: "",
+                                        team_number: ""
+                                    }
+                                    localStorage.setItem("authenticated", JSON.stringify(auth_json));
+                                }
+                                
+                            } else {
+                                // Check local storage for status
+                                if (JSON.parse(localStorage.getItem("authenticated")).authenticated) {
+                                    this.authenticated = true;
+                                } else {
+                                    this.authenticated = false;
+                                }
+                            }
+                        },
+
+                        init() {
+                            setTimeout(() => {
+                                this.check_authentication_status();
+                            }, 100);
+                        }
                     };
                 }
             </script>
@@ -349,7 +425,7 @@
             <script>
                 function year_select() {
                     return {
-                        YEARS: JSON.parse(`{{ YEARS|safe }}`),
+                        YEARS: JSON.parse(`{{ YEARS|safe }}`).reverse(),
                         selected_year: new Date().getFullYear(),
                         number_of_events: 0,
 
@@ -395,11 +471,11 @@
                  x-data="events()"
                  x-show="page == 3"
                  x-transition>
-                <p class="text-center dark:text-white text-black font-sans text-2xl">
+                <p class="text-center dark:text-white text-black font-sans text-2xl mt-4">
                     <i class="ph-bold ph-calendar-blank"></i> Select event
                 </p>
-                <div class="flex flex-row mt-2">
-                    <input class="bg-slate-700 border-2 border-slate-700 dark:text-white text-black rounded-lg"
+                <div class="flex flex-row mt-2 justify-center align-middle items-center">
+                    <input class="ui_checkbox"
                            type="checkbox"
                            x-ref="show_past_events"
                            @input="update_filters()">
@@ -412,7 +488,7 @@
                        x-ref="event_search"
                        @input="update_filters()">
 
-                <div>
+                <div class="my-4">
                     <button class="dark:bg-slate-700 bg-slate-200 border-2 dark:border-slate-600 border-slate-300 text-black dark:text-white rounded-t-md px-4 py-2 ml-4 disabled:opacity-50 hover:enabled:px-5 active:enabled:px-3 transition-all whitespace-nowrap"
                             :disabled="!show_custom_events"
                             @click="show_custom_events = false">
@@ -799,7 +875,6 @@
             }
         </script>
 
-        <!-- Create custom event dialog -->
         <div class="fixed z-50 h-[80%] bottom-0 md:bottom-auto w-screen md:h-[80%] md:w-[80%] md:mx-4 md:my-8 dark:bg-slate-800/60 dark:border-slate-700 border-slate-300 border-2 md:rounded-2xl rounded-t-xl bg-slate-200/60 backdrop-blur-md p-4 md:p-8 overflow-y-auto"
              x-data="create_custom_event()"
              x-init="init()"

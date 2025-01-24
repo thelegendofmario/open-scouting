@@ -20,6 +20,7 @@ class Data(models.Model):
     )
     username_created = models.CharField(max_length=999, blank=True)
     team_number_created = models.CharField(max_length=6, blank=True)
+    account = models.BooleanField(default=False)
 
     def __str__(self):
         return f"Data from {self.event} in {str(self.year)}"

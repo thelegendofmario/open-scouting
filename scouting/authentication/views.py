@@ -5,6 +5,7 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.db.utils import IntegrityError
+from django.views.decorators.csrf import csrf_exempt
 
 from . import email
 from authentication.models import Profile, VerificationCode
@@ -230,5 +231,32 @@ def create_account(request):
         else:
             return HttpResponse("invalid verification code", status=401)
 
+    else:
+        return HttpResponse("Request is not a POST request!", status=501)
+
+
+@csrf_exempt
+def get_authentication_status(request):
+    if request.method == "POST":
+        if request.user.is_authenticated:
+            return JsonResponse(
+                {
+                    "authenticated": True,
+                    "username": request.user.username,
+                    "display_name": request.user.profile.display_name,
+                    "team_number": request.user.profile.team_number,
+                },
+                safe=False,
+            )
+        else:
+            return JsonResponse(
+                {
+                    "authenticated": False,
+                    "username": "",
+                    "display_name": "",
+                    "team_number": "",
+                },
+                safe=False,
+            )
     else:
         return HttpResponse("Request is not a POST request!", status=501)

@@ -31,6 +31,7 @@ def get_season_data_from_year(year):
 
 # TODO: Move to respective .py files instead
 def get_demo_data_from_year(year):
+    year = str(year)
     if year == "2024":
         return demo_data.crescendo
     elif year == "2025":
@@ -146,6 +147,28 @@ def submit(request):
                 year=request.headers["year"],
             )
 
+            if len(events) == 0:
+                if request.user.is_authenticated:
+                    event = Event(
+                        name=unquote(request.headers["event_name"]),
+                        event_code=request.headers["event_code"],
+                        custom=True,
+                        year=request.headers["year"],
+                        user_created=request.user,
+                    )
+                else:
+                    event = Event(
+                        name=unquote(request.headers["event_name"]),
+                        event_code=request.headers["event_code"],
+                        custom=True,
+                        year=request.headers["year"],
+                    )
+
+                event.save()
+
+            else:
+                event = events[0]
+
             if request.user.is_authenticated:
                 data = Data(
                     uuid=request.headers["uuid"],
@@ -154,9 +177,11 @@ def submit(request):
                     event_code=request.headers["event_code"],
                     data=json.loads(request.headers["data"]),
                     created=timezone.now(),
-                    event_model=events[0],
+                    event_model=event,
+                    user_created=request.user,
                     username_created=request.user.username,
                     team_number_created=request.user.profile.team_number,
+                    account=True,
                 )
                 data.save()
 
@@ -168,10 +193,10 @@ def submit(request):
                     event_code=request.headers["event_code"],
                     data=json.loads(request.headers["data"]),
                     created=timezone.now(),
-                    event_model=events[0],
-                    user_created=request.user,
+                    event_model=event,
                     username_created=request.session["username"],
                     team_number_created=request.session["team_number"],
+                    account=False,
                 )
                 data.save()
 
@@ -214,6 +239,7 @@ def submit(request):
                     user_created=request.user,
                     username_created=request.user.username,
                     team_number_created=request.user.profile.team_number,
+                    account=True,
                 )
                 data.save()
 
@@ -228,6 +254,7 @@ def submit(request):
                     event_model=event,
                     username_created=request.session["username"],
                     team_number_created=request.session["team_number"],
+                    account=False,
                 )
                 data.save()
 
@@ -266,7 +293,28 @@ def get_data(request):
                     custom=True,
                     year=request.headers["year"],
                 )
-                event = events[0]
+
+                if len(events) == 0:
+                    if request.user.is_authenticated:
+                        event = Event(
+                            name=unquote(request.headers["event_name"]),
+                            event_code=request.headers["event_code"],
+                            custom=True,
+                            year=request.headers["year"],
+                            user_created=request.user,
+                        )
+                    else:
+                        event = Event(
+                            name=unquote(request.headers["event_name"]),
+                            event_code=request.headers["event_code"],
+                            custom=True,
+                            year=request.headers["year"],
+                        )
+
+                    event.save()
+
+                else:
+                    event = events[0]
 
             else:
                 events = Event.objects.filter(
@@ -312,6 +360,7 @@ def get_data(request):
                 item_data["created"] = item.created
                 item_data["username_created"] = item.username_created
                 item_data["team_number_created"] = item.team_number_created
+                item_data["account"] = item.account
 
                 data_json.append(item_data)
 
@@ -484,6 +533,7 @@ def check_local_backup_reports(request):
                         user_created=request.user,
                         username_created=request.user.username,
                         team_number_created=request.user.profile.team_number,
+                        account=True,
                     )
                     new_data.save()
                 else:
@@ -495,8 +545,9 @@ def check_local_backup_reports(request):
                         data=report["data"],
                         created=timezone.now(),
                         event_model=event,
-                        username_created=request.user.username,
-                        team_number_created=request.user.profile.team_number,
+                        username_created=request.session["username"],
+                        team_number_created=request.session["team_number"],
+                        account=False,
                     )
                     new_data.save()
 
@@ -579,6 +630,7 @@ def upload_offline_reports(request):
                         user_created=request.user,
                         username_created=request.user.username,
                         team_number_created=request.user.profile.team_number,
+                        account=True,
                     )
                     new_data.save()
                 else:
@@ -590,8 +642,9 @@ def upload_offline_reports(request):
                         data=report["data"],
                         created=timezone.now(),
                         event_model=event,
-                        username_created=request.user.username,
-                        team_number_created=request.user.profile.team_number,
+                        username_created=request.session["username"],
+                        team_number_created=request.session["team_number"],
+                        account=False,
                     )
                     new_data.save()
 

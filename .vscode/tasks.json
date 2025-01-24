@@ -67,6 +67,16 @@
           "runOn": "folderOpen"
         },
         "problemMatcher": []
+      },
+      {
+        "label": "Run Tests",
+        "type": "shell",
+        "command": "source .venv/bin/activate && cd scouting && python manage.py test",
+        "presentation": {
+          "reveal": "always",
+          "panel": "new"
+        },
+        "problemMatcher": []
       }
     ]
   }

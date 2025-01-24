@@ -76,6 +76,14 @@
                  x-ref="table"></div>
 
             <div class="flex flex-row w-screen items-center justify-center"
+                 x-show="!offline && !no_data"
+                 x-transition>
+                <p class="dark:text-white text-black text-sans text-md mx-1 mt-2 text-center">
+                    <i class="ph ph-mouse-scroll"></i> You may need to scroll left and right to view the entire table
+                </p>
+            </div>
+
+            <div class="flex flex-row w-screen items-center justify-center"
                  x-show="offline"
                  x-transition>
                 <p class="dark:text-white text-black text-sans text-lg mx-1 text-center">
@@ -90,6 +98,7 @@
                     <i class="ph ph-info"></i> No data found for this event.
                 </p>
             </div>
+
         </div>
 
         <script>
@@ -151,11 +160,20 @@
                             //onRendered - function to call when the formatter has been rendered
 
                             let div = document.createElement("div");
-                            div.classList = "flex flex-col dark:bg-slate-700 bg-slate-200 border-2 dark:border-slate-600 border-slate-300 rounded-2xl p-4";
+                            div.classList = "flex flex-col dark:bg-slate-700 bg-slate-200 border-2 dark:border-slate-600 border-slate-300 rounded-2xl p-4 transition-all shadow-lg";
 
                             let div_header = document.createElement("p");
-                            div_header.innerText = "Data Info";
+                            div_header.innerText = "Info";
                             div_header.classList = "dark:text-white text-black text-lg text-bold text-sans";
+
+                            let div_verified = document.createElement("p");
+                            div_verified.classList = "dark:text-white text-black text-sm text-bold text-sans opacity-80";
+
+                            if (component.getData().account) {
+                                div_verified.innerHTML = '<i class="ph-bold ph-check-circle"></i> Verified Account';
+                            } else {
+                                div_verified.innerHTML = '<i class="ph-bold ph-x-circle"></i> Temporary Account';
+                            }
 
                             let div_info = document.createElement("p");
                             div_info.classList = "dark:text-white text-black text-md text-sans";
@@ -170,11 +188,12 @@
 
                             div.appendChild(div_header);
                             div.appendChild(div_info);
+                            div.appendChild(div_verified);
 
                             return div;
                         };
 
-                        this.headers.unshift({title:"Info", hozAlign:"center", formatter:menu_icon, width:20, clickPopup:menu_click});
+                        this.headers.unshift({title:"Info", hozAlign:"center", formatter:menu_icon, width:20, clickPopup:menu_click, headerSort:false});
 
                         var table = new Tabulator(this.$refs.table, {
                             height: "100%",
