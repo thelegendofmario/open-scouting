@@ -24,7 +24,6 @@ env = environ.Env(
     ),
     DJANGO_ALLOWED_HOSTS=(list, ["localhost", "127.0.0.1"]),
     ADMIN_PATH=(str, "admin/"),
-    DATABASE_URL=(str, "sqlite:///db.sqlite3"),
 )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -46,6 +45,11 @@ ADMIN_PATH = env("ADMIN_PATH")
 TBA_API_KEY = env("TBA_API_KEY")
 SERVER_IP = env("SERVER_IP")
 SERVER_MESSAGE = env("SERVER_MESSAGE")
+
+POSTGRES_NAME = env("POSTGRES_NAME")
+POSTGRES_USER = env("POSTGRES_USER")
+POSTGRES_PASSWORD = env("POSTGRES_PASSWORD")
+POSTGRES_PORT = env("POSTGRES_PORT")
 
 EMAIL_ENABLED = env("EMAIL_ENABLED")
 EMAIL_BACKEND = env("EMAIL_BACKEND")
@@ -102,8 +106,16 @@ WSGI_APPLICATION = "scouting.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+
 DATABASES = {
-    "default": env.db(),
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": POSTGRES_NAME,
+        "USER": POSTGRES_USER,
+        "PASSWORD": POSTGRES_PASSWORD,
+        "HOST": "db",
+        "PORT": POSTGRES_PORT,
+    }
 }
 
 
