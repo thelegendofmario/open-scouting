@@ -38,94 +38,52 @@
 - Dark/light mode theme support
 - Manually go offline in case of bad connection
 
-## Development Installation
-Follow these steps to get the server running locally for contributing or development
+## Installation
+The installation and deployment process uses docker for simplicity.
+### Development
+Follow the steps in [Development Installation](./docs/Development_Installation.md) for how to get Open Scouting up and running locally for development or contributing
 
-First, clone this repository using the following command
+### Production
+First, ensure you have `docker`, `docker-compose`, and `git` installed on your system
+
+Next, clone this repository
 ```bash
 git clone https://github.com/nfoert/open-scouting
+cd open-scouting
 ```
 
-Then, navigate to that directory and create a new python virtual environment
-```bash
-cd scouting
-python3 -m venv .venv
-```
-
-Activate the virtual environment using the command for your system (Linux is used here) and install the required dependencies
-```bash
-source ./.venv/bin/activate
-pip install -r requirements.txt
-pip install -r requirements-dev.txt
-```
-
-Install the required `npm` libraries
-```bash
-npm install
-```
-
-Copy the `.env-template` file to a new file called `.env`.
+Now, copy `.env-template` to a new file called `.env`
 ```bash
 cp .env-template .env
 ```
-You should add your TBA API key here. If you want to be able to send emails, fill out those variables as well
 
-Next, create a django superuser and make and migrate the models
+You'll want to change several of these variables in `.env`
+- **`DEBUG`** - `False`
+- **`SECRET_KEY`** - Generate your secret key using `django.core.management.utils.get_random_secret_key()`
+- **`ADMIN_PATH`** - Change this to a random string or something specific that only you would know, protects the admin page from attacks
+- **`TBA_API_KEY`** - Replace with your TBA API key, generated [here](https://www.thebluealliance.com/account)
+- **`SERVER_IP`** - Replace with the IP address and port that the server will be accessed at
+  
+The following variables are for the superuser that is created when the server starts for the first time, this is the main administrator account that is used to access the `/admin` page.
+- **`DJANGO_SUPERUSER_USERNAME`** - Replace with your superuser's username (Make this equal to your email if you want to use this account inside of Open Scouting for contributing)
+- **`DJANGO_SUPERUSER_PASSWORD`** - Replace with your superuser's password
+- **`DJANGO_SUPERUSER_EMAIL`** - Replace with your superuser's email
+
+
+Finally, building and running the server is as simple as running the following
 ```bash
-cd scouting
-python manage.py createsuperuser
-python manage.py makemigrations
-python manage.py migrate
+docker compose up --build -d
 ```
 
-Now run the server using the following command, or run the `Start server` task in your Visual Studio Code
+Subsequent starts should be run using
 ```bash
-python manage.py runserver
+docker compose up -d
 ```
 
-Now, navigate to the `./admin` page (usually `http://127.0.0.1:8000/admin`), add view the `User` models. Find the superuser you just created, scroll down, and fill out all the fields for the profile object to prevent any errors
+The server should now be up and running!
 
-Additionally, you should start the Tailwind CSS builder with the following command, or use the `Build CSS` task in Visual Studio Code
-```bash
-npm run build:css
-```
-
-### Additional steps for Production installation
-This depends on what server hosting provider you're using. However, there's a couple environment variables you need to set.
-
-Set the following global environment variables (See the `.env-template` file for the complete list of needed environment variables):
-- `DJANGO_ALLOWED_HOSTS` -> `${APP_DOMAIN}` (This works on DigitalOcean, this may not work on every hosting provider)
-- `DJANGO_LOG_LEVEL` -> `WARNING`
-
-- `SECRET_KEY` -> `<your new secret key>` (Generate this using `django.core.management.utils.get_random_secret_key()`. If possible you should encrypt this value in your hosting provider.)
-- `DEBUG` -> `False`
-- `DATABASE_URL` -> `${db.DATABASE_URL}` (This works on DigitalOcean, this may not work on every hosting provider)
-
-Additionally, if you wish to show a custom message to the user on each page (demonstration server, currently undergoing maintenance), set the `SERVER_MESSAGE` environment variable to the message you wish to display.
-
-If you wish to send emails with the server, set the following environment variables:
-- `EMAIL_ENABLED` -> `True`
-- `EMAIL_BACKEND` -> `django.core.mail.backends.smtp.EmailBackend`
-- `EMAIL_HOST` -> `<your email host>`
-- `EMAIL_HOST_USER` -> `<your email host username>`
-- `EMAIL_HOST_PASSWORD` -> `<your email host password>`
-- `EMAIL_PORT` -> `<your email host port>`
-- `EMAIL_USE_TLS` -> `<True if your email host uses TLS>`
-
-## Development
-### djlint
-This project uses `djlint` to lint the templates. You can run this using the following command
-```bash
-djlint scouting --reformat
-```
-
-### ruff
-This project uses [`ruff`](https://docs.astral.sh/ruff/) to lint and format the python code.
-You can run the following command to run the linter once
-```bash
-ruff check cardie --fix
-```
-For VS Code users, you can install the `ruff` extension to get linting and formatting on save.
+> ![NOTE]
+> If you're having issues with pip being able to resolve the DNS name, you may need to restart your docker daemon using `sudo systemctl restart docker`
 
 ## Contributing
 Contributions are welcome to this project! Please see the [issues](https://github.com/nfoert/open-scouting/issues) page or the [roadmap](/docs/ROADMAP.md) for any current bugs or features that need implemented.
