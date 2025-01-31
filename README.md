@@ -63,6 +63,8 @@ You'll want to change several of these variables in `.env`
 - **`ADMIN_PATH`** - Change this to a random string or something specific that only you would know, protects the admin page from attacks
 - **`TBA_API_KEY`** - Replace with your TBA API key, generated [here](https://www.thebluealliance.com/account)
 - **`SERVER_IP`** - Replace with the IP address and port that the server will be accessed at
+
+- **`POSTGRES_PASSWORD`** - Replace with a password for the postgres database, this should be long and hard to guess
   
 The following variables are for the superuser that is created when the server starts for the first time, this is the main administrator account that is used to access the `/admin` page.
 - **`DJANGO_SUPERUSER_USERNAME`** - Replace with your superuser's username (Make this equal to your email if you want to use this account inside of Open Scouting for contributing)
@@ -71,6 +73,8 @@ The following variables are for the superuser that is created when the server st
 
 Additionally, you should configure the environment variables for setting up emails
 
+> ![NOTE]
+> If you're having issues with pip being able to resolve the DNS name, you may need to restart your docker daemon using `sudo systemctl restart docker`
 
 Finally, building and running the server is as simple as running the following
 ```bash
@@ -84,8 +88,7 @@ docker compose up -d
 
 The server should now be working!
 
-> ![NOTE]
-> If you're having issues with pip being able to resolve the DNS name, you may need to restart your docker daemon using `sudo systemctl restart docker`
+You should navigate to the `/admin` page (or whatever your admin path is) and access your new superuser, and fill in some values for the `Profile` object to prevent any errors when attempting to use this account
 
 ## Contributing
 Contributions are welcome to this project! Please see the [issues](https://github.com/nfoert/open-scouting/issues) page or the [roadmap](/docs/ROADMAP.md) for any current bugs or features that need implemented.

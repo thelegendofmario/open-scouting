@@ -28,7 +28,7 @@ Copy the `.env-template` file to a new file called `.env`.
 ```bash
 cp .env.development.template .env.development
 ```
-You should add your TBA API key here. If you want to be able to send emails, fill out those environment variables as well
+You should add your TBA API key here, and credentials for sending emails
 
 Next, create a django superuser and make and migrate the models
 ```bash
