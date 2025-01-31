@@ -15,8 +15,8 @@ python3 -m venv .venv
 Activate the virtual environment using the command for your system (Linux is used here) and install the required dependencies
 ```bash
 source ./.venv/bin/activate
-pip install -r requirements.txt
-pip install -r requirements-dev.txt
+pip install -r scouting/requirements.txt
+pip install -r scouting/requirements-dev.txt
 ```
 
 Install the required `npm` libraries
@@ -26,7 +26,7 @@ npm install
 
 Copy the `.env-template` file to a new file called `.env`.
 ```bash
-cp .env-template .env
+cp .env.development.template .env.development
 ```
 You should add your TBA API key here. If you want to be able to send emails, fill out those environment variables as well
 

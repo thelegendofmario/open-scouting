@@ -28,8 +28,12 @@ env = environ.Env(
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-environ.Env.read_env(BASE_DIR / ".." / ".env")
 
+if os.environ.get("OPEN_SCOUTING_PRODUCTION") == "1":
+    environ.Env.read_env(BASE_DIR / ".." / ".env.production")
+else:
+    print("Running in development mode!")
+    environ.Env.read_env(BASE_DIR / ".." / ".env.development")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -45,6 +49,8 @@ ADMIN_PATH = env("ADMIN_PATH")
 TBA_API_KEY = env("TBA_API_KEY")
 SERVER_IP = env("SERVER_IP")
 SERVER_MESSAGE = env("SERVER_MESSAGE")
+
+CSRF_TRUSTED_ORIGINS = env("CSRF_TRUSTED_ORIGINS")
 
 POSTGRES_NAME = env("POSTGRES_NAME")
 POSTGRES_USER = env("POSTGRES_USER")
@@ -102,21 +108,30 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "scouting.wsgi.application"
 
+CSRF_TRUSTED_ORIGINS = [SERVER_IP]
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": POSTGRES_NAME,
-        "USER": POSTGRES_USER,
-        "PASSWORD": POSTGRES_PASSWORD,
-        "HOST": "db",
-        "PORT": POSTGRES_PORT,
+if DEBUG:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": POSTGRES_NAME,
+            "USER": POSTGRES_USER,
+            "PASSWORD": POSTGRES_PASSWORD,
+            "HOST": "db",
+            "PORT": POSTGRES_PORT,
+        }
+    }
 
 
 # Password validation

@@ -54,7 +54,7 @@ cd open-scouting
 
 Now, copy `.env-template` to a new file called `.env`
 ```bash
-cp .env-template .env
+cp .env.production.template .env.production
 ```
 
 You'll want to change several of these variables in `.env`
@@ -69,6 +69,8 @@ The following variables are for the superuser that is created when the server st
 - **`DJANGO_SUPERUSER_PASSWORD`** - Replace with your superuser's password
 - **`DJANGO_SUPERUSER_EMAIL`** - Replace with your superuser's email
 
+Additionally, you should configure the environment variables for setting up emails
+
 
 Finally, building and running the server is as simple as running the following
 ```bash
@@ -80,7 +82,7 @@ Subsequent starts should be run using
 docker compose up -d
 ```
 
-The server should now be up and running!
+The server should now be working!
 
 > ![NOTE]
 > If you're having issues with pip being able to resolve the DNS name, you may need to restart your docker daemon using `sudo systemctl restart docker`
