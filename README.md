@@ -63,6 +63,7 @@ You'll want to change several of these variables in `.env`
 - **`ADMIN_PATH`** - Change this to a random string or something specific that only you would know, protects the admin page from attacks
 - **`TBA_API_KEY`** - Replace with your TBA API key, generated [here](https://www.thebluealliance.com/account)
 - **`SERVER_IP`** - Replace with the IP address and port that the server will be accessed at
+- **`CSRF_TRUSTED_ORIGINS`** - Replace with a list containing the IP address that the server will be hosted on
 
 - **`POSTGRES_PASSWORD`** - Replace with a password for the postgres database, this should be long and hard to guess
   

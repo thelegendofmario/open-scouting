@@ -30,10 +30,10 @@ env = environ.Env(
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 if os.environ.get("OPEN_SCOUTING_PRODUCTION") == "1":
-    environ.Env.read_env(BASE_DIR / ".." / ".env.production")
+    environ.Env.read_env(BASE_DIR / ".env.production")
 else:
     print("Running in development mode!")
-    environ.Env.read_env(BASE_DIR / ".." / ".env.development")
+    environ.Env.read_env(BASE_DIR / ".env.development")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/

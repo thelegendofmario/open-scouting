@@ -203,3 +203,29 @@ class CreateAccountTest(TestCase):
         self.assertEqual(profile.user, user)
         self.assertEqual(profile.display_name, "test")
         self.assertEqual(profile.team_number, "test")
+
+
+class GetAuthenticationStatusTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+        self.user = User.objects.create_user("test", "test", "test")
+        self.user.save()
+
+        profile = Profile(user=self.user, display_name="test", team_number="1234")
+        profile.save()
+
+    def test_get_authentication_status_anonymous(self):
+        response = self.client.post("/authentication/get_authentication_status")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "application/json")
+        self.assertEqual(response.json(), False)
+
+    def test_get_authentication_status_authenticated(self):
+        self.client.login(username="test", password="test")
+        response = self.client.post("/authentication/get_authentication_status")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "application/json")
+        self.assertEqual(response.json(), True)
