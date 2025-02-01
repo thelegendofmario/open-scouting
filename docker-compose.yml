@@ -27,9 +27,10 @@ services:
     image: postgres
     container_name: postgres
     volumes:
-      - ./data/db:/var/lib/postgresql/data
+      - db-data:/var/lib/postgresql/data
     env_file:
       - ./scouting/.env.production
 
 volumes:
+  db-data:
   staticfiles:
