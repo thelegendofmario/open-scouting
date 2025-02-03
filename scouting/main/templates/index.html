@@ -760,6 +760,10 @@
                     <i class="ph-bold ph-database"></i> View All Data
                 </button>
                 <p class="dark:text-white text-black opacity-80 text-sm text-center">View all data for this event</p>
+                <button class="ui_button" @click="get_header_data('pit_scouting')">
+                    <i class="ph-bold ph-garage"></i> Pit Scouting
+                </button>
+                <p class="dark:text-white text-black opacity-80 text-sm text-center">View or contribute scouting data for this event</p>
 
                 <p class="text-center dark:text-white text-black font-sans text-xl mb-1 mt-6">
                     <i class="ph-bold ph-export"></i> Share a link to this event
@@ -813,15 +817,25 @@
                                 } else {
                                     window.location.href = `{{ SERVER_IP }}/data?username=${encodeURIComponent(this.username)}&team_number=${encodeURIComponent(this.team_number)}&event_name=${encodeURIComponent(this.event_name)}&event_code=${this.event_code}&year=${this.year}&custom=true&`;
                                 }
+                            } else if (page == "pit_scouting") {
+                                if (!this.custom) {
+                                    window.location.href = `{{ SERVER_IP }}/pits?username=${encodeURIComponent(this.username)}&team_number=${encodeURIComponent(this.team_number)}&event_name=${encodeURIComponent(this.event_name)}&event_code=${this.event_code}&year=${this.year}&`;
+                                } else {
+                                    window.location.href = `{{ SERVER_IP }}/pits?username=${encodeURIComponent(this.username)}&team_number=${encodeURIComponent(this.team_number)}&event_name=${encodeURIComponent(this.event_name)}&event_code=${this.event_code}&year=${this.year}&custom=true&`;
+                                }
                             }
                         } else {
                             if (page == "session") {
                                 console.log("This feature is coming soon");
+                                
                             } else if (page == "contribute_separately") {
                                 window.location.href = `{{ SERVER_IP }}/contribute?year=${this.year}&demo=true&`;
 
                             } else if (page == "view_data") {
                                 window.location.href = `{{ SERVER_IP }}/data?year=${this.year}&demo=true&`;
+
+                            } else if (page == "pit_scouting") {
+                                window.location.href = `{{ SERVER_IP }}/pits?year=${this.year}&demo=true&`;
                             }
                         }
                     },

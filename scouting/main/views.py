@@ -131,6 +131,31 @@ def data(request):
     return render(request, "data.html", context)
 
 
+def pits(request):
+    request.session["username"] = request.GET.get("username", "unknown")
+    request.session["team_number"] = request.GET.get("team_number", "unknown")
+    request.session["event_name"] = request.GET.get("event_name", "unknown")
+    request.session["event_code"] = request.GET.get("event_code", "unknown")
+    request.session["custom"] = request.GET.get("custom", "unknown")
+    request.session["year"] = request.GET.get("year", "unknown")
+    request.session["demo"] = request.GET.get("demo", "unknown")
+
+    context = {
+        "SERVER_IP": settings.SERVER_IP,
+        "TBA_API_KEY": settings.TBA_API_KEY,
+        "SERVER_MESSAGE": settings.SERVER_MESSAGE,
+        "username": request.GET.get("username", "unknown"),
+        "team_number": request.GET.get("team_number", "unknown"),
+        "event_name": request.GET.get("event_name", "unknown"),
+        "event_code": request.GET.get("event_code", "unknown"),
+        "custom": request.GET.get("custom", "unknown"),
+        "year": request.GET.get("year", "unknown"),
+        "demo": request.GET.get("demo", "unknown"),
+    }
+
+    return render(request, "pits.html", context)
+
+
 def service_worker(request):
     sw_path = settings.BASE_DIR / "frontend" / "sw.js"
     return HttpResponse(open(sw_path).read(), content_type="application/javascript")
