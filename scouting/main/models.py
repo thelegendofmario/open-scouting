@@ -48,10 +48,22 @@ class Event(models.Model):
             return f"{self.name} in {str(self.year)}"
 
 
+# Represents a group of pits for an event, points to the event
+class PitGroup(models.Model):
+    event = models.ForeignKey(Event, on_delete=models.CASCADE)
+    created = models.DateTimeField(null=True, blank=True)
+    events_generated = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.event.name}'s pits"
+
+
 # Represents a team's pit at an event
 class Pit(models.Model):
     team_number = models.CharField(max_length=6)
-    event = models.ForeignKey(Event, on_delete=models.CASCADE)
+    pit_group = models.ForeignKey(
+        PitGroup, on_delete=models.SET_NULL, null=True, blank=True
+    )
     created = models.DateTimeField(null=True, blank=True)
     data = models.JSONField(default=dict)
 
