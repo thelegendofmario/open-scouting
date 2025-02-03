@@ -65,7 +65,10 @@ class Pit(models.Model):
         PitGroup, on_delete=models.SET_NULL, null=True, blank=True
     )
     created = models.DateTimeField(null=True, blank=True)
-    data = models.JSONField(default=dict)
+    data = models.JSONField(default=list)
 
     def __str__(self):
-        return f"{self.team_number}'s pit at {self.event.name}"
+        if self.pit_group is None:
+            return f"{self.team_number}'s pit"
+        else:
+            return f"{self.team_number}'s pit at {self.pit_group.event.name}"
