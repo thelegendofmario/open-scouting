@@ -488,7 +488,7 @@ def check_local_backup_reports(request):
                         name=unquote(report["event_name"]),
                         event_code=report["event_code"],
                         custom=True,
-                        year=request.headers["year"],
+                        year=report["year"],
                     )
                     event = events[0]
 
@@ -585,7 +585,7 @@ def upload_offline_reports(request):
                         name=unquote(report["event_name"]),
                         event_code=report["event_code"],
                         custom=True,
-                        year=request.headers["year"],
+                        year=report["year"],
                     )
                     event = events[0]
 

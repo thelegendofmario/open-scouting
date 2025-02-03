@@ -24,13 +24,16 @@ env = environ.Env(
     ),
     DJANGO_ALLOWED_HOSTS=(list, ["localhost", "127.0.0.1"]),
     ADMIN_PATH=(str, "admin/"),
-    DATABASE_URL=(str, "sqlite:///db.sqlite3"),
 )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-environ.Env.read_env(BASE_DIR / ".." / ".env")
 
+if os.environ.get("OPEN_SCOUTING_PRODUCTION") == "1":
+    environ.Env.read_env(BASE_DIR / ".env.production")
+else:
+    print("Running in development mode!")
+    environ.Env.read_env(BASE_DIR / ".env.development")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -47,6 +50,13 @@ TBA_API_KEY = env("TBA_API_KEY")
 SERVER_IP = env("SERVER_IP")
 SERVER_MESSAGE = env("SERVER_MESSAGE")
 
+CSRF_TRUSTED_ORIGINS = env("CSRF_TRUSTED_ORIGINS")
+
+POSTGRES_NAME = env("POSTGRES_NAME")
+POSTGRES_USER = env("POSTGRES_USER")
+POSTGRES_PASSWORD = env("POSTGRES_PASSWORD")
+POSTGRES_PORT = env("POSTGRES_PORT")
+
 EMAIL_ENABLED = env("EMAIL_ENABLED")
 EMAIL_BACKEND = env("EMAIL_BACKEND")
 EMAIL_HOST = env("EMAIL_HOST")
@@ -54,6 +64,9 @@ EMAIL_HOST_USER = env("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
 EMAIL_PORT = env("EMAIL_PORT")
 EMAIL_USE_TLS = env("EMAIL_USE_TLS")
+
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # Application definition
 
@@ -98,13 +111,30 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "scouting.wsgi.application"
 
+CSRF_TRUSTED_ORIGINS = [SERVER_IP]
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    "default": env.db(),
-}
+
+if DEBUG:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": POSTGRES_NAME,
+            "USER": POSTGRES_USER,
+            "PASSWORD": POSTGRES_PASSWORD,
+            "HOST": "db",
+            "PORT": POSTGRES_PORT,
+        }
+    }
 
 
 # Password validation
