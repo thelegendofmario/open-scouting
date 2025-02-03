@@ -4,14 +4,16 @@ from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 
-from main.models import Data, Event
+from main.models import Data, Event, PitGroup, Pit
 from . import season_fields
 from . import demo_data
+from . import pit_scouting_questions
 
 import json
 from datetime import datetime
 import uuid
 from urllib.parse import unquote
+import requests
 
 # TODO: This is a duplicate of a similar array in models.py, I don't know if there's a good way to make these into one array
 YEARS = ["2024", "2025"]
@@ -565,3 +567,77 @@ def upload_offline_reports(request):
 
     else:
         return HttpResponse("Request is not a POST request!", status=501)
+
+
+@csrf_exempt
+def get_pits(request):
+    """
+    Returns the pits and their data for a given event as JSON
+
+    1. Check if an event exists for this event code and year
+    2. Check and see if a pit group has been created for this pit
+    3. If the pit group already has pits, they will be returned
+    4. If not, the server will attempt to ask TBA for the pits for this event, if none are specified, no pits will be returned and the user will have to manually add them
+
+    Required Headers:
+        event_name - The event name for the event
+        event_code - The event code for the event
+        year - The year that this event is from
+
+    Returns:
+        A json dictionary of all the pits for this event and their data
+    """
+    if request.method == "POST":
+        event = check_if_event_exists(
+            request,
+            request.headers["event_name"],
+            request.headers["event_code"],
+            request.headers["year"],
+            request.headers["custom"],
+        )
+
+        pit_group = PitGroup.objects.filter(event=event).first()
+
+        if pit_group:
+            pits = Pit.objects.filter(pit_group=pit_group)
+
+            pit_data = []
+            for pit in pits:
+                pit_data.append(pit.data)
+
+            return JsonResponse(pit_data, safe=False, status=200)
+
+        else:
+            pit_group = PitGroup.objects.create(
+                event=event, created=timezone.now(), events_generated=True
+            )
+            pit_group.save()
+
+            request_data = {
+                "X-TBA-Auth-Key": settings.TBA_API_KEY,
+            }
+
+            response = requests.get(
+                f"https://www.thebluealliance.com/api/v3/event/{request.headers['year']}{request.headers['event_code']}/teams",
+                request_data,
+            )
+
+            pits_to_create = [
+                Pit(
+                    team_number=team["team_number"],
+                    pit_group=pit_group,
+                    created=timezone.now(),
+                    data=pit_scouting_questions.reefscape,
+                )
+                for team in response.json()
+            ]
+            Pit.objects.bulk_create(pits_to_create)
+
+            pits = Pit.objects.filter(pit_group=pit_group)
+            pit_data = []
+            for pit in pits:
+                pit_data.append(pit.data)
+
+            return JsonResponse(pit_data, safe=False, status=200)
+    else:
+        return HttpResponse(request, "Request is not a POST request!", status=501)

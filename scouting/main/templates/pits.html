@@ -61,6 +61,34 @@
                 }
             }
         </script>
+
+        <div x-data="pits()">
+            <div>List of pits that need scouted and filter buttons</div>
+
+            <div>Contains all pits that are received from the server if they exist</div>
+        </div>
+
+        <script>
+            function pits() {
+                return {
+                    async init() {
+                        var response = await fetch("{{ SERVER_IP }}/get_pits", {
+                            method: "POST",
+                            headers: {
+                                    "event-name": encodeURIComponent("{{ event_name }}"),
+                                    "event-code": "{{ event_code }}",
+                                    "custom": "{{ custom }}",
+                                    "year": "{{ year }}"
+                                }
+                            });
+
+                            response.text().then(async (text) => {
+                                console.log(JSON.parse(text));
+                            });
+                    }
+                }
+            }
+        </script>
     </div>
 {% endblock %}
 
