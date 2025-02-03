@@ -4,15 +4,19 @@ This document describes the roadmap for Open Scouting, and roughly when each fea
 ---
 
 ## To-Do
-### `v0.0.8-alpha`
+### `v0.0.9-alpha`
 - [ ] [#5](https://github.com/FRC-Team3484/open-scouting/issues/5) - Be able to collect pit scouting data
 - [ ] [#18](https://github.com/FRC-Team3484/open-scouting/issues/18) - Export data
 
-### `v0.0.9-alpha`
+### `v0.0.10-alpha`
 - [ ] [#19](https://github.com/FRC-Team3484/open-scouting/issues/19) - More ways to view data
 
 ---
 ## Completed
+### `v0.0.8-alpha`
+- [x] Make site able to be run out of a docker container in production
+- [x] Adjust site for new repository location
+
 ### `v0.0.7-alpha`
 - [x] [#44](https://github.com/FRC-Team3484/open-scouting/issues/44) - Backups database store isn't getting created correctly
 - [x] [#30](https://github.com/FRC-Team3484/open-scouting/issues/30) - Add tests
