@@ -6,7 +6,7 @@
 
   **An open source application for easier scouting at First Robotics competitions**
 
-  **[Releases](https://github.com/nfoert/open-scouting/releases) ● [Issues](https://github.com/nfoert/open-scouting/issues) ● [Development branch](https://github.com/nfoert/open-scouting/tree/development)**
+  **[Releases](https://github.com/FRC-Team3484/open-scouting/releases) ● [Issues](https://github.com/FRC-Team3484/open-scouting/issues) ● [Development branch](https://github.com/FRC-Team3484/open-scouting/tree/development)**
 
 </div>
 
@@ -48,7 +48,7 @@ First, ensure you have `docker`, `docker-compose`, and `git` installed on your s
 
 Next, clone this repository
 ```bash
-git clone https://github.com/nfoert/open-scouting
+git clone https://github.com/FRC-Team3484/open-scouting
 cd open-scouting
 ```
 
@@ -92,7 +92,7 @@ The server should now be working!
 You should navigate to the `/admin` page (or whatever your admin path is) and access your new superuser, and fill in some values for the `Profile` object to prevent any errors when attempting to use this account
 
 ## Contributing
-Contributions are welcome to this project! Please see the [issues](https://github.com/nfoert/open-scouting/issues) page or the [roadmap](/docs/ROADMAP.md) for any current bugs or features that need implemented.
+Contributions are welcome to this project! Please see the [issues](https://github.com/FRC-Team3484/open-scouting/issues) page or the [roadmap](/docs/ROADMAP.md) for any current bugs or features that need implemented.
 
 You can view the guide on how `season_fields.py` is formatted [here](/docs/Formatting_Season_Fields.md) if your contribution involves this file
 
@@ -103,4 +103,4 @@ Next, create a new branch and implement your changes. You can install this proje
 Eventually, `development` will be merged into `main` and your changes will be released into production with a new release. Thanks for your contribution!
 
 ## To-Do
-Please see the [roadmap](/docs/ROADMAP.md) for the currently planned out things that need to be completed. Additionally, see the [issues page](https://github.com/nfoert/open-scouting/issues) for any current bugs or features that need implemented, but aren't officially scheduled.
+Please see the [roadmap](/docs/ROADMAP.md) for the currently planned out things that need to be completed. Additionally, see the [issues page](https://github.com/FRC-Team3484/open-scouting/issues) for any current bugs or features that need implemented, but aren't officially scheduled.

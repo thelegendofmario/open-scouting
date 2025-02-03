@@ -4,7 +4,7 @@ This page documents how the data in `season_fields.py` should be formatted and s
 
 `season_fields.py` is used to define all the fields and sections needed for scouts to contribute data to the server when scouting. A single field represents a key value pair which is stored in the database for each needed information about the year
 
-You can view the current `season_fields.py` file [here](https://github.com/nfoert/open-scouting/blob/main/scouting/main/season_fields.py)
+You can view the current `season_fields.py` file [here](https://github.com/FRC-Team3484/open-scouting/blob/main/scouting/main/season_fields.py)
 
 ## Types of fields
 This section demonstrates what each of the available fields are and their parameters
