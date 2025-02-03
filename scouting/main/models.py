@@ -29,6 +29,7 @@ class Data(models.Model):
         verbose_name_plural = "Data"
 
 
+# Represents an event in a year
 class Event(models.Model):
     year = models.IntegerField(choices=YEARS)
     name = models.CharField(max_length=999)
@@ -45,3 +46,14 @@ class Event(models.Model):
             return f"{self.name} in {str(self.year)} (Custom event)"
         else:
             return f"{self.name} in {str(self.year)}"
+
+
+# Represents a team's pit at an event
+class Pit(models.Model):
+    team_number = models.CharField(max_length=6)
+    event = models.ForeignKey(Event, on_delete=models.CASCADE)
+    created = models.DateTimeField(null=True, blank=True)
+    data = models.JSONField(default=dict)
+
+    def __str__(self):
+        return f"{self.team_number}'s pit at {self.event.name}"
