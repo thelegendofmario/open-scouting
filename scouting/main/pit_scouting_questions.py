@@ -15,7 +15,7 @@ reefscape = [
         "answers": [],
     },
     {
-        "text": "Can your robot score coral the reef?",
+        "text": "Can your robot score coral in the reef?",
         "simple_name": "reef",
         "type": "boolean",
         "answers": [],

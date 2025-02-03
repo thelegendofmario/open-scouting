@@ -7,7 +7,7 @@
 {% block stylesheets %}{% endblock %}
 
 {% block body %}
-    <div class="flex h-screen justify-center items-center flex-col w-screen">
+    <div class="flex justify-center items-center flex-col w-screen">
         <div class="flex flex-row w-full md:w-3/4 lg:w-2/3 mx-8 my-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 items-center justify-center"
              x-data="pits_header()">
             <img class="w-16 h-16 aspect-square m-2 hover:scale-110 transition-all ease-in-out active:scale-95"
@@ -62,15 +62,38 @@
             }
         </script>
 
-        <div x-data="pits()">
-            <div>List of pits that need scouted and filter buttons</div>
+        <div x-data="pits()" class="w-full md:w-3/4 lg:w-2/3 mx-8">
+            <div class="flex flex-row bg-slate-200/80 dark:bg-slate-700/80 border-2 dark:border-slate-600 border-slate-300 rounded-xl backdrop-blur-md p-4 my-2">
+                <p class="dark:text-white text-black">List of pits that need scouted and filter buttons</p>
+            </div>
 
-            <div>Contains all pits that are received from the server if they exist</div>
-        </div>
+            <div class="h-auto">
+                <template x-for="pit in pit_data">
+                    <div class="flex flex-col bg-slate-200/80 dark:bg-slate-700/80 border-2 dark:border-slate-600 border-slate-300 rounded-xl backdrop-blur-md p-4 my-2">
+                        <div class="flex flex-row items-center">
+                            <div class="rounded-md w-12 h-12 mr-2 bg-slate-200/80 dark:bg-slate-700/80 border-2 dark:border-slate-600 border-slate-300">
+                                <img :src="'https://www.thebluealliance.com/avatar/'+ '{{ year }}' + '/frc' + pit.team_number + '.png'"
+                                     onerror="this.onerror=null;this.src='';this.style.display='none';"
+                                     class="w-full h-full rounded-md">
+                            </div>
+                            <p class="dark:text-white text-black text-xl font-bold"
+                               x-text="pit.team_number"></p>
+                        </div>
 
-        <script>
+                        <div class="flex flex-col mr-4">
+                            <template x-for="question in pit.questions">
+                                <p class="dark:text-white text-black" x-text="question.text"></p>
+                            </template>
+                        </div>
+                    </div>
+                </template>https://placehold.co/400x300
+            </div>
+
+            <script>
             function pits() {
                 return {
+                    pit_data: [],
+
                     async init() {
                         var response = await fetch("{{ SERVER_IP }}/get_pits", {
                             method: "POST",
@@ -83,14 +106,15 @@
                             });
 
                             response.text().then(async (text) => {
-                                console.log(JSON.parse(text));
+                                this.pit_data = JSON.parse(text);
+                                console.log(this.pit_data);
                             });
                     }
                 }
             }
-        </script>
-    </div>
-{% endblock %}
+            </script>
+        </div>
+    {% endblock %}
 
-{% block scripts %}
-{% endblock %}
+    {% block scripts %}
+    {% endblock %}

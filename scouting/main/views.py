@@ -603,7 +603,11 @@ def get_pits(request):
 
             pit_data = []
             for pit in pits:
-                pit_data.append(pit.data)
+                pit_entry = {
+                    "team_number": pit.team_number,
+                    "questions": pit.data,
+                }
+                pit_data.append(pit_entry)
 
             return JsonResponse(pit_data, safe=False, status=200)
 
@@ -636,7 +640,11 @@ def get_pits(request):
             pits = Pit.objects.filter(pit_group=pit_group)
             pit_data = []
             for pit in pits:
-                pit_data.append(pit.data)
+                pit_entry = {
+                    "team_number": pit.team_number,
+                    "questions": pit.data,
+                }
+                pit_data.append(pit_entry)
 
             return JsonResponse(pit_data, safe=False, status=200)
     else:
