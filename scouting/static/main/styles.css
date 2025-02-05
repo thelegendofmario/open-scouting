@@ -1055,6 +1055,11 @@ select {
   width: 100vw;
 }
 
+.w-fit {
+  width: -moz-fit-content;
+  width: fit-content;
+}
+
 .max-w-14 {
   max-width: 3.5rem;
 }
@@ -1073,6 +1078,10 @@ select {
 
 .max-w-sm {
   max-width: 24rem;
+}
+
+.flex-1 {
+  flex: 1 1 0%;
 }
 
 .-translate-x-1\/2 {

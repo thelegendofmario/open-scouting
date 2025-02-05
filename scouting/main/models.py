@@ -61,6 +61,7 @@ class PitGroup(models.Model):
 # Represents a team's pit at an event
 class Pit(models.Model):
     team_number = models.CharField(max_length=6)
+    nickname = models.CharField(max_length=999, blank=True)
     pit_group = models.ForeignKey(
         PitGroup, on_delete=models.SET_NULL, null=True, blank=True
     )

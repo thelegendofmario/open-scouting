@@ -78,16 +78,15 @@
                                          onerror="this.onerror=null;this.src='';this.style.display='none';"
                                          class="w-full h-full rounded-md">
                                 </div>
-                                <div class="flex flex-col">
+                                <div class="flex flex-col w-fit">
                                     <p class="dark:text-white text-black text-xl font-bold mb-0 pb-0"
                                        x-text="pit.team_number"></p>
-                                    <!-- TODO: Add nickname -->
                                     <p class="dark:text-white text-black text-md opacity-80"
-                                       x-text="'nickname'"></p>
+                                       x-text="pit.nickname"></p>
                                 </div>
 
                             </div>
-                            <div class="mr-2 w-full justify-end">
+                            <div class="flex-1 mr-2 w-auto justify-end">
                                 <p @click="open = !open"
                                    x-show="open"
                                    class="dark:text-white text-black cursor-pointer text-lg w-full text-right">
@@ -135,16 +134,15 @@
                     </div>
                 </template>
 
-                <div class="flex flex-col bg-slate-200/80 dark:bg-slate-700/80 border-2 dark:border-slate-600 border-slate-300 rounded-xl backdrop-blur-md p-4 mt-2">
-                    <p class="dark:text-white text-black text-lg text-center">
-                        Add a team's pit/p>
-                        <button class="ui_button">
-                            <i class="ph-bold ph-plus-circle"></i> Add a pit
-                        </button>
-                    </div>
+                <div class="flex flex-col bg-slate-200/80 dark:bg-slate-700/80 border-2 dark:border-slate-600 border-slate-300 rounded-xl backdrop-blur-md p-4 mt-2 mb-4">
+                    <p class="dark:text-white text-black text-lg text-center">Is a team's pit not here yet?</p>
+                    <button class="ui_button">
+                        <i class="ph-bold ph-plus-circle"></i> Add a pit
+                    </button>
                 </div>
+            </div>
 
-                <script>
+            <script>
             function pits() {
                 return {
                     pit_data: [],
@@ -167,9 +165,9 @@
                     }
                 }
             }
-                </script>
-            </div>
-        {% endblock %}
+            </script>
+        </div>
+    {% endblock %}
 
-        {% block scripts %}
-        {% endblock %}
+    {% block scripts %}
+    {% endblock %}

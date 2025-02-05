@@ -605,6 +605,7 @@ def get_pits(request):
             for pit in pits:
                 pit_entry = {
                     "team_number": pit.team_number,
+                    "nickname": pit.nickname,
                     "questions": pit.data,
                 }
                 pit_data.append(pit_entry)
@@ -629,6 +630,7 @@ def get_pits(request):
             pits_to_create = [
                 Pit(
                     team_number=team["team_number"],
+                    nickname=team["nickname"],
                     pit_group=pit_group,
                     created=timezone.now(),
                     data=pit_scouting_questions.reefscape,
@@ -642,6 +644,7 @@ def get_pits(request):
             for pit in pits:
                 pit_entry = {
                     "team_number": pit.team_number,
+                    "nickname": pit.nickname,
                     "questions": pit.data,
                 }
                 pit_data.append(pit_entry)
