@@ -10,6 +10,10 @@
     @apply border-solid border-2 dark:border-slate-600 dark:bg-slate-700/80 dark:enabled:active:bg-slate-600/85 dark:hover:bg-slate-800/80 dark:text-white border-slate-300 bg-slate-100/80 hover:bg-slate-300/80 text-black rounded-full p-2 transition backdrop-blur-lg disabled:scale-95 disabled:opacity-80 aspect-square flex justify-center items-center text-2xl;
 }
 
+.ui_button_small {
+    @apply border-solid border-2 dark:border-slate-600 dark:bg-slate-700/80 dark:enabled:active:bg-slate-600/85 dark:hover:bg-slate-800/80 dark:text-white border-slate-300 bg-slate-100/80 hover:bg-slate-300/80 text-black rounded-full p-1 transition backdrop-blur-lg disabled:scale-95 disabled:opacity-80 text-sm w-fit px-2 py-1;
+}
+
 .ui_input {
     @apply border-solid border-2 dark:border-slate-600 dark:bg-slate-700/80 dark:enabled:active:bg-slate-600/85 dark:hover:bg-slate-800/80 dark:text-white border-slate-300 bg-slate-100/80 hover:bg-slate-300/80 text-black rounded-xl py-2 px-6 transition backdrop-blur-lg my-1 w-5/6;
 }

@@ -845,6 +845,11 @@ select {
   margin-right: auto;
 }
 
+.my-1 {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
 .my-2 {
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
@@ -865,9 +870,8 @@ select {
   margin-bottom: auto;
 }
 
-.my-1 {
-  margin-top: 0.25rem;
-  margin-bottom: 0.25rem;
+.mb-0 {
+  margin-bottom: 0px;
 }
 
 .mb-1 {
@@ -930,8 +934,8 @@ select {
   margin-top: 1.5rem;
 }
 
-.mb-0 {
-  margin-bottom: 0px;
+.mt-1 {
+  margin-top: 0.25rem;
 }
 
 .block {
@@ -956,6 +960,10 @@ select {
 
 .aspect-square {
   aspect-ratio: 1 / 1;
+}
+
+.\!h-10 {
+  height: 2.5rem !important;
 }
 
 .\!h-8 {
@@ -1002,10 +1010,6 @@ select {
   height: 100vh;
 }
 
-.\!h-10 {
-  height: 2.5rem !important;
-}
-
 .max-h-\[80vh\] {
   max-height: 80vh;
 }
@@ -1014,8 +1018,17 @@ select {
   min-height: 100vh;
 }
 
+.\!w-10 {
+  width: 2.5rem !important;
+}
+
 .\!w-8 {
   width: 2rem !important;
+}
+
+.\!w-fit {
+  width: -moz-fit-content !important;
+  width: fit-content !important;
 }
 
 .w-10 {
@@ -1040,10 +1053,6 @@ select {
 
 .w-screen {
   width: 100vw;
-}
-
-.\!w-10 {
-  width: 2.5rem !important;
 }
 
 .max-w-14 {
@@ -1403,6 +1412,10 @@ select {
   padding-bottom: 1.5rem;
 }
 
+.pb-0 {
+  padding-bottom: 0px;
+}
+
 .pl-2 {
   padding-left: 0.5rem;
 }
@@ -1413,10 +1426,6 @@ select {
 
 .pt-6 {
   padding-top: 1.5rem;
-}
-
-.pb-0 {
-  padding-bottom: 0px;
 }
 
 .text-left {
@@ -1441,11 +1450,6 @@ select {
 
 .font-sans {
   font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-}
-
-.\!text-sm {
-  font-size: 0.875rem !important;
-  line-height: 1.25rem !important;
 }
 
 .text-2xl {
@@ -1539,10 +1543,6 @@ select {
 
 .opacity-80 {
   opacity: 0.8;
-}
-
-.opacity-90 {
-  opacity: 0.9;
 }
 
 .shadow-lg {
@@ -1701,6 +1701,61 @@ select {
 }
 
 .ui_button_icon:active:enabled:where(.dark, .dark *) {
+  background-color: rgb(71 85 105 / 0.85);
+}
+
+.ui_button_small {
+  width: -moz-fit-content;
+  width: fit-content;
+  border-radius: 9999px;
+  border-width: 2px;
+  border-style: solid;
+  --tw-border-opacity: 1;
+  border-color: rgb(203 213 225 / var(--tw-border-opacity));
+  background-color: rgb(241 245 249 / 0.8);
+  padding: 0.25rem;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  --tw-text-opacity: 1;
+  color: rgb(0 0 0 / var(--tw-text-opacity));
+  --tw-backdrop-blur: blur(16px);
+  -webkit-backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
+  backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-backdrop-filter;
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-backdrop-filter;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.ui_button_small:hover {
+  background-color: rgb(203 213 225 / 0.8);
+}
+
+.ui_button_small:disabled {
+  --tw-scale-x: .95;
+  --tw-scale-y: .95;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+  opacity: 0.8;
+}
+
+.ui_button_small:where(.dark, .dark *) {
+  --tw-border-opacity: 1;
+  border-color: rgb(71 85 105 / var(--tw-border-opacity));
+  background-color: rgb(51 65 85 / 0.8);
+  --tw-text-opacity: 1;
+  color: rgb(255 255 255 / var(--tw-text-opacity));
+}
+
+.ui_button_small:hover:where(.dark, .dark *) {
+  background-color: rgb(30 41 59 / 0.8);
+}
+
+.ui_button_small:active:enabled:where(.dark, .dark *) {
   background-color: rgb(71 85 105 / 0.85);
 }
 
