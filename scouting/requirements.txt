@@ -5,3 +5,4 @@ django-environ
 gunicorn
 psycopg2
 requests
+deepdiff

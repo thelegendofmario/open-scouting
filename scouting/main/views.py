@@ -14,6 +14,7 @@ from datetime import datetime
 import uuid
 from urllib.parse import unquote
 import requests
+import deepdiff
 
 # TODO: This is a duplicate of a similar array in models.py, I don't know if there's a good way to make these into one array
 YEARS = ["2024", "2025"]
@@ -650,5 +651,99 @@ def get_pits(request):
                 pit_data.append(pit_entry)
 
             return JsonResponse(pit_data, safe=False, status=200)
+    else:
+        return HttpResponse(request, "Request is not a POST request!", status=501)
+
+
+@csrf_exempt
+def update_pits(request):
+    """
+    Takes a pit db (json), compares the received one with the one in the server, and apply the changes to the database
+
+    1. Check if an event exists for this event code and year
+    2. Find the changes between the two databases
+    3. Apply the changes to the local db from the server
+
+    Required Headers:
+        event_name - The event name for the event
+        event_code - The event code for the event
+        year - The year that this event is from
+        data - The pit scouting json db from the client
+
+    Returns:
+        The changes made to the database as JSON
+    """
+
+    if request.method == "POST":
+        try:
+            client_db = json.loads(request.headers["data"])
+        except KeyError:
+            return HttpResponse(request, "No data found in request", status=400)
+
+        event = check_if_event_exists(
+            request,
+            request.headers["event_name"],
+            request.headers["event_code"],
+            request.headers["year"],
+            request.headers["custom"],
+        )
+
+        pit_group = PitGroup.objects.filter(event=event).first()
+
+        if pit_group:
+            pits = Pit.objects.filter(pit_group=pit_group)
+
+            server_db = []
+            for pit in pits:
+                pit_entry = {
+                    "team_number": pit.team_number,
+                    "nickname": pit.nickname,
+                    "questions": pit.data,
+                }
+                server_db.append(pit_entry)
+
+            diff = deepdiff.DeepDiff(client_db, server_db, view="tree")
+
+            for change in list(diff["iterable_item_removed"]):
+                if "root" and "questions" and "answers" in change.path():
+                    team_number = client_db[change.path(output_format="list")[0]][
+                        "team_number"
+                    ]
+                    pit = Pit.objects.filter(
+                        team_number=team_number, pit_group=pit_group
+                    ).first()
+
+                    pit.data[change.path(output_format="list")[2]]["answers"].append(
+                        change.t1
+                    )
+                    pit.save()
+
+                elif "root" and "questions" in change.path():
+                    team_number = client_db[change.path(output_format="list")[0]][
+                        "team_number"
+                    ]
+                    pit = Pit.objects.filter(
+                        team_number=team_number, pit_group=pit_group
+                    ).first()
+
+                    pit.data.append(change.t1)
+                    pit.save()
+
+                elif "root" in change.path():
+                    pit_data = change.t1
+                    pit = Pit(
+                        team_number=pit_data["team_number"],
+                        nickname=pit_data["nickname"],
+                        pit_group=pit_group,
+                        created=timezone.now(),
+                        data=pit_data["questions"],
+                    )
+                    pit.save()
+
+            return JsonResponse("done", safe=False, status=200)
+
+        else:
+            return HttpResponse(request, "No pits found for this event", status=404)
+
     else:
         return HttpResponse(request, "Request is not a POST request!", status=501)

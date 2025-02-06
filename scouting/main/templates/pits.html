@@ -182,10 +182,27 @@
                                 }
                             });
 
+                        response.text().then(async (text) => {
+                            this.pit_data = JSON.parse(text);
+                            console.log(this.pit_data[0]);
+                            
+                            var response = await fetch("{{ SERVER_IP }}/update_pits", {
+                                method: "POST",
+                                headers: {
+                                        "event-name": encodeURIComponent("{{ event_name }}"),
+                                        "event-code": "{{ event_code }}",
+                                        "custom": "{{ custom }}",
+                                        "year": "{{ year }}",
+                                        "data": JSON.stringify(this.pit_data)
+                                    }
+                                });
+
                             response.text().then(async (text) => {
-                                this.pit_data = JSON.parse(text);
-                                console.log(this.pit_data);
+                                console.log(text);
                             });
+                        });
+
+                        
                     }
                 }
             }
