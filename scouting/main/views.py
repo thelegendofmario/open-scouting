@@ -704,43 +704,47 @@ def update_pits(request):
 
             diff = deepdiff.DeepDiff(client_db, server_db, view="tree")
 
-            for change in list(diff["iterable_item_removed"]):
-                if "root" and "questions" and "answers" in change.path():
-                    team_number = client_db[change.path(output_format="list")[0]][
-                        "team_number"
-                    ]
-                    pit = Pit.objects.filter(
-                        team_number=team_number, pit_group=pit_group
-                    ).first()
+            if diff:
+                for change in list(diff["iterable_item_removed"]):
+                    if "root" and "questions" and "answers" in change.path():
+                        team_number = client_db[change.path(output_format="list")[0]][
+                            "team_number"
+                        ]
+                        pit = Pit.objects.filter(
+                            team_number=team_number, pit_group=pit_group
+                        ).first()
 
-                    pit.data[change.path(output_format="list")[2]]["answers"].append(
-                        change.t1
-                    )
-                    pit.save()
+                        pit.data[change.path(output_format="list")[2]][
+                            "answers"
+                        ].append(change.t1)
+                        pit.save()
 
-                elif "root" and "questions" in change.path():
-                    team_number = client_db[change.path(output_format="list")[0]][
-                        "team_number"
-                    ]
-                    pit = Pit.objects.filter(
-                        team_number=team_number, pit_group=pit_group
-                    ).first()
+                    elif "root" and "questions" in change.path():
+                        team_number = client_db[change.path(output_format="list")[0]][
+                            "team_number"
+                        ]
+                        pit = Pit.objects.filter(
+                            team_number=team_number, pit_group=pit_group
+                        ).first()
 
-                    pit.data.append(change.t1)
-                    pit.save()
+                        pit.data.append(change.t1)
+                        pit.save()
 
-                elif "root" in change.path():
-                    pit_data = change.t1
-                    pit = Pit(
-                        team_number=pit_data["team_number"],
-                        nickname=pit_data["nickname"],
-                        pit_group=pit_group,
-                        created=timezone.now(),
-                        data=pit_data["questions"],
-                    )
-                    pit.save()
+                    elif "root" in change.path():
+                        pit_data = change.t1
+                        pit = Pit(
+                            team_number=pit_data["team_number"],
+                            nickname=pit_data["nickname"],
+                            pit_group=pit_group,
+                            created=timezone.now(),
+                            data=pit_data["questions"],
+                        )
+                        pit.save()
 
-            return JsonResponse("done", safe=False, status=200)
+                return JsonResponse("done", safe=False, status=200)
+
+            else:
+                return JsonResponse("no changes", safe=False, status=200)
 
         else:
             return HttpResponse(request, "No pits found for this event", status=404)
