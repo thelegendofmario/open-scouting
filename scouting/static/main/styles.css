@@ -1014,6 +1014,10 @@ select {
   height: 100vh;
 }
 
+.\!max-h-8 {
+  max-height: 2rem !important;
+}
+
 .max-h-\[80vh\] {
   max-height: 80vh;
 }
@@ -1789,8 +1793,8 @@ select {
   --tw-border-opacity: 1;
   border-color: rgb(203 213 225 / var(--tw-border-opacity));
   background-color: rgb(241 245 249 / 0.8);
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
   padding-left: 1.5rem;
   padding-right: 1.5rem;
   --tw-text-opacity: 1;

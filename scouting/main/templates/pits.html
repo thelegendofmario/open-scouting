@@ -104,27 +104,44 @@
                             <template x-for="question in pit.questions">
                                 <div>
                                     <template x-if="question.answers && question.answers[0] && question.answers[0].value !== ''">
-                                        <div class="flex flex-col" x-data="{ open: false }">
+                                        <div class="flex flex-col"
+                                             x-data="{ open: false, editing: false }"
+                                             @click.outside="editing = false; open = false">
                                             <div class="ml-4 flex flex-row items-center my-1">
                                                 <i class="ph-bold ph-check text-md text-green-600 mr-1"></i>
-                                                <button class="ui_button_icon ml-2 mr-1 !w-10 !h-10">
-                                                    <i class="ph-bold ph-plus-circle !text-md"></i>
+                                                <button class="ui_button_icon ml-2 mr-1 !w-10 !h-10"
+                                                        @click="editing = !editing">
+                                                    <i class="ph-bold ph-plus-circle !text-md" x-show="!editing"></i>
+                                                    <i class="ph-bold ph-x-circle !text-md" x-show="editing"></i>
                                                 </button>
-                                                <button class="ui_button_icon mr-2 ml-1 !w-10 !h-10" @click="open = !open">
+                                                <button class="ui_button_icon mr-2 ml-1 !w-10 !h-10"
+                                                        @click="open = !open"
+                                                        x-show="!editing"
+                                                        x-transition>
                                                     <i class="ph-bold ph-eye !text-md" x-show="!open"></i>
                                                     <i class="ph-bold ph-eye-closed !text-md" x-show="open"></i>
                                                 </button>
                                                 <p class="dark:text-white text-black" x-text="question.text"></p>
                                                 <p class="dark:text-white text-black opacity-80 ml-2 mr-2"
                                                    x-text="question.answers[0].value"
-                                                   x-show="!open"
+                                                   x-show="!open || editing"
                                                    x-transition></p>
                                                 <p class="dark:text-white text-black opacity-60"
-                                                   x-text="'(' + question.answers.length + ' answers)'"
-                                                   x-show="!open"
+                                                   x-text="'(' + question.answers.length + ')'"
+                                                   x-show="!open || editing"
                                                    x-transition></p>
+
                                             </div>
-                                            <div class="flex flex-row ml-8 flex-wrap" x-show="open" x-collapse>
+                                            <div class="flex flex-row items-center ml-8" x-show="editing" x-collapse>
+                                                <!-- TODO: Change based off of field type -->
+                                                <input class="ui_input !max-h-8" type="text">
+                                                <button class="ui_button_icon !w-10 !h-10 ml-2">
+                                                    <i class="ph-bold ph-check !text-md"></i>
+                                                </button>
+                                            </div>
+                                            <div class="flex flex-row ml-8 flex-wrap"
+                                                 x-show="open || editing"
+                                                 x-collapse>
                                                 <template x-for="answer in question.answers">
                                                     <div class="flex flex-row items-end mx-1 mb-1">
                                                         <p class="dark:text-white text-black opacity-80" x-text="answer.value"></p>
@@ -140,13 +157,27 @@
                                     </template>
 
                                     <template x-if="!question.answers || question.answers.length < 1">
-                                        <div class="ml-4 flex flex-row items-center my-1">
-                                            <i class="ph-bold ph-x text-md text-red-500 mr-1"></i>
-                                            <button class="ui_button_icon mx-2 !w-10 !h-10">
-                                                <i class="ph-bold ph-plus-circle !text-md"></i>
-                                            </button>
-                                            <p class="dark:text-white text-black" x-text="question.text"></p>
+                                        <div class="flex flex-col"
+                                             x-data="{ editing: false }"
+                                             @click.outside="editing = false">
+                                            <div class="ml-4 flex flex-row items-center my-1">
+                                                <i class="ph-bold ph-x text-md text-red-500 mr-1"></i>
+                                                <button class="ui_button_icon ml-2 mr-1 !w-10 !h-10"
+                                                        @click="editing = !editing">
+                                                    <i class="ph-bold ph-plus-circle !text-md" x-show="!editing"></i>
+                                                    <i class="ph-bold ph-x-circle !text-md" x-show="editing"></i>
+                                                </button>
+                                                <p class="dark:text-white text-black" x-text="question.text"></p>
+                                            </div>
+                                            <div class="flex flex-row items-center ml-8" x-show="editing" x-collapse>
+                                                <!-- TODO: Change based off of field type -->
+                                                <input class="ui_input !max-h-8" type="text">
+                                                <button class="ui_button_icon !w-10 !h-10 ml-2">
+                                                    <i class="ph-bold ph-check !text-md"></i>
+                                                </button>
+                                            </div>
                                         </div>
+
                                     </template>
                                 </div>
                             </template>
