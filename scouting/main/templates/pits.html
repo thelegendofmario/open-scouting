@@ -220,9 +220,25 @@
                                 </div>
                             </template>
 
-                            <button class="ui_button_small ml-4 mt-1">
-                                <i class="ph-bold ph-plus-circle"></i> Add Custom Question
-                            </button>
+                            <div x-data="{ custom_question_open: false }"
+                                 @click.outside="custom_question_open = false">
+                                <button class="ui_button_small ml-4 mt-1"
+                                        @click="custom_question_open = !custom_question_open">
+                                    <i class="ph-bold ph-plus-circle"></i> Add Custom Question
+                                </button>
+                                <div class="flex flex-row" x-show="custom_question_open" x-collapse>
+                                    <input class="ui_input mt-1 ml-4 w-1/2"
+                                           type="text"
+                                           placeholder="Question"
+                                           x-ref="question_input">
+                                    <button class="ui_button_small"
+                                            @click="custom_question_open = false"
+                                            @click="submit_question($event, $refs.question_input.value)">
+                                        <i class="ph-bold ph-check"></i> Add
+                                    </button>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                 </template>
@@ -256,6 +272,14 @@
                             this.pit_data[pit_index].questions[question_index].answers.push({value: input.value, user: "{{ username }}", contributed: date});
                         }
                         
+                    },
+
+                    submit_question(event, name) {
+                        let team_number = event.target.closest(".pit_top").getAttribute("team_number");
+                        let simple_name = name.toLowerCase().replace("?", "").replace(" ", "_");
+                        let pit_index = this.pit_data.findIndex(obj => obj.team_number == team_number);
+
+                        this.pit_data[pit_index].questions.push({name: name, simple_name: simple_name, type: "text", answers: []});
                     },
 
                     async init() {
