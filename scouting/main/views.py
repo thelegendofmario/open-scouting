@@ -43,6 +43,16 @@ def get_demo_data_from_year(year):
         return None
 
 
+def get_pit_scouting_questions_from_year(year):
+    year = str(year)
+    if year == "2024":
+        return pit_scouting_questions.crescendo
+    elif year == "2025":
+        return pit_scouting_questions.reefscape
+    else:
+        return None
+
+
 def decode_json_strings(obj):
     if isinstance(obj, dict):  # If the object is a dictionary
         return {key: decode_json_strings(value) for key, value in obj.items()}
@@ -634,7 +644,7 @@ def get_pits(request):
                     nickname=team["nickname"],
                     pit_group=pit_group,
                     created=timezone.now(),
-                    data=pit_scouting_questions.reefscape,
+                    data=get_pit_scouting_questions_from_year(request.headers["year"]),
                 )
                 for team in response.json()
             ]
@@ -748,6 +758,29 @@ def update_pits(request):
 
         else:
             return HttpResponse(request, "No pits found for this event", status=404)
+
+    else:
+        return HttpResponse(request, "Request is not a POST request!", status=501)
+
+
+@csrf_exempt
+def get_pit_questions(request):
+    """
+    Returns the master list of pit scouting questions for a given year
+
+    Required Headers:
+        year - The year that this event is from
+
+    Returns:
+        The master list of pit scouting questions as JSON
+    """
+
+    if request.method == "POST":
+        return JsonResponse(
+            get_pit_scouting_questions_from_year(request.headers["year"]),
+            safe=False,
+            status=200,
+        )
 
     else:
         return HttpResponse(request, "Request is not a POST request!", status=501)

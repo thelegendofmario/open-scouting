@@ -25,4 +25,5 @@ urlpatterns = [
     ),
     path("get_pits", views.get_pits, name="get_pits"),
     path("update_pits", views.update_pits, name="update_pits"),
+    path("get_pit_questions", views.get_pit_questions, name="get_pit_questions"),
 ]

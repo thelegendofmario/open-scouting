@@ -232,8 +232,7 @@
                                            placeholder="Question"
                                            x-ref="question_input">
                                     <button class="ui_button_small"
-                                            @click="custom_question_open = false"
-                                            @click="submit_question($event, $refs.question_input.value)">
+                                            @click="custom_question_open = false; submit_question($event, $refs.question_input)">
                                         <i class="ph-bold ph-check"></i> Add
                                     </button>
                                 </div>
@@ -245,9 +244,26 @@
 
                 <div class="flex flex-col bg-slate-200/80 dark:bg-slate-700/80 border-2 dark:border-slate-600 border-slate-300 rounded-xl backdrop-blur-md p-4 mt-2 mb-4">
                     <p class="dark:text-white text-black text-lg text-center">Is a team's pit not here yet?</p>
-                    <button class="ui_button">
-                        <i class="ph-bold ph-plus-circle"></i> Add a pit
-                    </button>
+                    <div class="flex flex-col" x-data="{ add_pit_open: false }">
+                        <button class="ui_button" @click="add_pit_open = !add_pit_open">
+                            <i class="ph-bold ph-plus-circle"></i> Add a pit
+                        </button>
+                        <div class="flex flex-col dark:bg-slate-700/80 bg-slate-200/80 border-2 dark:border-slate-600 border-slate-300 rounded-xl backdrop-blur-md p-4"
+                             x-show="add_pit_open"
+                             @click.outside="add_pit_open = false"
+                             x-collapse>
+                            <p class="dark:text-white text-black text-md text-center">Add a new pit</p>
+                            <input class="ui_input mt-1 !w-full"
+                                   type="text"
+                                   placeholder="Team Number"
+                                   x-ref="team_number_input">
+                            <button class="ui_button"
+                                    @click="add_pit_open = false; submit_team($event, $refs.team_number_input)">
+                                <i class="ph-bold ph-check"></i> Add pit
+                            </button>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
@@ -255,6 +271,7 @@
             function pits() {
                 return {
                     pit_data: [],
+                    master_questions: [],
 
                     submit_answer(event, simple_name, type) {
                         let input = event.target.closest("div").querySelector(".ui_input, .ui_checkbox");
@@ -271,15 +288,40 @@
                         } else {
                             this.pit_data[pit_index].questions[question_index].answers.push({value: input.value, user: "{{ username }}", contributed: date});
                         }
-                        
                     },
 
                     submit_question(event, name) {
                         let team_number = event.target.closest(".pit_top").getAttribute("team_number");
-                        let simple_name = name.toLowerCase().replace("?", "").replace(" ", "_");
+                        let simple_name = name.value.toLowerCase().replace("?", "").replace(" ", "_");
                         let pit_index = this.pit_data.findIndex(obj => obj.team_number == team_number);
 
-                        this.pit_data[pit_index].questions.push({name: name, simple_name: simple_name, type: "text", answers: []});
+                        this.pit_data[pit_index].questions.push({text: name.value, simple_name: simple_name, type: "text", answers: []});
+
+                        name.value = "";
+                    },
+
+                    async submit_team(event, team_number) {
+                        if (globalThis.offline == false) {
+                            var response = await fetch(`https://www.thebluealliance.com/api/v3/team/frc${team_number.value}`, {
+                                method: "GET",
+                                headers: {
+                                        "X-TBA-Auth-Key": "{{ TBA_API_KEY }}"
+                                    }
+                                });
+
+                            response.json().then(async (json) => {
+                                this.pit_data.push({team_number: team_number.value, nickname: json.nickname, questions: this.master_questions});
+                                team_number.value = "";
+                            }).catch((error) => {
+                                this.pit_data.push({team_number: team_number.value, nickname: "", questions: this.master_questions});
+                                team_number.value = "";
+                            });
+                        } else {
+                            this.pit_data.push({team_number: team_number.value, nickname: "", questions: this.master_questions});
+                            team_number.value = "";
+                        }
+
+
                     },
 
                     async init() {
@@ -292,7 +334,8 @@
                                     "year": "{{ year }}"
                                 }
                             });
-
+                        
+                        // TODO: Do this as a loop
                         response.text().then(async (text) => {
                             this.pit_data = JSON.parse(text);
                             console.log(this.pit_data[0]);
@@ -313,7 +356,16 @@
                             });
                         });
 
-                        
+                        var response = await fetch("{{ SERVER_IP }}/get_pit_questions", {
+                            method: "POST",
+                            headers: {
+                                    "year": "{{ year }}"
+                                }
+                            });
+
+                        response.text().then(async (text) => {
+                            this.master_questions = JSON.parse(text);
+                        });
                     }
                 }
             }
