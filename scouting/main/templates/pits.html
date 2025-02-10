@@ -69,8 +69,9 @@
 
             <div class="h-auto">
                 <template x-for="pit in pit_data">
-                    <div class="flex flex-col bg-slate-200/80 dark:bg-slate-700/80 border-2 dark:border-slate-600 border-slate-300 rounded-xl backdrop-blur-md p-4 my-2"
-                         x-data="{ open: true }">
+                    <div class="flex flex-col bg-slate-200/80 dark:bg-slate-700/80 border-2 dark:border-slate-600 border-slate-300 rounded-xl backdrop-blur-md p-4 my-2 pit_top"
+                         x-data="{ open: true }"
+                         :team_number="pit.team_number">
                         <div class="flex flex-row items-center justify-between">
                             <div class="flex flex-row">
                                 <div class="rounded-md w-12 h-12 mr-2 bg-slate-200/80 dark:bg-slate-700/80 border-2 dark:border-slate-600 border-slate-300">
@@ -132,10 +133,29 @@
                                                    x-transition></p>
 
                                             </div>
-                                            <div class="flex flex-row items-center ml-8" x-show="editing" x-collapse>
-                                                <!-- TODO: Change based off of field type -->
-                                                <input class="ui_input !max-h-8" type="text">
-                                                <button class="ui_button_icon !w-10 !h-10 ml-2">
+                                            <div class="flex flex-row items-center ml-8 justify-end"
+                                                 x-show="editing"
+                                                 x-ref="inputs"
+                                                 x-collapse>
+                                                <template x-if="question.type == 'choice'">
+                                                    <select class="ui_input !max-h-8">
+                                                        <template x-for="choice in question.choices">
+                                                            <option x-text="choice"></option>
+                                                        </template>
+                                                    </select>
+                                                </template>
+                                                <template x-if="question.type == 'boolean'">
+                                                    <input class="ui_checkbox !max-h-8" type="checkbox">
+                                                </template>
+                                                <template x-if="question.type == 'number'">
+                                                    <input class="ui_input !max-h-8" type="number">
+                                                </template>
+                                                <template x-if="question.type == 'text'">
+                                                    <input class="ui_input !max-h-8" type="text">
+                                                </template>
+
+                                                <button class="ui_button_icon !w-10 !h-10 ml-2"
+                                                        @click="submit_answer($event, question.simple_name, question.type)">
                                                     <i class="ph-bold ph-check !text-md"></i>
                                                 </button>
                                             </div>
@@ -169,10 +189,28 @@
                                                 </button>
                                                 <p class="dark:text-white text-black" x-text="question.text"></p>
                                             </div>
-                                            <div class="flex flex-row items-center ml-8" x-show="editing" x-collapse>
-                                                <!-- TODO: Change based off of field type -->
-                                                <input class="ui_input !max-h-8" type="text">
-                                                <button class="ui_button_icon !w-10 !h-10 ml-2">
+                                            <div class="flex flex-row items-center ml-8 justify-end"
+                                                 x-show="editing"
+                                                 x-collapse>
+                                                <template x-if="question.type == 'choice'">
+                                                    <select class="ui_input !max-h-8">
+                                                        <template x-for="choice in question.choices">
+                                                            <option x-text="choice"></option>
+                                                        </template>
+                                                    </select>
+                                                </template>
+                                                <template x-if="question.type == 'boolean'">
+                                                    <input class="ui_checkbox !max-h-8" type="checkbox">
+                                                </template>
+                                                <template x-if="question.type == 'number'">
+                                                    <input class="ui_input !max-h-8" type="number">
+                                                </template>
+                                                <template x-if="question.type == 'text'">
+                                                    <input class="ui_input !max-h-8" type="text">
+                                                </template>
+
+                                                <button class="ui_button_icon !w-10 !h-10 ml-2"
+                                                        @click="submit_answer($event, question.simple_name, question.type)">
                                                     <i class="ph-bold ph-check !text-md"></i>
                                                 </button>
                                             </div>
@@ -201,6 +239,24 @@
             function pits() {
                 return {
                     pit_data: [],
+
+                    submit_answer(event, simple_name, type) {
+                        let input = event.target.closest("div").querySelector(".ui_input, .ui_checkbox");
+                        let team_number = event.target.closest(".pit_top").getAttribute("team_number");
+
+                        var today = new Date();
+                        var date = today.getFullYear() + "-" + (today.getMonth()+1) + "-" + today.getDate();
+
+                        let pit_index = this.pit_data.findIndex(obj => obj.team_number == team_number);
+                        let question_index = this.pit_data[pit_index].questions.findIndex(obj => obj.simple_name == simple_name);
+
+                        if (type == "boolean") {
+                            this.pit_data[pit_index].questions[question_index].answers.push({value: input.checked, user: "{{ username }}", contributed: date});
+                        } else {
+                            this.pit_data[pit_index].questions[question_index].answers.push({value: input.value, user: "{{ username }}", contributed: date});
+                        }
+                        
+                    },
 
                     async init() {
                         var response = await fetch("{{ SERVER_IP }}/get_pits", {

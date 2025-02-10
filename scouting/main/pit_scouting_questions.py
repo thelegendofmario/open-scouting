@@ -41,7 +41,7 @@ reefscape = [
     {
         "text": "Can your robot climb?",
         "simple_name": "climb",
-        "type": "choices",
+        "type": "choice",
         "choices": ["No", "Shallow Cage", "Deep Cage"],
         "answers": [],
     },
