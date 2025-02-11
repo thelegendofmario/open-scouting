@@ -265,6 +265,38 @@
                     </div>
 
                 </div>
+
+                <div class="fixed bottom-1 left-1 md:bottom-2 md:left-2 z-5 drop-shadow-xl bg-slate-200/80 dark:bg-slate-700/80 border-2 dark:border-slate-600 border-slate-300 rounded-full backdrop-blur-md p-2 flex flex-row align-middle items-center">
+                    <button class="ui_button_icon mr-2 !w-8 !h-8 md:!w-12 md:!h-12"
+                            @click="sync_pit_data">
+                        <i class="ph-bold ph-arrows-clockwise"></i>
+                    </button>
+                    <p class="dark:text-white text-black mr-2 text-md md:text-md"
+                       x-show="state == 'loading'"
+                       x-transition:enter.delay.300ms>
+                        <i class="ph-bold ph-circle-notch animate-spin"></i> Fetching data from server...
+                    </p>
+                    <p class="text-red-500 mr-2 text-md md:text-md"
+                       x-show="state == 'unsaved'"
+                       x-transition:enter.delay.300ms>
+                        <i class="ph-bold ph-x"></i> Unsaved changes
+                    </p>
+                    <p class="text-green-500 mr-2 text-md md:text-md"
+                       x-show="state == 'saved'"
+                       x-transition:enter.delay.300ms>
+                        <i class="ph-bold ph-check"></i> Changes saved
+                    </p>
+                    <p class="text-blue-500 mr-2 text-md md:text-md"
+                       x-show="state == 'syncing'"
+                       x-transition:enter.delay.300ms>
+                        <i class="ph-bold ph-circle-notch animate-spin"></i> Syncing data...
+                    </p>
+                    <p class="text-orange-500 mr-2 text-md md:text-md"
+                       x-show="state == 'offline'"
+                       x-transition:enter.delay.300ms>
+                        <i class="ph-bold ph-warning"></i> Data saved offline
+                    </p>
+                </div>
             </div>
 
             <script>
@@ -273,6 +305,7 @@
                     pit_data: [],
                     pit_data_old: [],
                     master_questions: [],
+                    state: "loading",
 
                     submit_answer(event, simple_name, type) {
                         let input = event.target.closest("div").querySelector(".ui_input, .ui_checkbox");
@@ -289,6 +322,8 @@
                         } else {
                             this.pit_data[pit_index].questions[question_index].answers.push({value: input.value, user: "{{ username }}", contributed: date});
                         }
+
+                        this.state = "unsaved";
                     },
 
                     submit_question(event, name) {
@@ -299,6 +334,8 @@
                         this.pit_data[pit_index].questions.push({text: name.value, simple_name: simple_name, type: "text", answers: []});
 
                         name.value = "";
+
+                        this.state = "unsaved";
                     },
 
                     async submit_team(event, team_number) {
@@ -322,26 +359,66 @@
                             team_number.value = "";
                         }
 
-
+                        this.state = "unsaved";
                     },
 
                     async update_pit_data() {
                         if (JSON.stringify(this.pit_data) != JSON.stringify(this.pit_data_old)) {
-                            var response = await fetch("{{ SERVER_IP }}/update_pits", {
+                            if (this.state != "syncing") {
+                                var response = await fetch("{{ SERVER_IP }}/update_pits", {
+                                    method: "POST",
+                                    headers: {
+                                            "event-name": encodeURIComponent("{{ event_name }}"),
+                                            "event-code": "{{ event_code }}",
+                                            "custom": "{{ custom }}",
+                                            "year": "{{ year }}",
+                                            "data": JSON.stringify(this.pit_data)
+                                        }
+                                    });
+
+                                response.text().then(async (text) => {
+                                    this.pit_data_old = JSON.parse(JSON.stringify(this.pit_data));
+                                    this.state = "saved";
+                                });
+                            }
+                        } else {
+                            this.state = "saved";
+                        }
+                    },
+
+                    async sync_pit_data() {
+                        // Push and then pull pit data from the server
+                        this.state = "syncing";
+
+                        var response = await fetch("{{ SERVER_IP }}/update_pits", {
+                            method: "POST",
+                            headers: {
+                                    "event-name": encodeURIComponent("{{ event_name }}"),
+                                    "event-code": "{{ event_code }}",
+                                    "custom": "{{ custom }}",
+                                    "year": "{{ year }}",
+                                    "data": JSON.stringify(this.pit_data)
+                                }
+                            });
+
+                        response.text().then(async (text) => {
+                            var get_response = await fetch("{{ SERVER_IP }}/get_pits", {
                                 method: "POST",
                                 headers: {
                                         "event-name": encodeURIComponent("{{ event_name }}"),
                                         "event-code": "{{ event_code }}",
                                         "custom": "{{ custom }}",
-                                        "year": "{{ year }}",
-                                        "data": JSON.stringify(this.pit_data)
+                                        "year": "{{ year }}"
                                     }
                                 });
+                            
+                                get_response.text().then(async (text) => {
+                                this.pit_data = JSON.parse(text);
+                                this.pit_data_old = JSON.parse(text);
 
-                            response.text().then(async (text) => {
-                                this.pit_data_old = JSON.parse(JSON.stringify(this.pit_data));
+                                this.state = "saved";
                             });
-                        }
+                        });
                     },
 
                     async init() {
