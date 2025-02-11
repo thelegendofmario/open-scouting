@@ -271,6 +271,7 @@
             function pits() {
                 return {
                     pit_data: [],
+                    pit_data_old: [],
                     master_questions: [],
 
                     submit_answer(event, simple_name, type) {
@@ -324,22 +325,8 @@
 
                     },
 
-                    async init() {
-                        var response = await fetch("{{ SERVER_IP }}/get_pits", {
-                            method: "POST",
-                            headers: {
-                                    "event-name": encodeURIComponent("{{ event_name }}"),
-                                    "event-code": "{{ event_code }}",
-                                    "custom": "{{ custom }}",
-                                    "year": "{{ year }}"
-                                }
-                            });
-                        
-                        // TODO: Do this as a loop
-                        response.text().then(async (text) => {
-                            this.pit_data = JSON.parse(text);
-                            console.log(this.pit_data[0]);
-                            
+                    async update_pit_data() {
+                        if (JSON.stringify(this.pit_data) != JSON.stringify(this.pit_data_old)) {
                             var response = await fetch("{{ SERVER_IP }}/update_pits", {
                                 method: "POST",
                                 headers: {
@@ -352,8 +339,29 @@
                                 });
 
                             response.text().then(async (text) => {
-                                console.log(text);
+                                this.pit_data_old = JSON.parse(JSON.stringify(this.pit_data));
                             });
+                        }
+                    },
+
+                    async init() {
+                        var response = await fetch("{{ SERVER_IP }}/get_pits", {
+                            method: "POST",
+                            headers: {
+                                    "event-name": encodeURIComponent("{{ event_name }}"),
+                                    "event-code": "{{ event_code }}",
+                                    "custom": "{{ custom }}",
+                                    "year": "{{ year }}"
+                                }
+                            });
+                        
+                        response.text().then(async (text) => {
+                            this.pit_data = JSON.parse(text);
+                            this.pit_data_old = JSON.parse(text);
+
+                            setInterval(() => {
+                                this.update_pit_data();
+                            }, 3000);
                         });
 
                         var response = await fetch("{{ SERVER_IP }}/get_pit_questions", {

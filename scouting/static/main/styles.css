@@ -1034,6 +1034,14 @@ select {
   width: 2rem !important;
 }
 
+.\!w-full {
+  width: 100% !important;
+}
+
+.w-1\/2 {
+  width: 50%;
+}
+
 .w-10 {
   width: 2.5rem;
 }
@@ -1061,14 +1069,6 @@ select {
 
 .w-screen {
   width: 100vw;
-}
-
-.w-1\/2 {
-  width: 50%;
-}
-
-.\!w-full {
-  width: 100% !important;
 }
 
 .max-w-14 {
