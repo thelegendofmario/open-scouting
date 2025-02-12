@@ -512,39 +512,128 @@
                         };
                     },
 
-                    async init() {
-                        var response = await fetch("{{ SERVER_IP }}/get_pits", {
-                            method: "POST",
-                            headers: {
-                                    "event-name": encodeURIComponent("{{ event_name }}"),
-                                    "event-code": "{{ event_code }}",
-                                    "custom": "{{ custom }}",
-                                    "year": "{{ year }}"
-                                }
-                            });
+                    init() {
+                        // Delay by 100ms to make sure globalThis.offline is defined by menu
+                        setTimeout(async () => {
+                            if (globalThis.offline == false) {
+                                // The user is online, so fetch things from the server
+                                var response = await fetch("{{ SERVER_IP }}/get_pits", {
+                                    method: "POST",
+                                    headers: {
+                                            "event-name": encodeURIComponent("{{ event_name }}"),
+                                            "event-code": "{{ event_code }}",
+                                            "custom": "{{ custom }}",
+                                            "year": "{{ year }}"
+                                        }
+                                    });
+                                
+                                response.text().then(async (text) => {
+                                    this.pit_data = JSON.parse(text);
+                                    this.pit_data_old = JSON.parse(text);
+
+                                    this.update_pit_data();
+
+                                    setInterval(() => {
+                                        this.update_pit_data();
+                                    }, 5000);
+                                });
+
+                                var response = await fetch("{{ SERVER_IP }}/get_pit_questions", {
+                                    method: "POST",
+                                    headers: {
+                                            "year": "{{ year }}"
+                                        }
+                                    });
+
+                                response.text().then(async (text) => {
+                                    this.master_questions = JSON.parse(text);
+                                    this.store_master_list_of_questions_locally();
+                                });
+                            } else {
+                                // The user is offline, so try and fetch things from the local database
+                                // First, try and get the pit data locally
+
+                                const openRequest = indexedDB.open("scouting_data", 4);
+
+                                openRequest.onupgradeneeded = (event) => {
+                                    const db = event.target.result;
+                                    db.createObjectStore("offline_reports", { keyPath: "uuid" });
+                                    db.createObjectStore("backups", { keyPath: "uuid" });
+                                    db.createObjectStore("offline_pit_scouting", { keyPath: "uuid" });
+                                };
+
+                                openRequest.onsuccess = (event) => {
+                                    const db = event.target.result;
+                                    
+                                    const transaction = db.transaction(["offline_pit_scouting"], "readwrite");
+                                    const objectStore = transaction.objectStore("offline_pit_scouting");
+
+                                    var urlParams = new URLSearchParams(window.location.search);
+                                    var event_name = urlParams.get('event_name');
+                                    var event_code = urlParams.get('event_code');
+                                    var year = urlParams.get('year');
+
+                                    const request = objectStore.get(`${event_code}_${year}`);
+
+                                    request.onsuccess = async (event) => {
+                                        let data = event.target.result;
+
+                                        if (data) {
+                                            this.pit_data = JSON.parse(data.data);
+                                            this.pit_data_old = JSON.parse(data.data);
+
+                                            console.log(this.pit_data);
+
+                                            this.update_pit_data();
+
+                                            setInterval(() => {
+                                                this.update_pit_data();
+                                            }, 5000);
+                                        } else {
+                                            this.pit_data = [];
+                                            this.pit_data_old = [];
+
+                                            this.update_pit_data();
+
+                                            setInterval(() => {
+                                                this.update_pit_data();
+                                            }, 5000);
+
+                                            window.dispatchEvent(new CustomEvent('scouting_notification', {
+                                                detail: { title:"No local pit scouting data found for this event", body:"Set up locally with blank data", icon:"warning" }
+                                            }));
+                                        }
+                                    };
+
+                                    request.onerror = (event) => {
+                                        console.log("Error getting data from the database: " + event.target.errorCode);
+                                    }
+
+                                    const master_questions_request = objectStore.get(`master_questions`);
+
+                                    master_questions_request.onsuccess = async (event) => {
+                                        let data = event.target.result;
+                                        console.log("got master questionsss")
+
+                                        if (data) {
+                                            this.master_questions = JSON.parse(data.data);
+
+                                        } else {
+                                            this.master_questions = [];
+                                        }
+                                    };
+
+                                    master_questions_request.onerror = (event) => {
+                                        console.log("Error getting data from the database: " + event.target.errorCode);
+                                    };
+                                };
+
+                                openRequest.onerror = (event) => {
+                                    console.log("Error opening database: " + event.target.errorCode);
+                                };
+                            }
+                        }, 100);
                         
-                        response.text().then(async (text) => {
-                            this.pit_data = JSON.parse(text);
-                            this.pit_data_old = JSON.parse(text);
-
-                            this.update_pit_data();
-
-                            setInterval(() => {
-                                this.update_pit_data();
-                            }, 5000);
-                        });
-
-                        var response = await fetch("{{ SERVER_IP }}/get_pit_questions", {
-                            method: "POST",
-                            headers: {
-                                    "year": "{{ year }}"
-                                }
-                            });
-
-                        response.text().then(async (text) => {
-                            this.master_questions = JSON.parse(text);
-                            this.store_master_list_of_questions_locally();
-                        });
 
                         window.addEventListener("beforeunload", (event) => {
                             if (this.state != "saved") {
