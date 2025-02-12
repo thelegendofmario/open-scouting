@@ -438,7 +438,7 @@
 
                             setInterval(() => {
                                 this.update_pit_data();
-                            }, 3000);
+                            }, 10000);
                         });
 
                         var response = await fetch("{{ SERVER_IP }}/get_pit_questions", {
@@ -450,6 +450,14 @@
 
                         response.text().then(async (text) => {
                             this.master_questions = JSON.parse(text);
+                        });
+
+                        window.addEventListener("beforeunload", (event) => {
+                            if (this.state != "saved") {
+                                event.preventDefault();
+                                event.returnValue = '';
+                                return '';
+                            }
                         });
                     }
                 }
