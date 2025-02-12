@@ -475,6 +475,43 @@
                         };
                     },
 
+                    store_master_list_of_questions_locally() {
+                        const openRequest = indexedDB.open("scouting_data", 4);
+
+                        openRequest.onupgradeneeded = (event) => {
+                            const db = event.target.result;
+                            db.createObjectStore("offline_reports", { keyPath: "uuid" });
+                            db.createObjectStore("backups", { keyPath: "uuid" });
+                            db.createObjectStore("offline_pit_scouting", { keyPath: "uuid" });
+                        };
+
+                        openRequest.onsuccess = (event) => {
+                            const db = event.target.result;
+                            
+                            const transaction = db.transaction(["offline_pit_scouting"], "readwrite");
+                            const objectStore = transaction.objectStore("offline_pit_scouting");
+
+
+                            const pit_scouting_backup = {
+                                uuid: `master_questions`,
+                                data: JSON.stringify(this.master_questions),
+                                event_name: "",
+                                event_code: "",
+                                year: ""
+                            }
+
+                            const request = objectStore.put(pit_scouting_backup);
+
+                            request.onsuccess = (event) => {
+                                console.log("Data added to the database");
+                            };
+
+                            request.onerror = (event) => {
+                                console.log("Error adding data to the database: " + event.target.errorCode);
+                            };
+                        };
+                    },
+
                     async init() {
                         var response = await fetch("{{ SERVER_IP }}/get_pits", {
                             method: "POST",
@@ -506,6 +543,7 @@
 
                         response.text().then(async (text) => {
                             this.master_questions = JSON.parse(text);
+                            this.store_master_list_of_questions_locally();
                         });
 
                         window.addEventListener("beforeunload", (event) => {
