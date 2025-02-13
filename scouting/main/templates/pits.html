@@ -226,12 +226,17 @@
                                         @click="custom_question_open = !custom_question_open">
                                     <i class="ph-bold ph-plus-circle"></i> Add Custom Question
                                 </button>
-                                <div class="flex flex-row" x-show="custom_question_open" x-collapse>
+                                <div class="flex flex-row"
+                                     x-show="custom_question_open"
+                                     x-collapse
+                                     x-data="{ question_input: '' }">
                                     <input class="ui_input mt-1 ml-4 w-1/2"
                                            type="text"
                                            placeholder="Question"
-                                           x-ref="question_input">
-                                    <button class="ui_button_small"
+                                           x-ref="question_input"
+                                           x-model="question_input">
+                                    <button class="ui_button_small ml-2"
+                                            :disabled="question_input == ''"
                                             @click="custom_question_open = false; submit_question($event, $refs.question_input)">
                                         <i class="ph-bold ph-check"></i> Add
                                     </button>
@@ -251,14 +256,17 @@
                         <div class="flex flex-col dark:bg-slate-700/80 bg-slate-200/80 border-2 dark:border-slate-600 border-slate-300 rounded-xl backdrop-blur-md p-4"
                              x-show="add_pit_open"
                              @click.outside="add_pit_open = false"
+                             x-data="{ team_number_input: '' }"
                              x-collapse>
                             <p class="dark:text-white text-black text-md text-center">Add a new pit</p>
                             <input class="ui_input mt-1 !w-full"
-                                   type="text"
+                                   type="number"
                                    placeholder="Team Number"
-                                   x-ref="team_number_input">
+                                   x-ref="team_number_input"
+                                   x-model="team_number_input">
                             <button class="ui_button"
-                                    @click="add_pit_open = false; submit_team($event, $refs.team_number_input)">
+                                    @click="add_pit_open = false; submit_team($event, $refs.team_number_input)"
+                                    :disabled="team_number_input == ''">
                                 <i class="ph-bold ph-check"></i> Add pit
                             </button>
                         </div>
@@ -347,15 +355,20 @@
                                     }
                                 });
 
-                            response.json().then(async (json) => {
-                                this.pit_data.push({team_number: team_number.value, nickname: json.nickname, questions: this.master_questions});
+                            if (response.ok) {
+                                response.json().then(async (json) => {
+                                    this.pit_data.push({team_number: team_number.value, nickname: json.nickname, questions: this.master_questions});
+                                    team_number.value = "";   
+                                }).catch((error) => {
+                                    this.pit_data.push({team_number: team_number.value, nickname: " ", questions: this.master_questions});
+                                    team_number.value = "";
+                                }); 
+                            } else {
+                                this.pit_data.push({team_number: team_number.value, nickname: " ", questions: this.master_questions});
                                 team_number.value = "";
-                            }).catch((error) => {
-                                this.pit_data.push({team_number: team_number.value, nickname: "", questions: this.master_questions});
-                                team_number.value = "";
-                            });
+                            }
                         } else {
-                            this.pit_data.push({team_number: team_number.value, nickname: "", questions: this.master_questions});
+                            this.pit_data.push({team_number: team_number.value, nickname: " ", questions: this.master_questions});
                             team_number.value = "";
                         }
 
