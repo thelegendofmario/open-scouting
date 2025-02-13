@@ -79,7 +79,7 @@ def check_if_event_exists(request, event_name, event_code, year, custom):
     Returns:
         Event: The event object
     """
-    custom = json.loads(custom) if custom != "unknown" else False
+    custom = json.loads(custom) if custom is not None and custom != "unknown" else False
 
     if custom:
         events = Event.objects.filter(
@@ -678,6 +678,7 @@ def update_pits(request):
         event_name - The event name for the event
         event_code - The event code for the event
         year - The year that this event is from
+        custom - Whether or not this is a custom event
         data - The pit scouting json db from the client
 
     Returns:
@@ -686,16 +687,17 @@ def update_pits(request):
 
     if request.method == "POST":
         try:
-            client_db = json.loads(request.headers["data"])
+            body = json.loads(request.body)
+            client_db = body["data"]
         except KeyError:
             return HttpResponse(request, "No data found in request", status=400)
 
         event = check_if_event_exists(
             request,
-            request.headers["event_name"],
-            request.headers["event_code"],
-            request.headers["year"],
-            request.headers["custom"],
+            body["event_name"],
+            body["event_code"],
+            body["year"],
+            body["custom"],
         )
 
         pit_group = PitGroup.objects.filter(event=event).first()

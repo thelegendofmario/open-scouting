@@ -369,13 +369,16 @@
                                     var response = await fetch("{{ SERVER_IP }}/update_pits", {
                                         method: "POST",
                                         headers: {
-                                                "event-name": encodeURIComponent("{{ event_name }}"),
-                                                "event-code": "{{ event_code }}",
-                                                "custom": "{{ custom }}",
-                                                "year": "{{ year }}",
-                                                "data": JSON.stringify(this.pit_data)
-                                            }
-                                        });
+                                                "Content-Type": "application/json"
+                                            },
+                                        body: JSON.stringify({
+                                            event_name: encodeURIComponent("{{ event_name }}"),
+                                            event_code: "{{ event_code }}",
+                                            custom: "{{ custom }}",
+                                            year: "{{ year }}",
+                                            data: this.pit_data
+                                        })
+                                    });
 
                                     response.text().then(async (text) => {
                                         this.pit_data_old = JSON.parse(JSON.stringify(this.pit_data));
@@ -404,13 +407,16 @@
                             var response = await fetch("{{ SERVER_IP }}/update_pits", {
                                 method: "POST",
                                 headers: {
-                                        "event-name": encodeURIComponent("{{ event_name }}"),
-                                        "event-code": "{{ event_code }}",
-                                        "custom": "{{ custom }}",
-                                        "year": "{{ year }}",
-                                        "data": JSON.stringify(this.pit_data)
-                                    }
-                                });
+                                        "Content-Type": "application/json"
+,                                    },
+                                body: JSON.stringify({
+                                    event_name: encodeURIComponent("{{ event_name }}"),
+                                    event_code: "{{ event_code }}",
+                                    custom: "{{ custom }}",
+                                    year: "{{ year }}",
+                                    data: this.pit_data
+                                })
+                            });
 
                             response.text().then(async (text) => {
                                 var get_response = await fetch("{{ SERVER_IP }}/get_pits", {
@@ -459,13 +465,15 @@
                             var event_name = urlParams.get('event_name');
                             var event_code = urlParams.get('event_code');
                             var year = urlParams.get('year');
+                            var custom = urlParams.get('custom');
 
                             const pit_scouting_backup = {
                                 uuid: `${event_code}_${year}`,
                                 data: JSON.stringify(this.pit_data),
                                 event_name: event_name,
                                 event_code: event_code,
-                                year: year
+                                year: year,
+                                custom: custom
                             }
 
                             const request = objectStore.put(pit_scouting_backup);
@@ -502,7 +510,8 @@
                                 data: JSON.stringify(this.master_questions),
                                 event_name: "",
                                 event_code: "",
-                                year: ""
+                                year: "",
+                                custom: ""
                             }
 
                             const request = objectStore.put(pit_scouting_backup);

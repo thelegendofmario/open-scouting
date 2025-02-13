@@ -6,9 +6,10 @@ This document describes the roadmap for Open Scouting, and roughly when each fea
 ## To-Do
 ### `v0.0.9-alpha`
 - [ ] [#5](https://github.com/FRC-Team3484/open-scouting/issues/5) - Be able to collect pit scouting data
-- [ ] [#18](https://github.com/FRC-Team3484/open-scouting/issues/18) - Export data
+- [ ] [#52](https://github.com/FRC-Team3484/open-scouting/issues/52) - Fetch requests in the client are using headers for large data
 
 ### `v0.0.10-alpha`
+- [ ] [#18](https://github.com/FRC-Team3484/open-scouting/issues/18) - Export data
 - [ ] [#19](https://github.com/FRC-Team3484/open-scouting/issues/19) - More ways to view data
 
 ---

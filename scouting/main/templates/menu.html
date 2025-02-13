@@ -148,6 +148,24 @@
             </button>
         </div>
 
+        <div x-show="offline_pit_scouting"
+             class="flex flex-col mt-6 px-6 w-full bg-orange-200/50 dark:bg-orange-800/50 backdrop-blur-md dark:border-orange-700 border-orange-300 border-2 rounded-lg py-4"
+             x-transition>
+            <div class="flex flex-row">
+                <i class="ph-bold ph-cloud-arrow-up dark:text-white text-black text-4xl mr-2"></i>
+                <div class="flex flex-col">
+                    <p class="dark:text-white text-black text-lg text-sans font-bold">Upload pit scouting data</p>
+                    <p class="dark:text-white text-black text-md text-sans">
+                        While you were offline, some pit scouting data was saved locally. You should upload them to ensure that they've been saved to the server.
+                    </p>
+                </div>
+            </div>
+
+            <button class="ui_button" @click="upload_offline_pit_scouting()">
+                <i class="ph-bold ph-cloud-arrow-up"></i> Upload
+            </button>
+        </div>
+
         <div class="flex flex-col pt-6 w-full">
             <button class="dark:text-white text-black dark:bg-slate-700/80 bg-slate-200/80 backdrop-blur-md dark:border-slate-600 border-slate-300 border-2 rounded-lg py-4 hover:scale-105 active:scale-95 active:dark:bg-slate-800/60 active:bg-slate-300 transition-all hover:bg-slate-100 hover:dark:bg-slate-600 text-center text-md"
                     @click="mrbc_open = true">
