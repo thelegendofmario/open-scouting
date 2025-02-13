@@ -394,7 +394,11 @@
                                 this.pit_data_old = JSON.parse(JSON.stringify(this.pit_data));
                             }
                         } else {
-                            this.state = "saved";
+                            if (globalThis.offline == false) {
+                                this.state = "saved";
+                            } else {
+                                this.state = "offline";
+                            }
                         }
                         
                     },
