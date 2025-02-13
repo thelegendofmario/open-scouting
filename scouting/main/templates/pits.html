@@ -379,6 +379,9 @@
 
                                     response.text().then(async (text) => {
                                         this.pit_data_old = JSON.parse(JSON.stringify(this.pit_data));
+
+                                        this.remove_pit_data_locally();
+
                                         this.state = "saved";
                                     });
                                 }
@@ -423,6 +426,8 @@
                                     get_response.text().then(async (text) => {
                                     this.pit_data = JSON.parse(text);
                                     this.pit_data_old = JSON.parse(text);
+                                    
+                                    this.remove_pit_data_locally();
 
                                     this.state = "saved";
                                 });
@@ -512,6 +517,44 @@
                         };
                     },
 
+                    remove_pit_data_locally() {
+                        const openRequest = indexedDB.open("scouting_data", 4);
+
+                        openRequest.onupgradeneeded = (event) => {
+                            const db = event.target.result;
+                            db.createObjectStore("offline_reports", { keyPath: "uuid" });
+                            db.createObjectStore("backups", { keyPath: "uuid" });
+                            db.createObjectStore("offline_pit_scouting", { keyPath: "uuid" });
+                        };
+
+                        openRequest.onsuccess = (event) => {
+                            const db = event.target.result;
+                            
+                            const transaction = db.transaction(["offline_pit_scouting"], "readwrite");
+                            const objectStore = transaction.objectStore("offline_pit_scouting");
+
+                            var urlParams = new URLSearchParams(window.location.search);
+                            var event_name = urlParams.get('event_name');
+                            var event_code = urlParams.get('event_code');
+                            var year = urlParams.get('year');
+
+                            const request = objectStore.delete(`${event_code}_${year}`);
+
+                            request.onsuccess = (event) => {
+                                console.log("Data removed from the database");
+                            };
+
+                            request.onerror = (event) => {
+                                if (event.target.error.name == "DataError") {
+                                    console.log("Key not found in the database: " + event.target.errorCode);
+
+                                } else {
+                                    console.log("Error removing data from the database: " + event.target.errorCode);
+                                }
+                            };
+                        };
+                    },
+
                     init() {
                         // Delay by 100ms to make sure globalThis.offline is defined by menu
                         setTimeout(async () => {
@@ -582,8 +625,6 @@
                                             this.pit_data = JSON.parse(data.data);
                                             this.pit_data_old = JSON.parse(data.data);
 
-                                            console.log(this.pit_data);
-
                                             this.update_pit_data();
 
                                             setInterval(() => {
@@ -613,7 +654,6 @@
 
                                     master_questions_request.onsuccess = async (event) => {
                                         let data = event.target.result;
-                                        console.log("got master questionsss")
 
                                         if (data) {
                                             this.master_questions = JSON.parse(data.data);
