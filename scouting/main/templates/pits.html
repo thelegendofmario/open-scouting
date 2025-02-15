@@ -439,11 +439,14 @@
                                 var get_response = await fetch("{{ SERVER_IP }}/get_pits", {
                                     method: "POST",
                                     headers: {
-                                            "event-name": encodeURIComponent("{{ event_name }}"),
-                                            "event-code": "{{ event_code }}",
-                                            "custom": "{{ custom }}",
-                                            "year": "{{ year }}"
-                                        }
+                                            "Content-Type": "application/json",
+                                        },
+                                    body: JSON.stringify({
+                                            event_name: encodeURIComponent("{{ event_name }}"),
+                                            event_code: "{{ event_code }}",
+                                            custom: "{{ custom }}",
+                                            year: "{{ year }}"
+                                        })
                                     });
                                 
                                     get_response.text().then(async (text) => {
@@ -589,11 +592,14 @@
                                 var response = await fetch("{{ SERVER_IP }}/get_pits", {
                                     method: "POST",
                                     headers: {
-                                            "event-name": encodeURIComponent("{{ event_name }}"),
-                                            "event-code": "{{ event_code }}",
-                                            "custom": "{{ custom }}",
-                                            "year": "{{ year }}"
-                                        }
+                                            "Content-Type": "application/json",
+                                        },
+                                    body: JSON.stringify({
+                                            event_name: encodeURIComponent("{{ event_name }}"),
+                                            event_code: "{{ event_code }}",
+                                            custom: "{{ custom }}",
+                                            year: "{{ year }}"
+                                        })
                                     });
                                 
                                 response.text().then(async (text) => {
@@ -610,8 +616,11 @@
                                 var response = await fetch("{{ SERVER_IP }}/get_pit_questions", {
                                     method: "POST",
                                     headers: {
-                                            "year": "{{ year }}"
-                                        }
+                                            "Content-Type": "application/json",
+                                        },
+                                    body: JSON.stringify({
+                                            year: "{{ year }}"
+                                        })
                                     });
 
                                 response.text().then(async (text) => {

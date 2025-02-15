@@ -503,13 +503,16 @@
                                     var response = await fetch("{{ SERVER_IP }}/submit", {
                                     method: "POST",
                                     headers: {
-                                            "uuid": report_uuid,
-                                            "data": JSON.stringify(this.create_json_data()),
-                                            "event-name": encodeURIComponent("{{ event_name }}"),
-                                            "event-code": "{{ event_code }}",
-                                            "custom": "{{ custom }}",
-                                            "year": "{{ year }}"
-                                        }
+                                            "Content-Type": "application/json"
+                                        },
+                                    body: JSON.stringify({
+                                            uuid: report_uuid,
+                                            data: JSON.stringify(this.create_json_data()),
+                                            event_name: encodeURIComponent("{{ event_name }}"),
+                                            event_code: "{{ event_code }}",
+                                            custom: "{{ custom }}",
+                                            year: "{{ year }}"
+                                        })
                                     });
 
                                     response.text().then(async (text) => {

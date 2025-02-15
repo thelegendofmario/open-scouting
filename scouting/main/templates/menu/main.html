@@ -195,8 +195,11 @@
                         var response = await fetch("{{ SERVER_IP }}/upload_offline_reports", {
                         method: "POST",
                         headers: {
-                                "data": encodeURIComponent(JSON.stringify(report_list)),
-                            }
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            data: encodeURIComponent(JSON.stringify(report_list)),
+                        })
                         });
 
                         response.json().then(async (json) => {

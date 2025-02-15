@@ -76,10 +76,13 @@
                         }
 
                         var response = await fetch("{{ SERVER_IP }}/check_local_backup_reports", {
-                        method: "POST",
-                        headers: {
-                                "data": encodeURIComponent(JSON.stringify(report_list)),
-                            }
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({
+                                data: encodeURIComponent(JSON.stringify(report_list)),
+                            })
                         });
 
                         response.json().then(async (json) => {

@@ -438,8 +438,11 @@
                             var response = await fetch("{{ SERVER_IP }}/get_year_data", {
                                     method: "POST",
                                     headers: {
-                                        "year": this.selected_year
-                                    }
+                                        "Content-Type": "application/json",
+                                    },
+                                    body: JSON.stringify({
+                                        year: this.selected_year
+                                    })
                                 });
                         
                             let year_data = JSON.parse(await response.json());
@@ -610,7 +613,7 @@
                             var response = await fetch(`https://www.thebluealliance.com/api/v3/events/${this.year}`, {
                             method: "GET",
                             headers: {
-                                "X-TBA-Auth-Key": "{{ TBA_API_KEY }}"
+                                    "X-TBA-Auth-Key": "{{ TBA_API_KEY }}"
                                 }
                             });
                     
@@ -621,8 +624,11 @@
                             var response = await fetch("{{ SERVER_IP }}/get_custom_events", {
                                 method: "POST",
                                 headers: {
-                                    "year": this.year
-                                }
+                                    "Content-Type": "application/json",
+                                },
+                                body: JSON.stringify({
+                                    year: this.year
+                                })
                             });
                     
                             let custom_data = JSON.parse(await response.json());
@@ -1019,13 +1025,16 @@
                         var response = await fetch("{{ SERVER_IP }}/create_custom_event", {
                             method: "POST",
                             headers: {
-                                    "name": this.$refs.name.value,
-                                    "year": this.$refs.year.value,
-                                    "date-begins": this.$refs.date_begins.value,
-                                    "date-ends": this.$refs.date_ends.value,
-                                    "location": this.$refs.location.value,
-                                    "type": this.$refs.type.value,
-                                }
+                                    "Content-Type": "application/json",
+                                },
+                            body: JSON.stringify({
+                                    name: this.$refs.name.value,
+                                    year: this.$refs.year.value,
+                                    date_begins: this.$refs.date_begins.value,
+                                    date_ends: this.$refs.date_ends.value,
+                                    location: this.$refs.location.value,
+                                    type: this.$refs.type.value,
+                                })
                             });
 
                             response.text().then(async (text) => {
