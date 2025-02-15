@@ -253,21 +253,26 @@ def service_worker(request):
 @csrf_exempt
 def submit(request):
     if request.method == "POST":
+        try:
+            body = json.loads(request.body)
+        except KeyError:
+            return HttpResponse(request, "No body found in request", status=400)
+
         event = check_if_event_exists(
             request,
-            request.headers["event_name"],
-            request.headers["event_code"],
-            request.headers["year"],
-            request.headers["custom"],
+            body["event_name"],
+            body["event_code"],
+            body["year"],
+            body["custom"],
         )
 
         if request.user.is_authenticated:
             data = Data(
-                uuid=request.headers["uuid"],
-                year=request.headers["year"],
-                event=unquote(request.headers["event_name"]),
-                event_code=request.headers["event_code"],
-                data=json.loads(request.headers["data"]),
+                uuid=body["uuid"],
+                year=body["year"],
+                event=unquote(body["event_name"]),
+                event_code=body["event_code"],
+                data=json.loads(body["data"]),
                 created=timezone.now(),
                 event_model=event,
                 user_created=request.user,
@@ -279,11 +284,11 @@ def submit(request):
 
         else:
             data = Data(
-                uuid=request.headers["uuid"],
-                year=request.headers["year"],
-                event=unquote(request.headers["event_name"]),
-                event_code=request.headers["event_code"],
-                data=json.loads(request.headers["data"]),
+                uuid=body["uuid"],
+                year=body["year"],
+                event=unquote(body["event_name"]),
+                event_code=body["event_code"],
+                data=json.loads(body["data"]),
                 created=timezone.now(),
                 event_model=event,
                 username_created=request.session["username"],
@@ -300,8 +305,13 @@ def submit(request):
 @csrf_exempt
 def get_data(request):
     if request.method == "POST":
-        if request.headers["demo"] == "true":
-            data = get_demo_data_from_year(request.headers["year"])
+        try:
+            body = json.loads(request.body)
+        except KeyError:
+            return HttpResponse(request, "No body found in request", status=400)
+
+        if body["demo"] == "true":
+            data = get_demo_data_from_year(body["year"])
 
             data_json = []
             for item in data:
@@ -322,16 +332,16 @@ def get_data(request):
         else:
             event = check_if_event_exists(
                 request,
-                request.headers["event_name"],
-                request.headers["event_code"],
-                request.headers["year"],
-                request.headers["custom"],
+                body["event_name"],
+                body["event_code"],
+                body["year"],
+                body["custom"],
             )
 
             data = Data.objects.filter(
-                year=request.headers["year"],
-                event=unquote(request.headers["event_name"]),
-                event_code=request.headers["event_code"],
+                year=body["year"],
+                event=unquote(body["event_name"]),
+                event_code=body["event_code"],
                 event_model=event,
             )
 
@@ -350,7 +360,7 @@ def get_data(request):
 
             all_names = season_fields.create_tabulator_headers(
                 season_fields.collect_field_names(
-                    get_season_data_from_year(request.headers["year"])
+                    get_season_data_from_year(body["year"])
                 )
             )
 
@@ -366,9 +376,14 @@ def get_data(request):
 @csrf_exempt
 def get_custom_events(request):
     if request.method == "POST":
+        try:
+            body = json.loads(request.body)
+        except KeyError:
+            return HttpResponse(request, "No body found in request", status=400)
+
         data = []
 
-        events = Event.objects.filter(year=request.headers["year"], custom=True)
+        events = Event.objects.filter(year=body["year"], custom=True)
 
         for event in events:
             event_data = {
@@ -392,22 +407,27 @@ def get_custom_events(request):
 @csrf_exempt
 def create_custom_event(request):
     if request.method == "POST":
+        try:
+            body = json.loads(request.body)
+        except KeyError:
+            return HttpResponse(request, "No body found in request", status=400)
+
         UUID = uuid.uuid4().hex
 
         data = {
-            "name": request.headers["name"],
-            "year": request.headers["year"],
-            "date_begins": request.headers["date-begins"],
-            "date_ends": request.headers["date-ends"],
-            "location": request.headers["location"],
-            "type": request.headers["type"],
+            "name": body["name"],
+            "year": body["year"],
+            "date_begins": body["date_begins"],
+            "date_ends": body["date_ends"],
+            "location": body["location"],
+            "type": body["type"],
             "event_code": UUID,
         }
 
         if request.user.is_authenticated:
             event = Event(
                 year=data["year"],
-                name=request.headers["name"],
+                name=body["name"],
                 created=timezone.now(),
                 event_code=UUID,
                 custom=True,
@@ -419,7 +439,7 @@ def create_custom_event(request):
         else:
             event = Event(
                 year=data["year"],
-                name=request.headers["name"],
+                name=body["name"],
                 created=timezone.now(),
                 event_code=UUID,
                 custom=True,
@@ -435,7 +455,12 @@ def create_custom_event(request):
 @csrf_exempt
 def get_year_data(request):
     if request.method == "POST":
-        events = Event.objects.filter(year=request.headers["year"])
+        try:
+            body = json.loads(request.body)
+        except KeyError:
+            return HttpResponse(request, "No body found in request", status=400)
+
+        events = Event.objects.filter(year=body["year"])
 
         data = {
             "events": len(events),
@@ -450,10 +475,15 @@ def get_year_data(request):
 @csrf_exempt
 def check_local_backup_reports(request):
     if request.method == "POST":
+        try:
+            body = json.loads(request.body)
+        except KeyError:
+            return HttpResponse(request, "No body found in request", status=400)
+
         reports_found = 0
         reports_not_found = 0
 
-        reports_list = json.loads(unquote(request.headers["data"]))
+        reports_list = json.loads(unquote(body["data"]))
 
         for report in reports_list:
             data = Data.objects.filter(
@@ -517,10 +547,15 @@ def check_local_backup_reports(request):
 def upload_offline_reports(request):
     # TODO: This is identical to the previous function, is this necessary or should they be merged into one?
     if request.method == "POST":
+        try:
+            body = json.loads(request.body)
+        except KeyError:
+            return HttpResponse(request, "No body found in request", status=400)
+
         reports_found = 0
         reports_not_found = 0
 
-        reports_list = json.loads(unquote(request.headers["data"]))
+        reports_list = json.loads(unquote(body["data"]))
 
         for report in reports_list:
             data = Data.objects.filter(
@@ -599,12 +634,17 @@ def get_pits(request):
         A json dictionary of all the pits for this event and their data
     """
     if request.method == "POST":
+        try:
+            body = json.loads(request.body)
+        except KeyError:
+            return HttpResponse(request, "No body found in request", status=400)
+
         event = check_if_event_exists(
             request,
-            request.headers["event_name"],
-            request.headers["event_code"],
-            request.headers["year"],
-            request.headers["custom"],
+            body["event_name"],
+            body["event_code"],
+            body["year"],
+            body["custom"],
         )
 
         pit_group = PitGroup.objects.filter(event=event).first()
@@ -634,7 +674,7 @@ def get_pits(request):
             }
 
             response = requests.get(
-                f"https://www.thebluealliance.com/api/v3/event/{request.headers['year']}{request.headers['event_code']}/teams",
+                f"https://www.thebluealliance.com/api/v3/event/{body['year']}{body['event_code']}/teams",
                 request_data,
             )
 
@@ -644,7 +684,7 @@ def get_pits(request):
                     nickname=team["nickname"],
                     pit_group=pit_group,
                     created=timezone.now(),
-                    data=get_pit_scouting_questions_from_year(request.headers["year"]),
+                    data=get_pit_scouting_questions_from_year(body["year"]),
                 )
                 for team in response.json()
             ]
@@ -778,8 +818,13 @@ def get_pit_questions(request):
     """
 
     if request.method == "POST":
+        try:
+            body = json.loads(request.body)
+        except KeyError:
+            return HttpResponse(request, "No body found in request", status=400)
+
         return JsonResponse(
-            get_pit_scouting_questions_from_year(request.headers["year"]),
+            get_pit_scouting_questions_from_year(body["year"]),
             safe=False,
             status=200,
         )
