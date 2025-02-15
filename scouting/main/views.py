@@ -79,7 +79,12 @@ def check_if_event_exists(request, event_name, event_code, year, custom):
     Returns:
         Event: The event object
     """
-    custom = json.loads(custom) if custom is not None and custom != "unknown" else False
+    if type(custom) is not bool:
+        custom = (
+            json.loads(custom) if custom is not None and custom != "unknown" else False
+        )
+    else:
+        custom = custom
 
     if custom:
         events = Event.objects.filter(

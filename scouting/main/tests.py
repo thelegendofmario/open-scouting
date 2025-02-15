@@ -94,16 +94,16 @@ class SubmitTest(TestCase):
         profile.save()
 
     def test_submit_custom_anonymous(self):
-        headers = {
-            "HTTP_UUID": self.uuid,
-            "HTTP_DATA": "{}",
-            "HTTP_EVENT_NAME": "test",
-            "HTTP_EVENT_CODE": "test",
-            "HTTP_CUSTOM": "true",
-            "HTTP_YEAR": 2024,
+        data = {
+            "uuid": self.uuid,
+            "data": "{}",
+            "event_name": "test",
+            "event_code": "test",
+            "custom": "true",
+            "year": 2024,
         }
 
-        response = self.client.post("/submit", **headers)
+        response = self.client.post("/submit", data, content_type="application/json")
         self.assertEqual(response.status_code, 200)
 
         data = Data.objects.first()
@@ -115,18 +115,18 @@ class SubmitTest(TestCase):
         self.assertEqual(data.user_created, None)
 
     def test_submit_custom_authenticated(self):
-        headers = {
-            "HTTP_UUID": self.uuid,
-            "HTTP_DATA": "{}",
-            "HTTP_EVENT_NAME": "test",
-            "HTTP_EVENT_CODE": "test",
-            "HTTP_CUSTOM": "true",
-            "HTTP_YEAR": 2024,
+        data = {
+            "uuid": self.uuid,
+            "data": "{}",
+            "event_name": "test",
+            "event_code": "test",
+            "custom": "true",
+            "year": 2024,
         }
 
         self.client.login(username="test", password="test")
 
-        response = self.client.post("/submit", **headers)
+        response = self.client.post("/submit", data, content_type="application/json")
         self.assertEqual(response.status_code, 200)
 
         data = Data.objects.first()
@@ -138,16 +138,16 @@ class SubmitTest(TestCase):
         self.assertEqual(data.user_created, self.user)
 
     def test_submit_normal_anonymous(self):
-        headers = {
-            "HTTP_UUID": self.uuid,
-            "HTTP_DATA": "{}",
-            "HTTP_EVENT_NAME": "test",
-            "HTTP_EVENT_CODE": "test",
-            "HTTP_CUSTOM": "false",
-            "HTTP_YEAR": 2024,
+        data = {
+            "uuid": self.uuid,
+            "data": "{}",
+            "event_name": "test",
+            "event_code": "test",
+            "custom": "false",
+            "year": 2024,
         }
 
-        response = self.client.post("/submit", **headers)
+        response = self.client.post("/submit", data, content_type="application/json")
         self.assertEqual(response.status_code, 200)
 
         data = Data.objects.first()
@@ -159,18 +159,18 @@ class SubmitTest(TestCase):
         self.assertEqual(data.user_created, None)
 
     def test_submit_normal_authenticated(self):
-        headers = {
-            "HTTP_UUID": self.uuid,
-            "HTTP_DATA": "{}",
-            "HTTP_EVENT_NAME": "test",
-            "HTTP_EVENT_CODE": "test",
-            "HTTP_CUSTOM": "false",
-            "HTTP_YEAR": 2024,
+        data = {
+            "uuid": self.uuid,
+            "data": "{}",
+            "event_name": "test",
+            "event_code": "test",
+            "custom": "false",
+            "year": 2024,
         }
 
         self.client.login(username="test", password="test")
 
-        response = self.client.post("/submit", **headers)
+        response = self.client.post("/submit", data, content_type="application/json")
         self.assertEqual(response.status_code, 200)
 
         data = Data.objects.first()
@@ -193,15 +193,15 @@ class GetDataTest(TestCase):
         profile.save()
 
     def test_get_data_demo(self):
-        headers = {
-            "HTTP_EVENT_NAME": "test",
-            "HTTP_EVENT_CODE": "test",
-            "HTTP_CUSTOM": "false",
-            "HTTP_YEAR": 2024,
-            "HTTP_DEMO": "true",
+        data = {
+            "event_name": "test",
+            "event_code": "test",
+            "custom": "false",
+            "year": 2024,
+            "demo": "true",
         }
 
-        response = self.client.post("/get_data", **headers)
+        response = self.client.post("/get_data", data, content_type="application/json")
         self.assertEqual(response.status_code, 200)
 
         self.assertEqual(response["Content-Type"], "application/json")
@@ -209,29 +209,29 @@ class GetDataTest(TestCase):
         self.assertIn("demo", response_json)
 
     def test_get_data_custom(self):
-        headers = {
-            "HTTP_EVENT_NAME": "test",
-            "HTTP_EVENT_CODE": "test",
-            "HTTP_CUSTOM": "true",
-            "HTTP_YEAR": 2024,
-            "HTTP_DEMO": "false",
+        data = {
+            "event_name": "test",
+            "event_code": "test",
+            "custom": "true",
+            "year": 2024,
+            "demo": "false",
         }
 
-        response = self.client.post("/get_data", **headers)
+        response = self.client.post("/get_data", data, content_type="application/json")
         self.assertEqual(response.status_code, 200)
 
         self.assertEqual(response["Content-Type"], "application/json")
 
     def test_get_data_normal(self):
-        headers = {
-            "HTTP_EVENT_NAME": "test",
-            "HTTP_EVENT_CODE": "test",
-            "HTTP_CUSTOM": "false",
-            "HTTP_YEAR": 2024,
-            "HTTP_DEMO": "false",
+        data = {
+            "event_name": "test",
+            "event_code": "test",
+            "custom": "false",
+            "year": 2024,
+            "demo": "false",
         }
 
-        response = self.client.post("/get_data", **headers)
+        response = self.client.post("/get_data", data, content_type="application/json")
         self.assertEqual(response.status_code, 200)
 
         self.assertEqual(response["Content-Type"], "application/json")
@@ -242,9 +242,11 @@ class GetCustomEventsTest(TestCase):
         self.client = Client()
 
     def test_get_custom_events(self):
-        headers = {"HTTP_YEAR": 2024}
+        data = {"year": 2024}
 
-        response = self.client.post("/get_custom_events", **headers)
+        response = self.client.post(
+            "/get_custom_events", data, content_type="application/json"
+        )
         self.assertEqual(response.status_code, 200)
 
         self.assertEqual(response["Content-Type"], "application/json")
@@ -261,16 +263,18 @@ class CreateCustomEventTest(TestCase):
         profile.save()
 
     def test_create_custom_event_anonymous(self):
-        headers = {
-            "HTTP_NAME": "test",
-            "HTTP_YEAR": 2024,
-            "HTTP_DATE_BEGINS": "2024-01-01",
-            "HTTP_DATE_ENDS": "2024-01-01",
-            "HTTP_LOCATION": "test",
-            "HTTP_TYPE": "test",
+        data = {
+            "name": "test",
+            "year": 2024,
+            "date_begins": "2024-01-01",
+            "date_ends": "2024-01-01",
+            "location": "test",
+            "type": "test",
         }
 
-        response = self.client.post("/create_custom_event", **headers)
+        response = self.client.post(
+            "/create_custom_event", data, content_type="application/json"
+        )
         self.assertEqual(response.status_code, 200)
 
         event = Event.objects.first()
@@ -286,18 +290,20 @@ class CreateCustomEventTest(TestCase):
         self.assertEqual(event.custom_data["type"], "test")
 
     def test_create_custom_event_authenticated(self):
-        headers = {
-            "HTTP_NAME": "test",
-            "HTTP_YEAR": 2024,
-            "HTTP_DATE_BEGINS": "2024-01-01",
-            "HTTP_DATE_ENDS": "2024-01-01",
-            "HTTP_LOCATION": "test",
-            "HTTP_TYPE": "test",
+        data = {
+            "name": "test",
+            "year": 2024,
+            "date_begins": "2024-01-01",
+            "date_ends": "2024-01-01",
+            "location": "test",
+            "type": "test",
         }
 
         self.client.login(username="test", password="test")
 
-        response = self.client.post("/create_custom_event", **headers)
+        response = self.client.post(
+            "/create_custom_event", data, content_type="application/json"
+        )
         self.assertEqual(response.status_code, 200)
 
         event = Event.objects.first()
@@ -319,9 +325,11 @@ class GetYearDataTest(TestCase):
         self.client = Client()
 
     def test_get_year_data(self):
-        headers = {"HTTP_YEAR": 2024}
+        data = {"year": 2024}
 
-        response = self.client.post("/get_year_data", **headers)
+        response = self.client.post(
+            "/get_year_data", data, content_type="application/json"
+        )
         self.assertEqual(response.status_code, 200)
 
         self.assertEqual(response["Content-Type"], "application/json")
@@ -345,8 +353,8 @@ class CheckLocalBackupReportsTest(TestCase):
         profile.save()
 
     def test_check_local_backup_reports_custom_anonymous(self):
-        headers = {
-            "HTTP_DATA": json.dumps(
+        data = {
+            "data": json.dumps(
                 [
                     {
                         "uuid": self.uuid,
@@ -360,7 +368,9 @@ class CheckLocalBackupReportsTest(TestCase):
             ),
         }
 
-        response = self.client.post("/check_local_backup_reports", **headers)
+        response = self.client.post(
+            "/check_local_backup_reports", data, content_type="application/json"
+        )
 
         data = json.loads(response.json())
 
@@ -370,8 +380,8 @@ class CheckLocalBackupReportsTest(TestCase):
         self.assertEqual(data["reports_found"], 0)
 
     def test_check_local_backup_reports_custom_authenticated(self):
-        headers = {
-            "HTTP_DATA": json.dumps(
+        data = {
+            "data": json.dumps(
                 [
                     {
                         "uuid": self.uuid,
@@ -386,7 +396,9 @@ class CheckLocalBackupReportsTest(TestCase):
         }
 
         self.client.login(username="test", password="test")
-        response = self.client.post("/check_local_backup_reports", **headers)
+        response = self.client.post(
+            "/check_local_backup_reports", data, content_type="application/json"
+        )
 
         data = json.loads(response.json())
 
@@ -396,8 +408,8 @@ class CheckLocalBackupReportsTest(TestCase):
         self.assertEqual(data["reports_found"], 0)
 
     def test_check_local_backup_reports_normal_anonymous(self):
-        headers = {
-            "HTTP_DATA": json.dumps(
+        data = {
+            "data": json.dumps(
                 [
                     {
                         "uuid": self.uuid,
@@ -411,7 +423,9 @@ class CheckLocalBackupReportsTest(TestCase):
             ),
         }
 
-        response = self.client.post("/check_local_backup_reports", **headers)
+        response = self.client.post(
+            "/check_local_backup_reports", data, content_type="application/json"
+        )
 
         data = json.loads(response.json())
 
@@ -421,8 +435,8 @@ class CheckLocalBackupReportsTest(TestCase):
         self.assertEqual(data["reports_found"], 0)
 
     def test_check_local_backup_reports_normal_authenticated(self):
-        headers = {
-            "HTTP_DATA": json.dumps(
+        data = {
+            "data": json.dumps(
                 [
                     {
                         "uuid": self.uuid,
@@ -437,7 +451,9 @@ class CheckLocalBackupReportsTest(TestCase):
         }
 
         self.client.login(username="test", password="test")
-        response = self.client.post("/check_local_backup_reports", **headers)
+        response = self.client.post(
+            "/check_local_backup_reports", data, content_type="application/json"
+        )
 
         data = json.loads(response.json())
 
@@ -465,8 +481,8 @@ class UploadOfflineReports(TestCase):
         profile.save()
 
     def test_upload_offline_reports_custom_anonymous(self):
-        headers = {
-            "HTTP_DATA": json.dumps(
+        data = {
+            "data": json.dumps(
                 [
                     {
                         "uuid": self.uuid,
@@ -480,7 +496,9 @@ class UploadOfflineReports(TestCase):
             ),
         }
 
-        response = self.client.post("/upload_offline_reports", **headers)
+        response = self.client.post(
+            "/upload_offline_reports", data, content_type="application/json"
+        )
 
         data = json.loads(response.json())
 
@@ -490,8 +508,8 @@ class UploadOfflineReports(TestCase):
         self.assertEqual(data["reports_found"], 0)
 
     def test_upload_offline_reports_custom_authenticated(self):
-        headers = {
-            "HTTP_DATA": json.dumps(
+        data = {
+            "data": json.dumps(
                 [
                     {
                         "uuid": self.uuid,
@@ -506,7 +524,9 @@ class UploadOfflineReports(TestCase):
         }
 
         self.client.login(username="test", password="test")
-        response = self.client.post("/upload_offline_reports", **headers)
+        response = self.client.post(
+            "/upload_offline_reports", data, content_type="application/json"
+        )
 
         data = json.loads(response.json())
 
@@ -516,8 +536,8 @@ class UploadOfflineReports(TestCase):
         self.assertEqual(data["reports_found"], 0)
 
     def test_upload_offline_reports_normal_anonymous(self):
-        headers = {
-            "HTTP_DATA": json.dumps(
+        data = {
+            "data": json.dumps(
                 [
                     {
                         "uuid": self.uuid,
@@ -531,7 +551,9 @@ class UploadOfflineReports(TestCase):
             ),
         }
 
-        response = self.client.post("/upload_offline_reports", **headers)
+        response = self.client.post(
+            "/upload_offline_reports", data, content_type="application/json"
+        )
 
         data = json.loads(response.json())
 
@@ -541,8 +563,8 @@ class UploadOfflineReports(TestCase):
         self.assertEqual(data["reports_found"], 0)
 
     def test_upload_offline_reports_normal_authenticated(self):
-        headers = {
-            "HTTP_DATA": json.dumps(
+        data = {
+            "data": json.dumps(
                 [
                     {
                         "uuid": self.uuid,
@@ -557,7 +579,9 @@ class UploadOfflineReports(TestCase):
         }
 
         self.client.login(username="test", password="test")
-        response = self.client.post("/upload_offline_reports", **headers)
+        response = self.client.post(
+            "/upload_offline_reports", data, content_type="application/json"
+        )
 
         data = json.loads(response.json())
 
