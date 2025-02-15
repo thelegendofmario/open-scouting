@@ -1,6 +1,6 @@
 from django.test import TestCase, Client
 from authentication.models import User, Profile
-from main.models import Data, Event
+from main.models import Data, Event, PitGroup
 
 import uuid
 import json
@@ -63,6 +63,26 @@ class DataPageTest(TestCase):
     def test_data_authenticated(self):
         self.client.login(username="test", password="test")
         response = self.client.get("/data")
+        self.assertEqual(response.status_code, 200)
+
+
+class PitsPageTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+        user = User.objects.create_user("test", "test", "test")
+        user.save()
+
+        profile = Profile(user=user, display_name="test", team_number="1234")
+        profile.save()
+
+    def test_pits_anonymous(self):
+        response = self.client.get("/pits")
+        self.assertEqual(response.status_code, 200)
+
+    def test_pits_authenticated(self):
+        self.client.login(username="test", password="test")
+        response = self.client.get("/pits")
         self.assertEqual(response.status_code, 200)
 
 
@@ -589,3 +609,81 @@ class UploadOfflineReports(TestCase):
         self.assertEqual(response["Content-Type"], "application/json")
         self.assertEqual(data["reports_not_found"], 1)
         self.assertEqual(data["reports_found"], 0)
+
+
+class GetPits(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+        event = Event(year=2024, name="test", event_code="test")
+        event.save()
+
+        pit_group = PitGroup(event=event, events_generated=True)
+        pit_group.save()
+
+    def test_get_pits_pit_group_does_not_exist(self):
+        data = {
+            "event_name": "test_not_real",
+            "event_code": "test_not_real",
+            "year": 2024,
+            "custom": False,
+        }
+
+        response = self.client.post("/get_pits", data, content_type="application/json")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "application/json")
+
+    def test_get_pits_pit_group_exists(self):
+        data = {
+            "event_name": "test",
+            "event_code": "test",
+            "year": 2024,
+            "custom": False,
+        }
+
+        response = self.client.post("/get_pits", data, content_type="application/json")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "application/json")
+
+
+class UpdatePits(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+        event = Event(year=2024, name="test", event_code="test")
+        event.save()
+
+        pit_group = PitGroup(event=event, events_generated=True)
+        pit_group.save()
+
+    def test_update_pits(self):
+        data = {
+            "event_name": "test",
+            "event_code": "test",
+            "year": 2024,
+            "custom": False,
+            "data": json.dumps([]),
+        }
+
+        response = self.client.post(
+            "/update_pits", data, content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+
+class GetPitQuestions(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+    def test_get_pit_questions(self):
+        data = {"year": 2024}
+
+        response = self.client.post(
+            "/get_pit_questions", data, content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "application/json")

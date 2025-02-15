@@ -728,6 +728,7 @@ def get_pits(request):
         event_name: The event name for the event
         event_code: The event code for the event
         year: The year that this event is from
+        custom: Whether or not this event is a custom event
 
     Returns:
         A json dictionary of all the pits for this event and their data
@@ -773,21 +774,22 @@ def get_pits(request):
             }
 
             response = requests.get(
-                f"https://www.thebluealliance.com/api/v3/event/{body['year']}{body['event_code']}/teams",
+                f"https://www.thebluealliance.com/api/v3/event/{str(body['year'])}{body['event_code']}/teams",
                 request_data,
             )
 
-            pits_to_create = [
-                Pit(
-                    team_number=team["team_number"],
-                    nickname=team["nickname"],
-                    pit_group=pit_group,
-                    created=timezone.now(),
-                    data=get_pit_scouting_questions_from_year(body["year"]),
-                )
-                for team in response.json()
-            ]
-            Pit.objects.bulk_create(pits_to_create)
+            if response.ok:
+                pits_to_create = [
+                    Pit(
+                        team_number=team["team_number"],
+                        nickname=team["nickname"],
+                        pit_group=pit_group,
+                        created=timezone.now(),
+                        data=get_pit_scouting_questions_from_year(body["year"]),
+                    )
+                    for team in response.json()
+                ]
+                Pit.objects.bulk_create(pits_to_create)
 
             pits = Pit.objects.filter(pit_group=pit_group)
             pit_data = []
@@ -856,43 +858,47 @@ def update_pits(request):
             diff = deepdiff.DeepDiff(client_db, server_db, view="tree")
 
             if diff:
-                for change in list(diff["iterable_item_removed"]):
-                    if "root" and "questions" and "answers" in change.path():
-                        team_number = client_db[change.path(output_format="list")[0]][
-                            "team_number"
-                        ]
-                        pit = Pit.objects.filter(
-                            team_number=team_number, pit_group=pit_group
-                        ).first()
+                try:
+                    for change in list(diff["iterable_item_removed"]):
+                        if "root" and "questions" and "answers" in change.path():
+                            team_number = client_db[
+                                change.path(output_format="list")[0]
+                            ]["team_number"]
+                            pit = Pit.objects.filter(
+                                team_number=team_number, pit_group=pit_group
+                            ).first()
 
-                        pit.data[change.path(output_format="list")[2]][
-                            "answers"
-                        ].append(change.t1)
-                        pit.save()
+                            pit.data[change.path(output_format="list")[2]][
+                                "answers"
+                            ].append(change.t1)
+                            pit.save()
 
-                    elif "root" and "questions" in change.path():
-                        team_number = client_db[change.path(output_format="list")[0]][
-                            "team_number"
-                        ]
-                        pit = Pit.objects.filter(
-                            team_number=team_number, pit_group=pit_group
-                        ).first()
+                        elif "root" and "questions" in change.path():
+                            team_number = client_db[
+                                change.path(output_format="list")[0]
+                            ]["team_number"]
+                            pit = Pit.objects.filter(
+                                team_number=team_number, pit_group=pit_group
+                            ).first()
 
-                        pit.data.append(change.t1)
-                        pit.save()
+                            pit.data.append(change.t1)
+                            pit.save()
 
-                    elif "root" in change.path():
-                        pit_data = change.t1
-                        pit = Pit(
-                            team_number=pit_data["team_number"],
-                            nickname=pit_data["nickname"],
-                            pit_group=pit_group,
-                            created=timezone.now(),
-                            data=pit_data["questions"],
-                        )
-                        pit.save()
+                        elif "root" in change.path():
+                            pit_data = change.t1
+                            pit = Pit(
+                                team_number=pit_data["team_number"],
+                                nickname=pit_data["nickname"],
+                                pit_group=pit_group,
+                                created=timezone.now(),
+                                data=pit_data["questions"],
+                            )
+                            pit.save()
 
-                return JsonResponse("done", safe=False, status=200)
+                    return JsonResponse("done", safe=False, status=200)
+
+                except KeyError:
+                    return HttpResponse("No changes", status=200)
 
             else:
                 return JsonResponse("no changes", safe=False, status=200)
