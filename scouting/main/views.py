@@ -24,6 +24,12 @@ DATE_FORMAT = "%Y-%m-%d"
 
 # TODO: Move to respective .py files instead
 def get_season_data_from_year(year):
+    """
+    Returns the season data for a given year.
+
+    Args:
+        year (str): The year that you want the season data for
+    """
     if year == "2024":
         return season_fields.crescendo
     elif year == "2025":
@@ -34,6 +40,12 @@ def get_season_data_from_year(year):
 
 # TODO: Move to respective .py files instead
 def get_demo_data_from_year(year):
+    """
+    Returns the demo data for a given year.
+
+    Args:
+        year (str): The year that you want the demo data for
+    """
     year = str(year)
     if year == "2024":
         return demo_data.crescendo
@@ -44,6 +56,12 @@ def get_demo_data_from_year(year):
 
 
 def get_pit_scouting_questions_from_year(year):
+    """
+    Returns the pit scouting questions for a given year.
+
+    Args:
+        year (str): The year that you want the pit scouting questions for
+    """
     year = str(year)
     if year == "2024":
         return pit_scouting_questions.crescendo
@@ -54,6 +72,12 @@ def get_pit_scouting_questions_from_year(year):
 
 
 def decode_json_strings(obj):
+    """
+    Decodes JSON strings in a dictionary or list
+
+    Args:
+        obj (dict, list, or string): The object to decode
+    """
     if isinstance(obj, dict):  # If the object is a dictionary
         return {key: decode_json_strings(value) for key, value in obj.items()}
     elif isinstance(obj, list):  # If the object is a list
@@ -146,6 +170,9 @@ def check_if_event_exists(request, event_name, event_code, year, custom):
 
 
 def index(request):
+    """
+    Returns the index page
+    """
     if request.user.is_authenticated:
         context = {
             "SERVER_IP": settings.SERVER_IP,
@@ -173,6 +200,9 @@ def index(request):
 
 
 def contribute(request):
+    """
+    Returns the contribute page
+    """
     request.session["username"] = request.GET.get("username", "unknown")
     request.session["team_number"] = request.GET.get("team_number", "unknown")
     request.session["event_name"] = request.GET.get("event_name", "unknown")
@@ -201,6 +231,9 @@ def contribute(request):
 
 
 def data(request):
+    """
+    Returns the data page
+    """
     request.session["username"] = request.GET.get("username", "unknown")
     request.session["team_number"] = request.GET.get("team_number", "unknown")
     request.session["event_name"] = request.GET.get("event_name", "unknown")
@@ -226,6 +259,9 @@ def data(request):
 
 
 def pits(request):
+    """
+    Returns the pits page
+    """
     request.session["username"] = request.GET.get("username", "unknown")
     request.session["team_number"] = request.GET.get("team_number", "unknown")
     request.session["event_name"] = request.GET.get("event_name", "unknown")
@@ -251,12 +287,26 @@ def pits(request):
 
 
 def service_worker(request):
+    """
+    Returns the service worker file to the client for installation
+    """
     sw_path = settings.BASE_DIR / "frontend" / "sw.js"
     return HttpResponse(open(sw_path).read(), content_type="application/javascript")
 
 
 @csrf_exempt
 def submit(request):
+    """
+    Submits a scouting report to the server
+
+    Body Parameters:
+        uuid: The uuid of the scouting report
+        event_name: The name of the event
+        event_code: The event code of the event
+        year: The year of the event
+        custom: Whether or not the event is a custom event
+        data: The data of the scouting report
+    """
     if request.method == "POST":
         try:
             body = json.loads(request.body)
@@ -309,6 +359,15 @@ def submit(request):
 
 @csrf_exempt
 def get_data(request):
+    """
+    Gets the scouting data for an event from the server
+
+    Body Parameters:
+        event_name: The name of the event
+        event_code: The event code of the event
+        year: The year of the event
+        custom: Whether or not the event is a custom event
+    """
     if request.method == "POST":
         try:
             body = json.loads(request.body)
@@ -380,6 +439,12 @@ def get_data(request):
 
 @csrf_exempt
 def get_custom_events(request):
+    """
+    Gets the custom events from the server for a year
+
+    Body Parameters:
+        year: The year of the event
+    """
     if request.method == "POST":
         try:
             body = json.loads(request.body)
@@ -411,6 +476,17 @@ def get_custom_events(request):
 
 @csrf_exempt
 def create_custom_event(request):
+    """
+    Creates a custom event
+
+    Body Parameters:
+        name: The name of the event
+        year: The year of the event
+        date_begins: The start date of the event
+        date_ends: The end date of the event
+        location: The location of the event
+        type: The type of the event
+    """
     if request.method == "POST":
         try:
             body = json.loads(request.body)
@@ -459,6 +535,12 @@ def create_custom_event(request):
 
 @csrf_exempt
 def get_year_data(request):
+    """
+    Gets the number of events with data for a year
+
+    Body Parameters:
+        year: The year of the events to get
+    """
     if request.method == "POST":
         try:
             body = json.loads(request.body)
@@ -479,6 +561,12 @@ def get_year_data(request):
 
 @csrf_exempt
 def check_local_backup_reports(request):
+    """
+    Checks if local backup reports saved in the client exist on the server
+
+    Body Parameters:
+        data: The data to check
+    """
     if request.method == "POST":
         try:
             body = json.loads(request.body)
@@ -550,6 +638,12 @@ def check_local_backup_reports(request):
 
 @csrf_exempt
 def upload_offline_reports(request):
+    """
+    Uploads offline reports saved to the client to the server
+
+    Body Parameters:
+        data: The data to upload
+    """
     # TODO: This is identical to the previous function, is this necessary or should they be merged into one?
     if request.method == "POST":
         try:
@@ -630,10 +724,10 @@ def get_pits(request):
     3. If the pit group already has pits, they will be returned
     4. If not, the server will attempt to ask TBA for the pits for this event, if none are specified, no pits will be returned and the user will have to manually add them
 
-    Required Headers:
-        event_name - The event name for the event
-        event_code - The event code for the event
-        year - The year that this event is from
+    Body Parameters:
+        event_name: The event name for the event
+        event_code: The event code for the event
+        year: The year that this event is from
 
     Returns:
         A json dictionary of all the pits for this event and their data
@@ -719,12 +813,12 @@ def update_pits(request):
     2. Find the changes between the two databases
     3. Apply the changes to the local db from the server
 
-    Required Headers:
-        event_name - The event name for the event
-        event_code - The event code for the event
-        year - The year that this event is from
-        custom - Whether or not this is a custom event
-        data - The pit scouting json db from the client
+    Body Parameters:
+        event_name: The event name for the event
+        event_code: The event code for the event
+        year: The year that this event is from
+        custom: Whether or not this is a custom event
+        data: The pit scouting json db from the client
 
     Returns:
         The changes made to the database as JSON
@@ -815,8 +909,8 @@ def get_pit_questions(request):
     """
     Returns the master list of pit scouting questions for a given year
 
-    Required Headers:
-        year - The year that this event is from
+    Body Parameters:
+        year: The year that this event is from
 
     Returns:
         The master list of pit scouting questions as JSON
