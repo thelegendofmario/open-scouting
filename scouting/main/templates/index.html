@@ -438,8 +438,11 @@
                             var response = await fetch("{{ SERVER_IP }}/get_year_data", {
                                     method: "POST",
                                     headers: {
-                                        "year": this.selected_year
-                                    }
+                                        "Content-Type": "application/json",
+                                    },
+                                    body: JSON.stringify({
+                                        year: this.selected_year
+                                    })
                                 });
                         
                             let year_data = JSON.parse(await response.json());
@@ -610,7 +613,7 @@
                             var response = await fetch(`https://www.thebluealliance.com/api/v3/events/${this.year}`, {
                             method: "GET",
                             headers: {
-                                "X-TBA-Auth-Key": "{{ TBA_API_KEY }}"
+                                    "X-TBA-Auth-Key": "{{ TBA_API_KEY }}"
                                 }
                             });
                     
@@ -621,8 +624,11 @@
                             var response = await fetch("{{ SERVER_IP }}/get_custom_events", {
                                 method: "POST",
                                 headers: {
-                                    "year": this.year
-                                }
+                                    "Content-Type": "application/json",
+                                },
+                                body: JSON.stringify({
+                                    year: this.year
+                                })
                             });
                     
                             let custom_data = JSON.parse(await response.json());
@@ -760,6 +766,10 @@
                     <i class="ph-bold ph-database"></i> View All Data
                 </button>
                 <p class="dark:text-white text-black opacity-80 text-sm text-center">View all data for this event</p>
+                <button class="ui_button" @click="get_header_data('pit_scouting')">
+                    <i class="ph-bold ph-garage"></i> Pit Scouting
+                </button>
+                <p class="dark:text-white text-black opacity-80 text-sm text-center">View or contribute pit scouting data for this event</p>
 
                 <p class="text-center dark:text-white text-black font-sans text-xl mb-1 mt-6">
                     <i class="ph-bold ph-export"></i> Share a link to this event
@@ -813,15 +823,25 @@
                                 } else {
                                     window.location.href = `{{ SERVER_IP }}/data?username=${encodeURIComponent(this.username)}&team_number=${encodeURIComponent(this.team_number)}&event_name=${encodeURIComponent(this.event_name)}&event_code=${this.event_code}&year=${this.year}&custom=true&`;
                                 }
+                            } else if (page == "pit_scouting") {
+                                if (!this.custom) {
+                                    window.location.href = `{{ SERVER_IP }}/pits?username=${encodeURIComponent(this.username)}&team_number=${encodeURIComponent(this.team_number)}&event_name=${encodeURIComponent(this.event_name)}&event_code=${this.event_code}&year=${this.year}&`;
+                                } else {
+                                    window.location.href = `{{ SERVER_IP }}/pits?username=${encodeURIComponent(this.username)}&team_number=${encodeURIComponent(this.team_number)}&event_name=${encodeURIComponent(this.event_name)}&event_code=${this.event_code}&year=${this.year}&custom=true&`;
+                                }
                             }
                         } else {
                             if (page == "session") {
                                 console.log("This feature is coming soon");
+                                
                             } else if (page == "contribute_separately") {
                                 window.location.href = `{{ SERVER_IP }}/contribute?year=${this.year}&demo=true&`;
 
                             } else if (page == "view_data") {
                                 window.location.href = `{{ SERVER_IP }}/data?year=${this.year}&demo=true&`;
+
+                            } else if (page == "pit_scouting") {
+                                window.location.href = `{{ SERVER_IP }}/pits?year=${this.year}&demo=true&`;
                             }
                         }
                     },
@@ -1005,13 +1025,16 @@
                         var response = await fetch("{{ SERVER_IP }}/create_custom_event", {
                             method: "POST",
                             headers: {
-                                    "name": this.$refs.name.value,
-                                    "year": this.$refs.year.value,
-                                    "date-begins": this.$refs.date_begins.value,
-                                    "date-ends": this.$refs.date_ends.value,
-                                    "location": this.$refs.location.value,
-                                    "type": this.$refs.type.value,
-                                }
+                                    "Content-Type": "application/json",
+                                },
+                            body: JSON.stringify({
+                                    name: this.$refs.name.value,
+                                    year: this.$refs.year.value,
+                                    date_begins: this.$refs.date_begins.value,
+                                    date_ends: this.$refs.date_ends.value,
+                                    location: this.$refs.location.value,
+                                    type: this.$refs.type.value,
+                                })
                             });
 
                             response.text().then(async (text) => {

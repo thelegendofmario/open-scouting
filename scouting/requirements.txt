@@ -4,3 +4,5 @@ sqlparse==0.5.1
 django-environ
 gunicorn
 psycopg2
+requests
+deepdiff

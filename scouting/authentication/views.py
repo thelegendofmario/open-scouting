@@ -13,6 +13,7 @@ from main.views import index
 
 import random
 from datetime import timedelta
+import json
 
 
 def generate_verification_code(length=6):
@@ -42,9 +43,9 @@ def sign_in(request):
     """
     Signs the user in using the provided email and password and authenticates the session
 
-    Required Headers:
-        email - The email of the user
-        password - The password of the user
+    Body Parameters:
+        email: The email of the user
+        password: The password of the user
 
     Returns:
         Redirects to the home page if the user is authenticated and returns 'error' otherwise
@@ -52,10 +53,15 @@ def sign_in(request):
 
     if request.method == "POST":
         try:
+            body = json.loads(request.body)
+        except KeyError:
+            return HttpResponse(request, "No body found in request", status=400)
+
+        try:
             user = authenticate(
                 request,
-                username=request.headers["email"],
-                password=request.headers["password"],
+                username=body["email"],
+                password=body["password"],
             )
 
             if user is not None:
@@ -99,17 +105,22 @@ def send_verification_code(request):
     """
     Generate and send a verification code to the user
 
-    Required Headers:
-        uuid - The uuid of the user generated on the client
-        email - The email the user provided which the verification code should be sent to
-        display-name - The provided display name of the user
+    Body Parameters:
+        uuid: The uuid of the user generated on the client
+        email: The email the user provided which the verification code should be sent to
+        display-name: The provided display name of the user
 
     Returns:
-        expires - The expiration date and time of the code
-        user_uuid - The uuid of the user generated on the client
+        expires: The expiration date and time of the code
+        user_uuid: The uuid of the user generated on the client
     """
 
     if request.method == "POST":
+        try:
+            body = json.loads(request.body)
+        except KeyError:
+            return HttpResponse(request, "No body found in request", status=400)
+
         code = generate_verification_code()
         code_expires = timezone.now() + timedelta(minutes=10)
 
@@ -117,18 +128,16 @@ def send_verification_code(request):
             code=code,
             created=timezone.now(),
             expires=code_expires,
-            user_uuid=request.headers["uuid"],
+            user_uuid=body["uuid"],
         )
         code_object.save()
 
-        email.send_verify(
-            [request.headers["email"]], request.headers["display-name"], code
-        )
+        email.send_verify([body["email"]], body["display_name"], code)
 
         return JsonResponse(
             {
                 "expires": code_expires,
-                "user_uuid": request.headers["uuid"],
+                "user_uuid": body["uuid"],
             },
             safe=False,
         )
@@ -141,18 +150,23 @@ def check_verification_code(request):
     """
     Check a verification code the user entered on the client
 
-    Required Headers:
-        code - The verification code provided from the client
-        user-uuid - The uuid of the user generated on the client
+    Body Parameters:
+        code: The verification code provided from the client
+        user-uuid: The uuid of the user generated on the client
 
     Returns:
-        valid - Whether or not the verification code is valid
-        reason - The reason why or why not the code is valid
+        valid: Whether or not the verification code is valid
+        reason: The reason why or why not the code is valid
     """
 
     if request.method == "POST":
+        try:
+            body = json.loads(request.body)
+        except KeyError:
+            return HttpResponse(request, "No body found in request", status=400)
+
         code_object = VerificationCode.objects.filter(
-            code=request.headers["code"], user_uuid=request.headers["user-uuid"]
+            code=body["code"], user_uuid=body["user_uuid"]
         ).first()
 
         if code_object:
@@ -175,17 +189,22 @@ def create_account(request):
     """
     Creates a new user account and signs the user in
 
-    Required Headers:
-        uuid - The uuid of the user
-        display-name - The provided display name of the user
-        team-number - The team number of the user
-        email - The email the user provided
-        password - The password the user is setting
+    Body Parameters:
+        uuid: The uuid of the user
+        display-name: The provided display name of the user
+        team-number: The team number of the user
+        email: The email the user provided
+        password: The password the user is setting
     """
 
     if request.method == "POST":
+        try:
+            body = json.loads(request.body)
+        except KeyError:
+            return HttpResponse(request, "No body found in request", status=400)
+
         code_verified = VerificationCode.objects.filter(
-            user_uuid=request.headers["uuid"], verified=True
+            user_uuid=body["uuid"], verified=True
         ).first()
 
         if code_verified:
@@ -193,29 +212,28 @@ def create_account(request):
                 code_verified.delete()
 
                 user = User.objects.create_user(
-                    request.headers["email"],
-                    request.headers["email"],
-                    request.headers["password"],
+                    body["email"],
+                    body["email"],
+                    body["password"],
                 )
-                user.first_name = request.headers["display-name"]
+                user.first_name = body["display_name"]
                 user.save()
 
                 profile = Profile(
                     user=user,
-                    display_name=request.headers["display-name"],
-                    team_number=request.headers["team-number"],
+                    display_name=body["display_name"],
+                    team_number=body["team_number"],
                 )
                 profile.save()
 
-                email.send_welcome(
-                    [request.headers["email"]], request.headers["display-name"]
-                )
+                email.send_welcome([body["email"]], body["display_name"])
 
                 user = authenticate(
                     request,
-                    username=request.headers["email"],
-                    password=request.headers["password"],
+                    username=body["email"],
+                    password=body["password"],
                 )
+
                 if user is not None:
                     login(request, user)
 
@@ -237,6 +255,15 @@ def create_account(request):
 
 @csrf_exempt
 def get_authentication_status(request):
+    """
+    Gets the authentication status of the session
+
+    Returns:
+        authenticated: Whether or not the user is authenticated
+        username: The username of the user
+        display_name: The display name of the user
+        team_number: The team number of the user
+    """
     if request.method == "POST":
         if request.user.is_authenticated:
             return JsonResponse(

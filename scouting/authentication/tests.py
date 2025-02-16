@@ -37,12 +37,14 @@ class SignInTest(TestCase):
         profile.save()
 
     def test_sign_in(self):
-        headers = {
-            "HTTP_EMAIL": "test",
-            "HTTP_PASSWORD": "test",
+        data = {
+            "email": "test",
+            "password": "test",
         }
 
-        response = self.client.post("/authentication/sign_in", **headers)
+        response = self.client.post(
+            "/authentication/sign_in", data, content_type="application/json"
+        )
         self.assertEqual(response.status_code, 200)
         self.assertTrue(self.client.session.get("_auth_user_id"))
 
@@ -113,13 +115,17 @@ class SendVerificationCodeTest(TestCase):
         profile.save()
 
     def test_send_verification_code(self):
-        headers = {
-            "HTTP_EMAIL": "test",
-            "HTTP_DISPLAY_NAME": "test",
-            "HTTP_UUID": self.uuid,
+        data = {
+            "email": "test",
+            "display_name": "test",
+            "uuid": self.uuid,
         }
 
-        response = self.client.post("/authentication/send_verification_code", **headers)
+        response = self.client.post(
+            "/authentication/send_verification_code",
+            data,
+            content_type="application/json",
+        )
 
         data = response.json()
 
@@ -152,13 +158,15 @@ class CheckVerificationCodeTest(TestCase):
         verification_code.save()
 
     def test_check_verification_code(self):
-        headers = {
-            "HTTP_CODE": "123456",
-            "HTTP_USER_UUID": self.uuid,
+        data = {
+            "code": "123456",
+            "user_uuid": self.uuid,
         }
 
         response = self.client.post(
-            "/authentication/check_verification_code", **headers
+            "/authentication/check_verification_code",
+            data,
+            content_type="application/json",
         )
 
         data = response.json()
@@ -183,15 +191,17 @@ class CreateAccountTest(TestCase):
         verification_code.save()
 
     def test_create_account(self):
-        headers = {
-            "HTTP_EMAIL": "test",
-            "HTTP_PASSWORD": "test",
-            "HTTP_DISPLAY_NAME": "test",
-            "HTTP_TEAM_NUMBER": "test",
-            "HTTP_UUID": self.uuid,
+        data = {
+            "email": "test",
+            "password": "test",
+            "display_name": "test",
+            "team_number": "test",
+            "uuid": self.uuid,
         }
 
-        response = self.client.post("/authentication/create_account", **headers)
+        response = self.client.post(
+            "/authentication/create_account", data, content_type="application/json"
+        )
 
         self.assertEqual(response.status_code, 200)
 
@@ -220,7 +230,7 @@ class GetAuthenticationStatusTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response["Content-Type"], "application/json")
-        self.assertEqual(response.json(), False)
+        self.assertEqual(response.json()["authenticated"], False)
 
     def test_get_authentication_status_authenticated(self):
         self.client.login(username="test", password="test")
@@ -228,4 +238,4 @@ class GetAuthenticationStatusTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response["Content-Type"], "application/json")
-        self.assertEqual(response.json(), True)
+        self.assertEqual(response.json()["authenticated"], True)

@@ -18,9 +18,28 @@
             <div class="flex flex-col">
                 <div class="flex flex-row items-center">
 
-                    <button class="ui_button_icon mr-2" @click="go_to_data()">
-                        <i class="ph-bold ph-hard-drives"></i>
+                    <button class="ui_button_icon mr-2"
+                            @click="page_dropdown = !page_dropdown"
+                            x-ref="page_button">
+                        <i class="ph-bold ph-dots-three"></i>
                     </button>
+                    <div class="dark:bg-slate-700/60 bg-slate-200/60 border-2 dark:border-slate-600 border-slate-300 rounded-xl backdrop-blur-md flex flex-col p-4 z-10"
+                         x-show="page_dropdown"
+                         x-anchor.offset.10="$refs.page_button"
+                         x-transition>
+                        <button class="ui_button_small !my-1 !py-1 !px-2 !w-full !text-left"
+                                @click="go_to_contribute">
+                            <i class="ph-bold ph-pencil"></i> Add Scouting Reports
+                        </button>
+                        <button class="ui_button_small !my-1 !py-1 !px-2 !w-full !text-left"
+                                @click="go_to_data">
+                            <i class="ph-bold ph-database"></i> View Scouting Data
+                        </button>
+                        <button class="ui_button_small !my-1 !py-1 !px-2 !w-full !text-left"
+                                @click="go_to_pits">
+                            <i class="ph-bold ph-garage"></i> Pit Scouting
+                        </button>
+                    </div>
                     <p class="dark:text-white text-black text-sans text-2xl">Contribute</p>
                 </div>
 
@@ -45,10 +64,24 @@
             function contribute_header() {
                 return {
                     demo: false,
+                    page_dropdown: false,
+                    page_path: "/contribute",
+
+                    go_to_contribute() {
+                        let url = new URL(window.location.href);
+                        url.pathname = url.pathname.replace(this.page_path, "/contribute");
+                        window.location.href = url.toString();
+                    },
 
                     go_to_data() {
                         let url = new URL(window.location.href);
-                        url.pathname = url.pathname.replace("/contribute", "/data");
+                        url.pathname = url.pathname.replace(this.page_path, "/data");
+                        window.location.href = url.toString();
+                    },
+
+                    go_to_pits() {
+                        let url = new URL(window.location.href);
+                        url.pathname = url.pathname.replace(this.page_path, "/pits");
                         window.location.href = url.toString();
                     },
 
@@ -460,12 +493,13 @@
                             if (this.check_fields()) {
                                 let report_uuid = crypto.randomUUID();
 
-                                const openRequest = indexedDB.open("scouting_data", 3);
+                                const openRequest = indexedDB.open("scouting_data", 4);
 
                                 openRequest.onupgradeneeded = (event) => {
                                     const db = event.target.result;
                                     db.createObjectStore("offline_reports", { keyPath: "uuid" });
                                     db.createObjectStore("backups", { keyPath: "uuid" });
+                                    db.createObjectStore("offline_pit_scouting", { keyPath: "uuid" });
                                 };
 
                                 openRequest.onsuccess = (event) => {
@@ -502,13 +536,16 @@
                                     var response = await fetch("{{ SERVER_IP }}/submit", {
                                     method: "POST",
                                     headers: {
-                                            "uuid": report_uuid,
-                                            "data": JSON.stringify(this.create_json_data()),
-                                            "event-name": encodeURIComponent("{{ event_name }}"),
-                                            "event-code": "{{ event_code }}",
-                                            "custom": "{{ custom }}",
-                                            "year": "{{ year }}"
-                                        }
+                                            "Content-Type": "application/json"
+                                        },
+                                    body: JSON.stringify({
+                                            uuid: report_uuid,
+                                            data: JSON.stringify(this.create_json_data()),
+                                            event_name: encodeURIComponent("{{ event_name }}"),
+                                            event_code: "{{ event_code }}",
+                                            custom: "{{ custom }}",
+                                            year: "{{ year }}"
+                                        })
                                     });
 
                                     response.text().then(async (text) => {
@@ -523,12 +560,13 @@
                                 } else {
                                     console.log("You're offline, report will be saved offline.")
 
-                                    const openRequest = indexedDB.open("scouting_data", 3);
+                                    const openRequest = indexedDB.open("scouting_data", 4);
 
                                     openRequest.onupgradeneeded = (event) => {
                                         const db = event.target.result;
                                         db.createObjectStore("offline_reports", { keyPath: "uuid" });
                                         db.createObjectStore("backups", { keyPath: "uuid" });
+                                        db.createObjectStore("offline_pit_scouting", { keyPath: "uuid" });
                                     };
 
                                     openRequest.onsuccess = (event) => {

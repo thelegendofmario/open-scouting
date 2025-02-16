@@ -301,7 +301,7 @@
                             method: "GET",
                             headers: {
                                 "X-TBA-Auth-Key": "{{ TBA_API_KEY }}"
-                                }
+                            }
                             });
                             
                             if (current_season.ok) {
@@ -312,7 +312,7 @@
                                         method: "GET",
                                         headers: {
                                             "X-TBA-Auth-Key": "{{ TBA_API_KEY }}"
-                                            }
+                                        }
                                     });
                                         
                                     if (response.ok) {
@@ -363,10 +363,13 @@
                         method: "POST",
                         headers: {
                                 "X-CSRFToken": "{{ csrf_token }}",
-                                "uuid": this.user.uuid,
-                                "email": this.$refs.create_email.value,
-                                "display-name": this.$refs.create_display_name.value,
-                            }
+                                "Content-Type": "application/json"
+                            },
+                        body: JSON.stringify({
+                                uuid: this.user.uuid,
+                                email: this.$refs.create_email.value,
+                                display_name: this.$refs.create_display_name.value,
+                            })
                         });
 
                         if (response.ok) {
@@ -385,9 +388,12 @@
                         method: "POST",
                         headers: {
                                 "X-CSRFToken": "{{ csrf_token }}",
-                                "code": this.$refs.create_verification_code.value,
-                                "user-uuid": this.user.uuid
-                            }
+                                "Content-Type": "application/json"
+                            },
+                        body: JSON.stringify({
+                                code: this.$refs.create_verification_code.value,
+                                user_uuid: this.user.uuid
+                            })
                         });
 
                         if (response.ok) {
@@ -469,12 +475,15 @@
                         method: "POST",
                         headers: {
                                 "X-CSRFToken": "{{ csrf_token }}",
-                                "uuid": this.user.uuid,
-                                "display-name": this.$refs.create_display_name.value,
-                                "team-number": this.$refs.create_team_number.value,
-                                "email": this.$refs.create_email.value,
-                                "password": this.$refs.create_password.value,
-                            }
+                                "Content-Type": "application/json"
+                            },
+                        body: JSON.stringify({
+                                uuid: this.user.uuid,
+                                display_name: this.$refs.create_display_name.value,
+                                team_number: this.$refs.create_team_number.value,
+                                email: this.$refs.create_email.value,
+                                password: this.$refs.create_password.value,
+                            })
                         });
 
                         if (response.ok) {
@@ -513,9 +522,12 @@
                         method: "POST",
                         headers: {
                                 "X-CSRFToken": "{{ csrf_token }}",
-                                "email": this.$refs.sign_in_email.value,
-                                "password": this.$refs.sign_in_password.value,
-                            }
+                                "Content-Type": "application/json"
+                            },
+                        body: JSON.stringify({
+                                email: this.$refs.sign_in_email.value,
+                                password: this.$refs.sign_in_password.value
+                            })
                         });
 
                         if (response.ok) {

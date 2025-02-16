@@ -8,12 +8,13 @@
             backed_up_reports_confirm_delete: false,
 
             get_local_backup_reports() {
-                const openRequest = indexedDB.open("scouting_data", 3);
+                const openRequest = indexedDB.open("scouting_data", 4);
 
                 openRequest.onupgradeneeded = (event) => {
                     const db = event.target.result;
                     db.createObjectStore("offline_reports", { keyPath: "uuid" });
                     db.createObjectStore("backups", { keyPath: "uuid" });
+                    db.createObjectStore("offline_pit_scouting", { keyPath: "uuid" });
                 };
 
                 openRequest.onsuccess = (event) => {
@@ -39,12 +40,13 @@
             },
 
             async check_local_backup_reports() {
-                const openRequest = indexedDB.open("scouting_data", 3);
+                const openRequest = indexedDB.open("scouting_data", 4);
 
                 openRequest.onupgradeneeded = (event) => {
                     const db = event.target.result;
                     db.createObjectStore("offline_reports", { keyPath: "uuid" });
                     db.createObjectStore("backups", { keyPath: "uuid" });
+                    db.createObjectStore("offline_pit_scouting", { keyPath: "uuid" });
                 };
 
                 openRequest.onsuccess = (event) => {
@@ -74,10 +76,13 @@
                         }
 
                         var response = await fetch("{{ SERVER_IP }}/check_local_backup_reports", {
-                        method: "POST",
-                        headers: {
-                                "data": encodeURIComponent(JSON.stringify(report_list)),
-                            }
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({
+                                data: encodeURIComponent(JSON.stringify(report_list)),
+                            })
                         });
 
                         response.json().then(async (json) => {
@@ -101,12 +106,13 @@
             },
 
             clear_saved_backup_reports() {
-                const openRequest = indexedDB.open("scouting_data", 3);
+                const openRequest = indexedDB.open("scouting_data", 4);
 
                 openRequest.onupgradeneeded = (event) => {
                     const db = event.target.result;
                     db.createObjectStore("offline_reports", { keyPath: "uuid" });
                     db.createObjectStore("backups", { keyPath: "uuid" });
+                    db.createObjectStore("offline_pit_scouting", { keyPath: "uuid" });
                 };
 
                 openRequest.onsuccess = (event) => {

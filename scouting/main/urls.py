@@ -6,6 +6,7 @@ urlpatterns = [
     path("", views.index, name="index"),
     path("contribute", views.contribute, name="contribute"),
     path("data", views.data, name="data"),
+    path("pits", views.pits, name="pits"),
     path("sw.js", views.service_worker),
     path("submit", views.submit, name="submit"),
     path("get_data", views.get_data, name="get_data"),
@@ -22,4 +23,7 @@ urlpatterns = [
         views.upload_offline_reports,
         name="upload_offline_reports",
     ),
+    path("get_pits", views.get_pits, name="get_pits"),
+    path("update_pits", views.update_pits, name="update_pits"),
+    path("get_pit_questions", views.get_pit_questions, name="get_pit_questions"),
 ]
