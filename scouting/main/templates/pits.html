@@ -96,12 +96,61 @@
         </script>
 
         <div x-data="pits()" class="w-full md:w-3/4 lg:w-2/3 mx-8">
-            <div class="flex flex-row bg-slate-200/80 dark:bg-slate-700/80 border-2 dark:border-slate-600 border-slate-300 rounded-xl backdrop-blur-md p-4 my-2">
-                <p class="dark:text-white text-black">List of pits that need scouted and filter buttons</p>
+            <div class="flex flex-col bg-slate-200/80 dark:bg-slate-700/80 border-2 dark:border-slate-600 border-slate-300 rounded-xl backdrop-blur-md p-4 my-2">
+                <div class="flex flex-row flex-wrap">
+                    <button class="ui_button_small !m-1"
+                            :disabled="filter == 'all'"
+                            @click="filter = 'all'; filter_pit_data(); get_pit_status()">
+                        <i class="ph-bold ph-selection-all"></i> View All Pits
+                    </button>
+                    <button class="ui_button_small !m-1"
+                            :disabled="filter == 'incomplete'"
+                            @click="filter = 'incomplete'; filter_pit_data(); get_pit_status()">
+                        <i class="ph-bold ph-arrows-clockwise"></i> View Incomplete Pits
+                    </button>
+                    <button class="ui_button_small !m-1"
+                            :disabled="filter == 'no_data'"
+                            @click="filter = 'no_data'; filter_pit_data(); get_pit_status()">
+                        <i class="ph-bold ph-x"></i> View Pits With No Data
+                    </button>
+                    <button class="ui_button_small !m-1"
+                            :disabled="filter == 'completed'"
+                            @click="filter = 'completed'; filter_pit_data(); get_pit_status()">
+                        <i class="ph-bold ph-check"></i> View Completed Pits
+                    </button>
+                </div>
+
+                <div class="flex flex-row flex-wrap my-4">
+                    <template x-for="pit in pit_status">
+                        <div class="cursor-pointer" @click="scroll_to_pit(pit.team_number)">
+                            <template x-if="pit.status == 'completed'">
+                                <div class="flex flex-row mx-1 items-center">
+                                    <i class="ph-bold ph-check text-green-500/80 text-sm"></i>
+                                    <p class="text-green-500" x-text="pit.team_number"></p>
+                                </div>
+                            </template>
+                            <template x-if="pit.status == 'incomplete'">
+                                <div class="flex flex-row mx-1 items-center">
+                                    <i class="ph-bold ph-arrows-clockwise text-orange-500/80 text-sm"></i>
+                                    <p class="text-orange-500" x-text="pit.team_number"></p>
+                                </div>
+                            </template>
+                            <template x-if="pit.status == 'no_data'">
+                                <div class="flex flex-row mx-1 items-center">
+                                    <i class="ph-bold ph-x text-red-500/80 text-sm"></i>
+                                    <p class="text-red-500" x-text="pit.team_number"></p>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+
+                <p class="dark:text-white text-black text-sm opacity-80 ml-4"
+                   x-text="'Viewing ' + pit_data_filtered.length + ' pits'"></p>
             </div>
 
             <div class="h-auto">
-                <template x-for="pit in pit_data">
+                <template x-for="pit in pit_data_filtered">
                     <div class="flex flex-col bg-slate-200/80 dark:bg-slate-700/80 border-2 dark:border-slate-600 border-slate-300 rounded-xl backdrop-blur-md p-4 my-2 pit_top"
                          x-data="{ open: true }"
                          :team_number="pit.team_number">
@@ -345,6 +394,9 @@
                 return {
                     pit_data: [],
                     pit_data_old: [],
+                    pit_data_filtered: [],
+                    filter: "all",
+                    pit_status: [],
                     master_questions: [],
                     state: "loading",
 
@@ -485,7 +537,10 @@
                                     get_response.text().then(async (text) => {
                                     this.pit_data = JSON.parse(text);
                                     this.pit_data_old = JSON.parse(text);
-                                    
+
+                                    this.filter_pit_data();
+                                    this.get_pit_status();
+
                                     this.remove_pit_data_locally();
 
                                     this.state = "saved";
@@ -617,7 +672,80 @@
                         };
                     },
 
-                    init() {
+                    filter_pit_data() {
+                        // Determines what pits in the database are complete, incomplete, or have no data
+                        const completed = [];
+                        const incomplete = [];
+                        const no_data = [];
+
+                        this.pit_data.forEach(pit => {
+                            const questions = pit.questions || []; // Default to empty array if undefined
+                            const totalQuestions = questions.length;
+                            const answeredQuestions = questions.filter(q => (q.answers || []).length > 0).length;
+
+                            if (answeredQuestions === 0) {
+                                no_data.push(pit);
+                            } else if (answeredQuestions === totalQuestions) {
+                                completed.push(pit);
+                            } else {
+                                incomplete.push(pit);
+                            }
+                        });
+
+                        if (this.filter === "completed") {
+                            this.pit_data_filtered = completed;
+                        } else if (this.filter === "incomplete") {
+                            this.pit_data_filtered = incomplete;
+                        } else if (this.filter === "no_data") {
+                            this.pit_data_filtered = no_data;
+                        } else if (this.filter === "all") {
+                            this.pit_data_filtered = this.pit_data;
+                        } else {
+                            this.pit_data_filtered = this.pit_data;
+                        }
+                    },
+
+                    get_pit_status() {
+                        // Creates a list of all the teams and their status to add buttons for the scout to scroll to
+                        const completed = [];
+                        const incomplete = [];
+                        const no_data = [];
+
+                        this.pit_data.forEach(pit => {
+                            const questions = pit.questions || []; // Default to empty array if undefined
+                            const totalQuestions = questions.length;
+                            const answeredQuestions = questions.filter(q => (q.answers || []).length > 0).length;
+
+                            if (answeredQuestions === 0) {
+                                no_data.push({team_number: pit.team_number, status: "no_data"});
+                            } else if (answeredQuestions === totalQuestions) {
+                                completed.push({team_number: pit.team_number, status: "completed"});
+                            } else {
+                                incomplete.push({team_number: pit.team_number, status: "incomplete"});
+                            }
+                        });
+
+                        const all = [...no_data, ...incomplete, ...completed];
+
+                        if (this.filter === "completed") {
+                            this.pit_status = completed;
+                        } else if (this.filter === "incomplete") {
+                            this.pit_status = incomplete;
+                        } else if (this.filter === "no_data") {
+                            this.pit_status = no_data;
+                        } else if (this.filter === "all") {
+                            this.pit_status = all;
+                        } else {
+                            this.pit_status = all;
+                        }
+                    },
+
+                    scroll_to_pit(pit) {
+                        const pit_div = document.querySelector(`div[team_number='${pit}']`);
+                        pit_div.scrollIntoView({behavior: "smooth"});
+                    },
+
+                     init() {
                         // Delay by 100ms to make sure globalThis.offline is defined by menu
                         setTimeout(async () => {
                             if (globalThis.offline == false) {
@@ -638,6 +766,9 @@
                                 response.text().then(async (text) => {
                                     this.pit_data = JSON.parse(text);
                                     this.pit_data_old = JSON.parse(text);
+
+                                    this.filter_pit_data();
+                                    this.get_pit_status();
 
                                     this.update_pit_data();
 
@@ -693,6 +824,9 @@
                                             this.pit_data = JSON.parse(data.data);
                                             this.pit_data_old = JSON.parse(data.data);
 
+                                            this.filter_pit_data();
+                                            this.get_pit_status();
+
                                             this.update_pit_data();
 
                                             setInterval(() => {
@@ -701,6 +835,9 @@
                                         } else {
                                             this.pit_data = [];
                                             this.pit_data_old = [];
+
+                                            this.filter_pit_data();
+                                            this.get_pit_status();
 
                                             this.update_pit_data();
 

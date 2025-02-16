@@ -822,6 +822,10 @@ select {
   margin: 0.5rem;
 }
 
+.\!m-1 {
+  margin: 0.25rem !important;
+}
+
 .mx-1 {
   margin-left: 0.25rem;
   margin-right: 0.25rem;
@@ -1110,6 +1114,10 @@ select {
 
 .flex-1 {
   flex: 1 1 0%;
+}
+
+.origin-center {
+  transform-origin: center;
 }
 
 .-translate-x-1\/2 {
@@ -1610,6 +1618,18 @@ select {
 .text-white {
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity));
+}
+
+.text-green-500\/80 {
+  color: rgb(34 197 94 / 0.8);
+}
+
+.text-orange-500\/80 {
+  color: rgb(249 115 22 / 0.8);
+}
+
+.text-red-500\/80 {
+  color: rgb(239 68 68 / 0.8);
 }
 
 .opacity-0 {
