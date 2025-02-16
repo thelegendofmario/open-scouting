@@ -878,6 +878,11 @@ select {
   margin-bottom: auto;
 }
 
+.\!my-1 {
+  margin-top: 0.25rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
 .mb-0 {
   margin-bottom: 0px;
 }
@@ -1388,6 +1393,10 @@ select {
   padding: 1rem;
 }
 
+.\!p-1 {
+  padding: 0.25rem !important;
+}
+
 .px-0\.5 {
   padding-left: 0.125rem;
   padding-right: 0.125rem;
@@ -1448,6 +1457,21 @@ select {
   padding-bottom: 1.5rem;
 }
 
+.\!px-1 {
+  padding-left: 0.25rem !important;
+  padding-right: 0.25rem !important;
+}
+
+.\!py-1 {
+  padding-top: 0.25rem !important;
+  padding-bottom: 0.25rem !important;
+}
+
+.\!px-2 {
+  padding-left: 0.5rem !important;
+  padding-right: 0.5rem !important;
+}
+
 .pb-0 {
   padding-bottom: 0px;
 }
@@ -1466,6 +1490,10 @@ select {
 
 .text-left {
   text-align: left;
+}
+
+.\!text-left {
+  text-align: left !important;
 }
 
 .text-center {
@@ -2336,6 +2364,10 @@ select {
 
 .dark\:bg-slate-800\/60:where(.dark, .dark *) {
   background-color: rgb(30 41 59 / 0.6);
+}
+
+.dark\:bg-slate-700\/60:where(.dark, .dark *) {
+  background-color: rgb(51 65 85 / 0.6);
 }
 
 .dark\:bg-gradient-to-br:where(.dark, .dark *) {
