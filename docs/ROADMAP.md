@@ -4,17 +4,17 @@ This document describes the roadmap for Open Scouting, and roughly when each fea
 ---
 
 ## To-Do
-### `v0.0.9-alpha`
-- [x] [#5](https://github.com/FRC-Team3484/open-scouting/issues/5) - Be able to collect pit scouting data
-- [x] [#52](https://github.com/FRC-Team3484/open-scouting/issues/52) - Fetch requests in the client are using headers for large data
-- [ ] Many requests use `@csrf_exempt` when they shouldn't
-
 ### `v0.0.10-alpha`
 - [ ] [#18](https://github.com/FRC-Team3484/open-scouting/issues/18) - Export data
 - [ ] [#19](https://github.com/FRC-Team3484/open-scouting/issues/19) - More ways to view data
+- [ ] Many requests use `@csrf_exempt` when they shouldn't
 
 ---
 ## Completed
+### `v0.0.9-alpha`
+- [x] [#5](https://github.com/FRC-Team3484/open-scouting/issues/5) - Be able to collect pit scouting data
+- [x] [#52](https://github.com/FRC-Team3484/open-scouting/issues/52) - Fetch requests in the client are using headers for large data
+
 ### `v0.0.8-alpha`
 - [x] Make site able to be run out of a docker container in production
 - [x] Adjust site for new repository location

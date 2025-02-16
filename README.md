@@ -37,6 +37,7 @@
 - Keep backups of scouting reports locally
 - Dark/light mode theme support
 - Manually go offline in case of bad connection
+- Scout team's pits at competition
 
 ## Installation
 The installation and deployment process uses docker for simplicity.
