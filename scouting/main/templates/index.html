@@ -377,6 +377,9 @@
                                 // Check local storage for status
                                 if (JSON.parse(localStorage.getItem("authenticated")).authenticated) {
                                     this.authenticated = true;
+                                    this.username = JSON.parse(localStorage.getItem("authenticated")).username;
+                                    this.display_name = JSON.parse(localStorage.getItem("authenticated")).display_name;
+                                    this.team_number = JSON.parse(localStorage.getItem("authenticated")).team_number;
                                 } else {
                                     this.authenticated = false;
                                 }
