@@ -442,6 +442,7 @@
                                     method: "POST",
                                     headers: {
                                         "Content-Type": "application/json",
+                                        "X-CSRFToken": "{{ csrf_token }}"
                                     },
                                     body: JSON.stringify({
                                         year: this.selected_year
@@ -628,6 +629,7 @@
                                 method: "POST",
                                 headers: {
                                     "Content-Type": "application/json",
+                                    "X-CSRFToken": "{{ csrf_token }}"
                                 },
                                 body: JSON.stringify({
                                     year: this.year
@@ -1029,6 +1031,7 @@
                             method: "POST",
                             headers: {
                                     "Content-Type": "application/json",
+                                    "X-CSRFToken": "{{ csrf_token }}"
                                 },
                             body: JSON.stringify({
                                     name: this.$refs.name.value,

@@ -536,7 +536,8 @@
                                     var response = await fetch("{{ SERVER_IP }}/submit", {
                                     method: "POST",
                                     headers: {
-                                            "Content-Type": "application/json"
+                                            "Content-Type": "application/json",
+                                            "X-CSRFToken": "{{ csrf_token }}"
                                         },
                                     body: JSON.stringify({
                                             uuid: report_uuid,

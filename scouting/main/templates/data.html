@@ -167,7 +167,8 @@
                         `${this.SERVER_IP}/get_data`, {
                         method: 'POST',
                         headers: {
-                            "Content-Type": "application/json"
+                            "Content-Type": "application/json",
+                            "X-CSRFToken": "{{ csrf_token }}"
                         },
                         body: JSON.stringify({
                             event_name: encodeURIComponent("{{ event_name }}"),

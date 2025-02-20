@@ -294,7 +294,6 @@ def service_worker(request):
     return HttpResponse(open(sw_path).read(), content_type="application/javascript")
 
 
-@csrf_exempt
 def submit(request):
     """
     Submits a scouting report to the server
@@ -357,7 +356,6 @@ def submit(request):
         return HttpResponse(request, "Request is not a POST request!", status=501)
 
 
-@csrf_exempt
 def get_data(request):
     """
     Gets the scouting data for an event from the server
@@ -437,7 +435,6 @@ def get_data(request):
         return HttpResponse("Request is not a POST request!", status=501)
 
 
-@csrf_exempt
 def get_custom_events(request):
     """
     Gets the custom events from the server for a year
@@ -474,7 +471,6 @@ def get_custom_events(request):
         return HttpResponse("Request is not a POST request!", status=501)
 
 
-@csrf_exempt
 def create_custom_event(request):
     """
     Creates a custom event
@@ -533,7 +529,6 @@ def create_custom_event(request):
         return HttpResponse(request, "Request is not a POST request!", status=501)
 
 
-@csrf_exempt
 def get_year_data(request):
     """
     Gets the number of events with data for a year
@@ -559,7 +554,6 @@ def get_year_data(request):
         return HttpResponse("Request is not a POST request!", status=501)
 
 
-@csrf_exempt
 def check_local_backup_reports(request):
     """
     Checks if local backup reports saved in the client exist on the server
@@ -636,7 +630,6 @@ def check_local_backup_reports(request):
         return HttpResponse("Request is not a POST request!", status=501)
 
 
-@csrf_exempt
 def upload_offline_reports(request):
     """
     Uploads offline reports saved to the client to the server
@@ -714,7 +707,6 @@ def upload_offline_reports(request):
         return HttpResponse("Request is not a POST request!", status=501)
 
 
-@csrf_exempt
 def get_pits(request):
     """
     Returns the pits and their data for a given event as JSON
@@ -806,7 +798,6 @@ def get_pits(request):
         return HttpResponse(request, "Request is not a POST request!", status=501)
 
 
-@csrf_exempt
 def update_pits(request):
     """
     Takes a pit db (json), compares the received one with the one in the server, and apply the changes to the database
@@ -910,7 +901,6 @@ def update_pits(request):
         return HttpResponse(request, "Request is not a POST request!", status=501)
 
 
-@csrf_exempt
 def get_pit_questions(request):
     """
     Returns the master list of pit scouting questions for a given year

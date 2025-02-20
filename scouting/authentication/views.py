@@ -253,7 +253,6 @@ def create_account(request):
         return HttpResponse("Request is not a POST request!", status=501)
 
 
-@csrf_exempt
 def get_authentication_status(request):
     """
     Gets the authentication status of the session
