@@ -7,6 +7,7 @@ This document describes the roadmap for Open Scouting, and roughly when each fea
 ### `v0.0.10-alpha`
 - [ ] [#18](https://github.com/FRC-Team3484/open-scouting/issues/18) - Export data
 - [ ] [#19](https://github.com/FRC-Team3484/open-scouting/issues/19) - More ways to view data
+- [ ] [#55](https://github.com/FRC-Team3484/open-scouting/issues/55) - Create a better home page
 - [x] Many requests use `@csrf_exempt` when they shouldn't
 
 ---
