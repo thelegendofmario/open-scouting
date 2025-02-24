@@ -987,6 +987,10 @@ select {
   margin-left: 0px;
 }
 
+.mt-12 {
+  margin-top: 3rem;
+}
+
 .block {
   display: block;
 }
@@ -1124,6 +1128,18 @@ select {
   width: 16rem;
 }
 
+.w-\[40vw\] {
+  width: 40vw;
+}
+
+.w-\[70vw\] {
+  width: 70vw;
+}
+
+.w-72 {
+  width: 18rem;
+}
+
 .max-w-14 {
   max-width: 3.5rem;
 }
@@ -1257,6 +1273,10 @@ select {
 
 .items-center {
   align-items: center;
+}
+
+.justify-start {
+  justify-content: flex-start;
 }
 
 .justify-end {
@@ -1455,6 +1475,10 @@ select {
   background-color: rgb(203 213 225 / var(--tw-bg-opacity));
 }
 
+.bg-slate-800\/80 {
+  background-color: rgb(30 41 59 / 0.8);
+}
+
 .bg-opacity-80 {
   --tw-bg-opacity: 0.8;
 }
@@ -1463,14 +1487,48 @@ select {
   background-image: linear-gradient(to bottom right, var(--tw-gradient-stops));
 }
 
+.bg-gradient-to-t {
+  background-image: linear-gradient(to top, var(--tw-gradient-stops));
+}
+
 .from-rose-200 {
   --tw-gradient-from: #fecdd3 var(--tw-gradient-from-position);
   --tw-gradient-to: rgb(254 205 211 / 0) var(--tw-gradient-to-position);
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
 }
 
+.from-slate-200\/50 {
+  --tw-gradient-from: rgb(226 232 240 / 0.5) var(--tw-gradient-from-position);
+  --tw-gradient-to: rgb(226 232 240 / 0) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
+.from-slate-700\/90 {
+  --tw-gradient-from: rgb(51 65 85 / 0.9) var(--tw-gradient-from-position);
+  --tw-gradient-to: rgb(51 65 85 / 0) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
+.from-slate-700\/10 {
+  --tw-gradient-from: rgb(51 65 85 / 0.1) var(--tw-gradient-from-position);
+  --tw-gradient-to: rgb(51 65 85 / 0) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
 .to-blue-200 {
   --tw-gradient-to: #bfdbfe var(--tw-gradient-to-position);
+}
+
+.to-slate-100 {
+  --tw-gradient-to: #f1f5f9 var(--tw-gradient-to-position);
+}
+
+.to-slate-600 {
+  --tw-gradient-to: #475569 var(--tw-gradient-to-position);
+}
+
+.to-slate-600\/10 {
+  --tw-gradient-to: rgb(71 85 105 / 0.1) var(--tw-gradient-to-position);
 }
 
 .p-1 {
@@ -1553,6 +1611,26 @@ select {
 .py-6 {
   padding-top: 1.5rem;
   padding-bottom: 1.5rem;
+}
+
+.py-12 {
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+}
+
+.py-48 {
+  padding-top: 12rem;
+  padding-bottom: 12rem;
+}
+
+.py-28 {
+  padding-top: 7rem;
+  padding-bottom: 7rem;
+}
+
+.py-8 {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
 }
 
 .pb-0 {
@@ -1746,6 +1824,12 @@ select {
 
 .backdrop-blur-md {
   --tw-backdrop-blur: blur(12px);
+  -webkit-backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
+  backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
+}
+
+.backdrop-blur-sm {
+  --tw-backdrop-blur: blur(4px);
   -webkit-backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
   backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
 }
@@ -2342,6 +2426,18 @@ select {
     width: 80%;
   }
 
+  .md\:w-64 {
+    width: 16rem;
+  }
+
+  .md\:w-\[30vw\] {
+    width: 30vw;
+  }
+
+  .md\:w-\[60vw\] {
+    width: 60vw;
+  }
+
   .md\:max-w-xl {
     max-width: 36rem;
   }
@@ -2381,6 +2477,14 @@ select {
     width: 66.666667%;
   }
 
+  .lg\:w-\[10vw\] {
+    width: 10vw;
+  }
+
+  .lg\:w-\[40vw\] {
+    width: 40vw;
+  }
+
   .lg\:max-w-3xl {
     max-width: 48rem;
   }
@@ -2393,11 +2497,24 @@ select {
     padding-left: 6rem;
     padding-right: 6rem;
   }
+
+  .lg\:py-28 {
+    padding-top: 7rem;
+    padding-bottom: 7rem;
+  }
 }
 
 @media (min-width: 1280px) {
   .xl\:w-2\/6 {
     width: 33.333333%;
+  }
+
+  .xl\:w-80 {
+    width: 20rem;
+  }
+
+  .xl\:w-60 {
+    width: 15rem;
   }
 }
 

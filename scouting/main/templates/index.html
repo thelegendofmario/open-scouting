@@ -10,7 +10,7 @@
 
 {% block body %}
     <div class="snap-y snap-mandatory h-screen overflow-y-scroll" id="index">
-        <div class="flex h-screen justify-center items-center flex-col w-screen snap-center">
+        <div class="flex h-screen justify-center items-center flex-col w-screen snap-center px-4">
 
             <div x-data="header()">
                 <div class="flex flex-col justify-center items-center"
@@ -1136,10 +1136,36 @@
             <div>
                 <img class="w-128 h-auto" src="{% static '/main/images/mobile.png' %}">
             </div>
-
         </div>
-    </div>
-{% endblock %}
 
-{% block scripts %}
-{% endblock %}
+        <div class="h-screen w-screen max-w-screen snap-center flex flex-col justify-end items-left px-6 lg:px-24 py-8 lg:py-28 backdrop-blur-sm"
+             style="background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 15%, rgba(0, 0, 0, 0.4) 100%)"
+             x-data="">
+            <img class="height-auto w-72 hidden dark:block cursor-pointer hover:scale-105 active:scale-95 transition-all"
+                 src="{% static '/main/images/logo_light.png' %}"
+                 @click="document.querySelector('#index').scrollTo({top: 0, behavior: 'smooth'})">
+            <img class="height-auto w-72 dark:hidden block cursor-pointer hover:scale-105 active:scale-95 transition-all"
+                 src="{% static '/main/images/logo_dark.png' %}"
+                 @click="win=document.querySelector('#index').scrollTo({top: 0, behavior: 'smooth'})">
+            <div class="flex flex-col ml-8 mt-6">
+                <a class="text-black dark:text-white font-sans text-lg opacity-80 hover:opacity-100 active:opacity-100 transition-opacity font-bold"
+                   href="{{ SERVER_IP }}/authentication"><i class="ph-bold ph-lock"></i> Log In</a>
+            </div>
+            <div class="flex flex-col ml-8 mt-6">
+                <a class="text-black dark:text-white font-sans text-md opacity-80 hover:opacity-100 active:opacity-100 transition-opacity"
+                   href="https://github.com/FRC-Team3484/open-scouting"><i class="ph-bold ph-github-logo"></i> Source Code</a>
+                <a class="text-black dark:text-white font-sans text-md opacity-80 hover:opacity-100 active:opacity-100 transition-opacity"
+                   href="https://github.com/FRC-Team3484/open-scouting/issues"><i class="ph-bold ph-bug"></i> Issues</a>
+                <a class="text-black dark:text-white font-sans text-md opacity-80 hover:opacity-100 active:opacity-100 transition-opacity"
+                   href="https://github.com/FRC-Team3484/open-scouting/releases"><i class="ph-bold ph-app-window"></i> Releases</a>
+            </div>
+            <div class="flex flex-col ml-8 mt-6">
+                <a class="text-black dark:text-white font-sans text-md opacity-80 hover:opacity-100 active:opacity-100 transition-opacity"
+                   href="https://github.com/FRC-Team3484/open-scouting/tree/main/docs"><i class="ph-bold ph-newspaper"></i> Documentation</a>
+                <a class="text-black dark:text-white font-sans text-md opacity-80 hover:opacity-100 active:opacity-100 transition-opacity"
+                   href="https://github.com/FRC-Team3484/open-scouting/tree/development"><i class="ph-bold ph-hammer"></i> Development Branch</a>
+            </div>
+        </div>
+    {% endblock %}
+
+    {% block scripts %}{% endblock %}
