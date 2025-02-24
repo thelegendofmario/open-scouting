@@ -1114,8 +1114,29 @@
 
         </div>
 
-        <div class="h-screen w-screen snap-center">
-            <p>Features</p>
+        <div class="h-screen w-screen max-w-screen snap-center flex flex-col lg:flex-row justify-center items-center px-6 lg:px-24">
+            <div class="flex flex-col ml-0 lg:ml-12">
+                <p class="text-black dark:text-white font-sans text-4xl">
+                    <i class="ph-bold ph-list-dashes"></i> Features
+                </p>
+                <p class="text-black dark:text-white font-sans text-lg mb-4 opacity-80">Open Scouting is an open source application for easier scouting at FIRST Robotics competitions</p>
+                <ul class="list-disc ml-4 text-black dark:text-white">
+                    <li>Gather pit scouting data</li>
+                    <li>Anyone can contribute data, and anyone can view it, no account needed</li>
+                    <li>Works offline in case of poor connection in the stands</li>
+                    <li>Uses The Blue Alliance to autofill data for faster scouting</li>
+                    <li>Create custom events if an event isn't in TBA</li>
+                    <li>Manually go offline in case of bad connection</li>
+                    <li>Demo mode to let scouts try out the app</li>
+                    <li>Share links to an event to start scouting as fast as possible</li>
+                    <li>Create an account to verify your scouting reports</li>
+                </ul>
+
+            </div>
+            <div>
+                <img class="w-128 h-auto" src="{% static '/main/images/mobile.png' %}">
+            </div>
+
         </div>
     </div>
 {% endblock %}

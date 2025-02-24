@@ -983,6 +983,10 @@ select {
   margin-top: 100%;
 }
 
+.ml-0 {
+  margin-left: 0px;
+}
+
 .block {
   display: block;
 }
@@ -1055,6 +1059,10 @@ select {
   height: 100vh;
 }
 
+.h-64 {
+  height: 16rem;
+}
+
 .\!max-h-8 {
   max-height: 2rem !important;
 }
@@ -1112,6 +1120,10 @@ select {
   width: 100vw;
 }
 
+.w-64 {
+  width: 16rem;
+}
+
 .max-w-14 {
   max-width: 3.5rem;
 }
@@ -1130,6 +1142,10 @@ select {
 
 .max-w-sm {
   max-width: 24rem;
+}
+
+.max-w-\[90vw\] {
+  max-width: 90vw;
 }
 
 .flex-1 {
@@ -1211,6 +1227,10 @@ select {
   scroll-snap-align: center;
 }
 
+.list-disc {
+  list-style-type: disc;
+}
+
 .grid-cols-2 {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
@@ -1221,6 +1241,10 @@ select {
 
 .flex-col {
   flex-direction: column;
+}
+
+.flex-col-reverse {
+  flex-direction: column-reverse;
 }
 
 .flex-wrap {
@@ -1245,6 +1269,10 @@ select {
 
 .justify-between {
   justify-content: space-between;
+}
+
+.gap-2 {
+  gap: 0.5rem;
 }
 
 .gap-x-2 {
@@ -2341,6 +2369,10 @@ select {
 }
 
 @media (min-width: 1024px) {
+  .lg\:ml-12 {
+    margin-left: 3rem;
+  }
+
   .lg\:w-1\/2 {
     width: 50%;
   }
@@ -2351,6 +2383,15 @@ select {
 
   .lg\:max-w-3xl {
     max-width: 48rem;
+  }
+
+  .lg\:flex-row {
+    flex-direction: row;
+  }
+
+  .lg\:px-24 {
+    padding-left: 6rem;
+    padding-right: 6rem;
   }
 }
 
