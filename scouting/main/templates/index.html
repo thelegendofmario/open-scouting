@@ -228,6 +228,10 @@
 
                     <p class="text-black dark:text-white font-sans text-center mt-2">Or...</p>
 
+                    <button class="ui_button" @click="advanced_data_view()">
+                        <i class="ph-bold ph-hard-drives"></i> Advanced Data View
+                    </button>
+
                     <button class="border-solid border-2 dark:border-slate-600 dark:bg-purple-900/50 dark:hover:bg-purple-900/80 dark:active:bg-purple-800/80 dark:text-white border-slate-300 bg-purple-200/50 hover:bg-purple-200/80 active:bg-purple-300/80 text-black rounded-xl py-2 px-8 transition backdrop-blur-lg my-2 disabled:scale-95 disabled:opacity-80"
                             @click="start_demo()">
                         <i class="ph-bold ph-test-tube"></i> Try Open Scouting
@@ -268,6 +272,10 @@
                                 }));
 
                                 this.page = 4;
+                            },
+
+                            advanced_data_view() {
+                                window.location.href = "{{ SERVER_IP }}/advanced_data";
                             },
 
                             sign_in() {

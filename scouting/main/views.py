@@ -286,6 +286,23 @@ def pits(request):
     return render(request, "pits.html", context)
 
 
+def advanced_data(request):
+    """
+    Returns the advanced data page
+    """
+    request.session["username"] = request.GET.get("username", "unknown")
+    request.session["team_number"] = request.GET.get("team_number", "unknown")
+
+    context = {
+        "SERVER_IP": settings.SERVER_IP,
+        "TBA_API_KEY": settings.TBA_API_KEY,
+        "SERVER_MESSAGE": settings.SERVER_MESSAGE,
+        "YEARS": json.dumps(YEARS),
+    }
+
+    return render(request, "advanced_data.html", context)
+
+
 def service_worker(request):
     """
     Returns the service worker file to the client for installation

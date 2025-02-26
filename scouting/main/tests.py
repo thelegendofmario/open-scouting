@@ -86,6 +86,26 @@ class PitsPageTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
 
+class AdvancedDataPageTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+        user = User.objects.create_user("test", "test", "test")
+        user.save()
+
+        profile = Profile(user=user, display_name="test", team_number="1234")
+        profile.save()
+
+    def test_advanced_data_anonymous(self):
+        response = self.client.get("/advanced_data")
+        self.assertEqual(response.status_code, 200)
+
+    def test_advanced_data_authenticated(self):
+        self.client.login(username="test", password="test")
+        response = self.client.get("/advanced_data")
+        self.assertEqual(response.status_code, 200)
+
+
 class ServiceWorkerPageTest(TestCase):
     def setUp(self):
         self.client = Client()
