@@ -29,12 +29,116 @@
         </div>
 
         <script>
-        function advanced_data_header() {
-            return {}
-        }
+            function advanced_data_header() {
+                return {}
+            }
         </script>
 
+        <div class="flex flex-col w-full md:w-3/4 lg:w-2/3 mx-8 my-2 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg gap-2"
+             x-data="filters()">
+            <p class="dark:text-white text-black text-sans text-2xl ml-4">
+                <i class="ph-bold ph-funnel"></i> Filters
+            </p>
+            <div class="flex flex-row items-center gap-2 ml-6" x-ref="year">
+                <p class="dark:text-white text-black text-sans text-lg">Year</p>
+                <select class="ui_input !w-32" x-ref="year_input">
+                    <template x-for="year in YEARS" :key="year">
+                        <option x-text="year"></option>
+                    </template>
+                </select>
+            </div>
+            <div class="flex flex-row items-center gap-2 ml-6" x-ref="teams">
+                <p class="dark:text-white text-black text-sans text-lg">Teams</p>
+                <button class="ui_button_small"
+                        x-ref="teams_add"
+                        @click="add_team_open = !add_team_open">
+                    <i class="ph-bold ph-plus"></i> Add
+                </button>
+            </div>
+            <div class="dark:bg-slate-800/80 border-2 dark:border-slate-700 bg-slate-200/80 border-slate-300 rounded-xl flex flex-col backdrop-blur-md z-10 p-2"
+                 x-anchor.offset.5="$refs.teams_add"
+                 x-show="add_team_open"
+                 x-transition
+                 @click.outside="add_team_open = false">
+                <div class="flex flex-row items-center gap-2">
+                    <input class="ui_input !w-full"
+                           type="text"
+                           placeholder="Search for a team..."
+                           x-ref="teams_search">
+                    <button class="ui_button_small" @click="add_team_open = false">
+                        <i class="ph-bold ph-x"></i>
+                    </button>
+                </div>
+
+                <template x-for="team in team_results">
+                    <div class="flex flex-row mx-4 my-1 hover:dark:bg-slate-700/80 hover:bg-slate-200/80 active:dark:bg-slate-600/80 active:bg-slate-100/80 rounded-lg transition-colors">
+                        <img class="w-8 h-8 aspect-square m-2"
+                             :src='"https://thebluealliance.com/avatar/" + $refs.year_input.value + "/frc" + team + ".png"'
+                             @error="event.target.style.display = 'none'">
+                        <p class="dark:text-white text-black text-sans text-md m-2"
+                           x-text="team"></p>
+                    </div>
+                </template>
+            </div>
+
+            <div class="flex flex-row items-center gap-2 ml-6" x-ref="events">
+                <p class="dark:text-white text-black text-sans text-lg">Events</p>
+                <button class="ui_button_small"
+                        x-ref="events_add"
+                        @click="add_event_open = !add_event_open">
+                    <i class="ph-bold ph-plus"></i> Add
+                </button>
+            </div>
+            <div class="dark:bg-slate-800/80 border-2 dark:border-slate-700 bg-slate-200/80 border-slate-300 rounded-xl flex flex-col backdrop-blur-md z-10 p-2"
+                 x-anchor.offset.5="$refs.events_add"
+                 x-show="add_event_open"
+                 x-transition
+                 @click.outside="add_event_open = false">
+                <div class="flex flex-row items-center gap-2">
+                    <input class="ui_input !w-full"
+                           type="text"
+                           placeholder="Search for an event..."
+                           x-ref="teams_search">
+                    <button class="ui_button_small" @click="add_event_open = false">
+                        <i class="ph-bold ph-x"></i>
+                    </button>
+                </div>
+
+                <template x-for="event in event_results">
+                    <div class="flex flex-row mx-4 my-1 hover:dark:bg-slate-700/80 hover:bg-slate-200/80 active:dark:bg-slate-600/80 active:bg-slate-100/80 rounded-lg transition-colors">
+                        <p class="dark:text-white text-black text-sans text-md m-2"
+                           x-text="event"></p>
+                    </div>
+                </template>
+            </div>
+            <p class="dark:text-white text-black text-monospace text-md"
+               x-text="filters"></p>
+        </div>
+
+        <script>
+            function filters() {
+                return {
+                    YEARS: JSON.parse('{{ YEARS | safe }}').reverse(),
+                    teams: [],
+                    events: [],
+                    filters: "",
+                    team_results: [],
+                    event_results: [],
+                    add_team_open: false,
+                    add_event_open: false,
+
+                    get_filters() {
+                        
+                    },
+
+                    init() {
+
+                    }
+                }
+            }
+        </script>
     </div>
 {% endblock %}
 
-{% block scripts %}{% endblock %}
+{% block scripts %}
+{% endblock %}

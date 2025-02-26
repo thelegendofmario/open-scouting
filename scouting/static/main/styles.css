@@ -971,6 +971,10 @@ select {
   margin-top: 1.5rem;
 }
 
+.ml-6 {
+  margin-left: 1.5rem;
+}
+
 .block {
   display: block;
 }
@@ -1043,6 +1047,10 @@ select {
   height: 100vh;
 }
 
+.h-8 {
+  height: 2rem;
+}
+
 .\!max-h-8 {
   max-height: 2rem !important;
 }
@@ -1102,6 +1110,22 @@ select {
 
 .w-screen {
   width: 100vw;
+}
+
+.\!w-auto {
+  width: auto !important;
+}
+
+.\!w-16 {
+  width: 4rem !important;
+}
+
+.\!w-32 {
+  width: 8rem !important;
+}
+
+.w-8 {
+  width: 2rem;
 }
 
 .max-w-14 {
@@ -1237,6 +1261,10 @@ select {
 
 .justify-between {
   justify-content: space-between;
+}
+
+.gap-2 {
+  gap: 0.5rem;
 }
 
 .gap-x-2 {
@@ -1690,6 +1718,10 @@ select {
 
 .opacity-80 {
   opacity: 0.8;
+}
+
+.\!opacity-80 {
+  opacity: 0.8 !important;
 }
 
 .shadow-lg {
@@ -2198,6 +2230,10 @@ select {
   background-color: rgb(241 245 249 / var(--tw-bg-opacity));
 }
 
+.hover\:bg-slate-200\/80:hover {
+  background-color: rgb(226 232 240 / 0.8);
+}
+
 .hover\:text-blue-700:hover {
   --tw-text-opacity: 1;
   color: rgb(29 78 216 / var(--tw-text-opacity));
@@ -2224,6 +2260,19 @@ select {
 .active\:bg-slate-300:active {
   --tw-bg-opacity: 1;
   background-color: rgb(203 213 225 / var(--tw-bg-opacity));
+}
+
+.active\:bg-slate-200\/80:active {
+  background-color: rgb(226 232 240 / 0.8);
+}
+
+.active\:bg-slate-200:active {
+  --tw-bg-opacity: 1;
+  background-color: rgb(226 232 240 / var(--tw-bg-opacity));
+}
+
+.active\:bg-slate-100\/80:active {
+  background-color: rgb(241 245 249 / 0.8);
 }
 
 .active\:opacity-100:active {
@@ -2472,6 +2521,10 @@ select {
   background-color: rgb(30 41 59 / 0.6);
 }
 
+.dark\:bg-slate-800\/80:where(.dark, .dark *) {
+  background-color: rgb(30 41 59 / 0.8);
+}
+
 .dark\:bg-gradient-to-br:where(.dark, .dark *) {
   background-image: linear-gradient(to bottom right, var(--tw-gradient-stops));
 }
@@ -2524,6 +2577,10 @@ select {
   background-color: rgb(71 85 105 / var(--tw-bg-opacity));
 }
 
+.hover\:dark\:bg-slate-700\/80:where(.dark, .dark *):hover {
+  background-color: rgb(51 65 85 / 0.8);
+}
+
 .hover\:dark\:text-blue-500:where(.dark, .dark *):hover {
   --tw-text-opacity: 1;
   color: rgb(59 130 246 / var(--tw-text-opacity));
@@ -2535,4 +2592,17 @@ select {
 
 .dark\:active\:bg-purple-800\/80:active:where(.dark, .dark *) {
   background-color: rgb(107 33 168 / 0.8);
+}
+
+.active\:dark\:bg-slate-800\/80:where(.dark, .dark *):active {
+  background-color: rgb(30 41 59 / 0.8);
+}
+
+.active\:dark\:bg-slate-800:where(.dark, .dark *):active {
+  --tw-bg-opacity: 1;
+  background-color: rgb(30 41 59 / var(--tw-bg-opacity));
+}
+
+.active\:dark\:bg-slate-600\/80:where(.dark, .dark *):active {
+  background-color: rgb(71 85 105 / 0.8);
 }
