@@ -49,9 +49,9 @@
                     </template>
                 </select>
             </div>
-            <div class="flex flex-row items-center gap-2 ml-6" x-ref="teams">
+            <div class="flex flex-row items-center gap-2 ml-6 flex-wrap" x-ref="teams">
                 <p class="dark:text-white text-black text-sans text-lg">Teams</p>
-                <template x-for="team in teams" :key="team">
+                <template x-for="team in teams" :key="teams.indexOf(team)">
                     <button class="ui_button_small !flex !flex-row items-center gap-1"
                             @click="remove_team(team)">
                         <i class="ph-bold ph-x"></i>
@@ -95,9 +95,10 @@
                 </template>
             </div>
 
-            <div class="flex flex-row items-center gap-2 ml-6" x-ref="events">
+            <div class="flex flex-row items-center gap-2 ml-6 flex-wrap"
+                 x-ref="events">
                 <p class="dark:text-white text-black text-sans text-lg">Events</p>
-                <template x-for="event in events" :key="event.event_code">
+                <template x-for="event in events" :key="events.indexOf(event)">
                     <button class="ui_button_small !flex !flex-row items-center gap-1"
                             @click="remove_event(event)">
                         <i class="ph-bold ph-x"></i>
