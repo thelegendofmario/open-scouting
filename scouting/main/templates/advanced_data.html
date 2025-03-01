@@ -54,8 +54,11 @@
                         @click="add_team_open = !add_team_open">
                     <i class="ph-bold ph-plus"></i> Add
                 </button>
+                <template x-for="team in teams" :key="team">
+                    <p x-text="team"></p>
+                </template>
             </div>
-            <div class="dark:bg-slate-800/80 border-2 dark:border-slate-700 bg-slate-200/80 border-slate-300 rounded-xl flex flex-col backdrop-blur-md z-10 p-2"
+            <div class="dark:bg-slate-800/80 border-2 dark:border-slate-700 bg-slate-200/80 border-slate-300 rounded-xl flex flex-col backdrop-blur-md z-10 p-2 max-w-screen max-h-64 overflow-y-scroll"
                  x-anchor.offset.5="$refs.teams_add"
                  x-show="add_team_open"
                  x-transition
@@ -71,7 +74,8 @@
                 </div>
 
                 <template x-for="team in team_results">
-                    <div class="flex flex-row mx-4 my-1 hover:dark:bg-slate-700/80 hover:bg-slate-200/80 active:dark:bg-slate-600/80 active:bg-slate-100/80 rounded-lg transition-colors">
+                    <div class="flex flex-row mx-4 my-1 hover:dark:bg-slate-700/80 hover:bg-slate-200/80 active:dark:bg-slate-600/80 active:bg-slate-100/80 rounded-lg transition-colors"
+                         @click="get_events_with_filters()">
                         <img class="w-8 h-8 aspect-square m-2"
                              :src='"https://thebluealliance.com/avatar/" + $refs.year_input.value + "/frc" + team + ".png"'
                              @error="event.target.style.display = 'none'">
@@ -88,8 +92,11 @@
                         @click="add_event_open = !add_event_open">
                     <i class="ph-bold ph-plus"></i> Add
                 </button>
+                <template x-for="event in events" :key="event.event_code">
+                    <p x-text="event.name"></p>
+                </template>
             </div>
-            <div class="dark:bg-slate-800/80 border-2 dark:border-slate-700 bg-slate-200/80 border-slate-300 rounded-xl flex flex-col backdrop-blur-md z-10 p-2"
+            <div class="dark:bg-slate-800/80 border-2 dark:border-slate-700 bg-slate-200/80 border-slate-300 rounded-xl flex flex-col backdrop-blur-md z-10 p-2 max-w-screen max-h-64 overflow-y-scroll"
                  x-anchor.offset.5="$refs.events_add"
                  x-show="add_event_open"
                  x-transition
@@ -105,12 +112,18 @@
                 </div>
 
                 <template x-for="event in event_results">
-                    <div class="flex flex-row mx-4 my-1 hover:dark:bg-slate-700/80 hover:bg-slate-200/80 active:dark:bg-slate-600/80 active:bg-slate-100/80 rounded-lg transition-colors">
+                    <div class="flex flex-col mx-4 my-1 hover:dark:bg-slate-700/80 hover:bg-slate-200/80 active:dark:bg-slate-600/80 active:bg-slate-100/80 rounded-lg transition-colors"
+                         @click="get_teams_with_filters()">
                         <p class="dark:text-white text-black text-sans text-md m-2"
-                           x-text="event"></p>
+                           x-text="event.name"></p>
+                        <p class="dark:text-white text-black text-sans font-mono text-sm opacity-80 ml-2"
+                           x-text="event.code"></p>
                     </div>
                 </template>
             </div>
+            <button class="ui_button_small ml-6" @click="clear_filters()">
+                <i class="ph-bold ph-trash"></i> Clear Filters
+            </button>
             <p class="dark:text-white text-black text-monospace text-md"
                x-text="filters"></p>
         </div>
@@ -128,11 +141,59 @@
                     add_event_open: false,
 
                     get_filters() {
-                        
+                        // year:2025&team:3484,1234,5678&event:ahlu,rcg
+                    },
+
+                    clear_filters() {
+
+                    },
+
+                    async get_teams_with_filters() {
+                        var response = await fetch("{{ SERVER_IP }}/get_teams_with_filters", {
+                            method: "POST",
+                            headers: {
+                                    "X-CSRFToken": "{{ csrf_token }}"
+                                },
+                            body: JSON.stringify({
+                                year: this.$refs.year_input.value,
+                                events: JSON.stringify(this.events)
+                            })
+                            });
+
+                        if (response.ok) {
+                            this.team_results = await response.json();
+                        }
+                    },
+
+                    async get_events_with_filters() {
+                        var response = await fetch("{{ SERVER_IP }}/get_events_with_filters", {
+                            method: "POST",
+                            headers: {
+                                    "X-CSRFToken": "{{ csrf_token }}"
+                                },
+                            body: JSON.stringify({
+                                year: this.$refs.year_input.value,
+                                teams: JSON.stringify(this.teams)
+                            })
+                            });
+
+                        if (response.ok) {
+                            this.event_results = await response.json();
+                        }
                     },
 
                     init() {
+                        
+                        // Wait to ensure year drop down is populated
+                        setTimeout(() => {
+                            this.get_teams_with_filters();
+                            this.get_events_with_filters();
 
+                            console.log(this.team_results);
+                            console.log(this.event_results);
+
+                            console.log(this.$refs.year_input.value);
+                        }, 100);
                     }
                 }
             }

@@ -943,3 +943,120 @@ def get_pit_questions(request):
 
     else:
         return HttpResponse(request, "Request is not a POST request!", status=501)
+
+
+def get_teams_with_filters(request):
+    """
+    For the advanced data view. For the given year and events, returns a list of all of the teams that match the filters on the server
+
+    Body Parameters:
+        year: The year that this event is from
+        events: The list of events to filter by
+
+    Returns:
+        A list of all of the teams that match the filters as JSON
+    """
+
+    if request.method == "POST":
+        try:
+            body = json.loads(request.body)
+            events = json.loads(body["events"])
+        except KeyError:
+            return HttpResponse(request, "No body found in request", status=400)
+
+        team_list = []
+
+        if len(events) > 0:
+            event_list = Event.objects.filter(event_code__in=events)
+
+            datas = data_list = Data.objects.filter(
+                event_model__in=event_list,
+                year=body["year"],
+            )
+            data_list = []
+
+            for data in datas:
+                for item in data.data:
+                    if item["name"] == "team_number":
+                        if item["value"] not in data_list:
+                            data_list.append(item["value"])
+                        break
+        else:
+            datas = Data.objects.filter(year=body["year"])
+            data_list = []
+
+            for data in datas:
+                for item in data.data:
+                    if item["name"] == "team_number":
+                        if item["value"] not in data_list:
+                            data_list.append(item["value"])
+                        break
+
+        for team_number in data_list:
+            team_list.append(team_number)
+
+        return JsonResponse(team_list, safe=False, status=200)
+
+    else:
+        return HttpResponse(request, "Request is not a POST request!", status=501)
+
+
+def get_events_with_filters(request):
+    """
+    For the advanced data view. For the given year and events, returns a list of all of the events in that year
+    If teams are specified, only show events where there's data for those teams
+
+    Body Parameters:
+        year: The year that this event is from
+        teams: The list of teams to filter by
+
+    Returns:
+        A list of all of the events that match the filters as JSON
+    """
+
+    if request.method == "POST":
+        try:
+            body = json.loads(request.body)
+            teams = json.loads(body["teams"])
+        except KeyError:
+            return HttpResponse(request, "No body found in request", status=400)
+
+        event_list = []
+
+        if len(teams) > 0:
+            events_with_data = Data.objects.filter(
+                year=body["year"],
+            )
+
+            for data in events_with_data:
+                for item in data.data:
+                    if item["name"] == "team_number":
+                        print(item["value"] in teams)
+                        if str(item["value"]) in teams:
+                            if data.event_model.event_code not in event_list:
+                                event_list.append(
+                                    {
+                                        "name": data.event_model.name,
+                                        "code": data.event_model.event_code,
+                                    }
+                                )
+                            break
+
+        else:
+            events_with_data = Data.objects.filter(year=body["year"])
+
+            for data in events_with_data:
+                try:
+                    event_info = {
+                        "name": data.event_model.name,
+                        "code": data.event_model.event_code,
+                    }
+                    if event_info not in event_list:
+                        event_list.append(event_info)
+                except AttributeError:
+                    pass
+
+        return JsonResponse(event_list, safe=False, status=200)
+
+    else:
+        return HttpResponse(request, "Request is not a POST request!", status=501)
