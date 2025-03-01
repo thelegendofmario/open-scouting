@@ -960,7 +960,7 @@ def get_teams_with_filters(request):
     if request.method == "POST":
         try:
             body = json.loads(request.body)
-            events = json.loads(body["events"])
+            events = [event["code"] for event in json.loads(body["events"])]
         except KeyError:
             return HttpResponse(request, "No body found in request", status=400)
 
@@ -976,21 +976,27 @@ def get_teams_with_filters(request):
             data_list = []
 
             for data in datas:
-                for item in data.data:
-                    if item["name"] == "team_number":
-                        if item["value"] not in data_list:
-                            data_list.append(item["value"])
-                        break
+                try:
+                    for item in data.data:
+                        if item["name"] == "team_number":
+                            if item["value"] not in data_list:
+                                data_list.append(item["value"])
+                            break
+                except (AttributeError, TypeError, KeyError):
+                    pass
         else:
             datas = Data.objects.filter(year=body["year"])
             data_list = []
 
             for data in datas:
-                for item in data.data:
-                    if item["name"] == "team_number":
-                        if item["value"] not in data_list:
-                            data_list.append(item["value"])
-                        break
+                try:
+                    for item in data.data:
+                        if item["name"] == "team_number":
+                            if item["value"] not in data_list:
+                                data_list.append(item["value"])
+                            break
+                except (AttributeError, TypeError, KeyError):
+                    pass
 
         for team_number in data_list:
             team_list.append(team_number)
@@ -1029,18 +1035,20 @@ def get_events_with_filters(request):
             )
 
             for data in events_with_data:
-                for item in data.data:
-                    if item["name"] == "team_number":
-                        print(item["value"] in teams)
-                        if str(item["value"]) in teams:
-                            if data.event_model.event_code not in event_list:
-                                event_list.append(
-                                    {
-                                        "name": data.event_model.name,
-                                        "code": data.event_model.event_code,
-                                    }
-                                )
-                            break
+                try:
+                    for item in data.data:
+                        if item["name"] == "team_number":
+                            if str(item["value"]) in teams:
+                                if data.event_model.event_code not in event_list:
+                                    event_list.append(
+                                        {
+                                            "name": data.event_model.name,
+                                            "code": data.event_model.event_code,
+                                        }
+                                    )
+                                break
+                except (AttributeError, TypeError, KeyError):
+                    pass
 
         else:
             events_with_data = Data.objects.filter(year=body["year"])
