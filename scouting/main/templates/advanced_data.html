@@ -76,13 +76,14 @@
                     <input class="ui_input !w-full"
                            type="text"
                            placeholder="Search for a team..."
-                           x-ref="teams_search">
+                           x-ref="teams_search"
+                           @input="update_team_search()">
                     <button class="ui_button_small" @click="add_team_open = false">
                         <i class="ph-bold ph-x"></i>
                     </button>
                 </div>
 
-                <template x-for="team in team_results">
+                <template x-for="team in team_results_filtered">
                     <div class="flex flex-row mx-4 my-1 hover:dark:bg-slate-700/80 hover:bg-slate-200/80 active:dark:bg-slate-600/80 active:bg-slate-100/80 rounded-lg transition-colors"
                          @click="add_team(team)">
                         <img class="w-8 h-8 aspect-square m-2"
@@ -118,13 +119,14 @@
                     <input class="ui_input !w-full"
                            type="text"
                            placeholder="Search for an event..."
-                           x-ref="teams_search">
+                           x-ref="events_search"
+                           @input="update_event_search()">
                     <button class="ui_button_small" @click="add_event_open = false">
                         <i class="ph-bold ph-x"></i>
                     </button>
                 </div>
 
-                <template x-for="event in event_results">
+                <template x-for="event in event_results_filtered">
                     <div class="flex flex-col mx-4 my-1 hover:dark:bg-slate-700/80 hover:bg-slate-200/80 active:dark:bg-slate-600/80 active:bg-slate-100/80 rounded-lg transition-colors"
                          @click="add_event(event)">
                         <p class="dark:text-white text-black text-sans text-md m-2"
@@ -150,6 +152,8 @@
                     filters: "",
                     team_results: [],
                     event_results: [],
+                    team_results_filtered: [],
+                    event_results_filtered: [],
                     add_team_open: false,
                     add_event_open: false,
 
@@ -190,6 +194,16 @@
                         this.get_events_with_filters();
                     },
 
+                    update_team_search() {
+                        let search = this.$refs.teams_search.value.toLowerCase();
+                        this.team_results_filtered = this.team_results.filter(team => team.toLowerCase().includes(search));
+                    },
+
+                    update_event_search() {
+                        let search = this.$refs.events_search.value.toLowerCase();
+                        this.event_results_filtered = this.event_results.filter(event => event.name.toLowerCase().includes(search));
+                    },
+
                     async get_teams_with_filters() {
                         var response = await fetch("{{ SERVER_IP }}/get_teams_with_filters", {
                             method: "POST",
@@ -205,6 +219,8 @@
                         if (response.ok) {
                             let results = await response.json();
                             this.team_results = [...new Set(results)].filter(t => !this.teams.includes(t));
+                            this.team_results_filtered = this.team_results;
+                            this.update_team_search();
                         }
                     },
 
@@ -224,6 +240,8 @@
                             let results = await response.json();
                             this.event_results = [...new Map(results.map(event => [event.code, event])).values()]
                                 .filter(event => !this.events.some(e => e.code === event.code));
+                            this.event_results_filtered = this.event_results;
+                            this.update_event_search();
                         }
                     },
 
