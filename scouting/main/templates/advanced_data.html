@@ -43,7 +43,7 @@
                 <p class="dark:text-white text-black text-sans text-lg">Year</p>
                 <select class="ui_input !w-32"
                         x-ref="year_input"
-                        @input="get_teams_with_filters(); get_events_with_filters();">
+                        @input="update_results_and_query();">
                     <template x-for="year in YEARS" :key="year">
                         <option x-text="year"></option>
                     </template>
@@ -137,11 +137,11 @@
                     </div>
                 </template>
             </div>
+            <p class="dark:text-white text-black font-mono text-sm ml-6 opacity-60"
+               x-text="query"></p>
             <button class="ui_button_small ml-6" @click="clear_filters()">
                 <i class="ph-bold ph-trash"></i> Clear Filters
             </button>
-            <p class="dark:text-white text-black text-monospace text-md"
-               x-text="filters"></p>
         </div>
 
         <script>
@@ -150,7 +150,7 @@
                     YEARS: JSON.parse('{{ YEARS | safe }}').reverse(),
                     teams: [],
                     events: [],
-                    filters: "",
+                    query: "",
                     team_results: [],
                     event_results: [],
                     team_results_filtered: [],
@@ -158,8 +158,22 @@
                     add_team_open: false,
                     add_event_open: false,
 
-                    get_filters() {
-                        // year:2025&team:3484,1234,5678&event:ahlu,rcg
+                    get_query() {
+                        var teams_str = "";
+                        var events_str = "";
+
+                        if (this.teams.length > 0) {
+                            teams_str = "&teams=" + this.teams.join(",");
+                        } else {
+                            teams_str = "";
+                        }
+                        if (this.events.length > 0) {
+                            events_str = "&events=" + this.events.map(event => event.code).join(",");
+                        } else {
+                            events_str = "";
+                        }
+
+                        this.query = `?year=${this.$refs.year_input.value}${teams_str}${events_str}`;
                     },
 
                     clear_filters() {
@@ -167,32 +181,33 @@
                         this.events = [];
                         this.team_results = [];
                         this.event_results = [];
-                        this.get_teams_with_filters();
-                        this.get_events_with_filters();
+                        this.update_results_and_query();
                     },
 
                     add_team(team) {
                         this.teams.push(team);
-                        this.get_teams_with_filters();
-                        this.get_events_with_filters();
+                        this.update_results_and_query();
                     },
 
                     add_event(event) {
                         this.events.push(event);
-                        this.get_teams_with_filters();
-                        this.get_events_with_filters();
+                        this.update_results_and_query();
                     },
 
                     remove_team(team) {
                         this.teams = this.teams.filter(t => t !== team);
-                        this.get_teams_with_filters();
-                        this.get_events_with_filters();
+                        this.update_results_and_query();
                     },
 
                     remove_event(event) {
                         this.events = this.events.filter(e => e !== event);
+                        this.update_results_and_query();
+                    },
+
+                    update_results_and_query() {
                         this.get_teams_with_filters();
                         this.get_events_with_filters();
+                        this.get_query();
                     },
 
                     update_team_search() {
@@ -250,13 +265,7 @@
                         
                         // Wait to ensure year drop down is populated
                         setTimeout(() => {
-                            this.get_teams_with_filters();
-                            this.get_events_with_filters();
-
-                            console.log(this.team_results);
-                            console.log(this.event_results);
-
-                            console.log(this.$refs.year_input.value);
+                            this.update_results_and_query();
                         }, 100);
                     }
                 }
