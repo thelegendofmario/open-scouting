@@ -1120,8 +1120,29 @@ def get_data_from_query(request):
 
         final_data = []
 
+        team_data_map = {}
+
         for item in data:
-            final_data.append({"team_number": item.data[0]["value"], "data": item.data})
+            team_number = None
+            for field in item.data:
+                if "stat_type" not in field:
+                    field["stat_type"] = "ignore"
+                if "game_piece" not in field:
+                    field["game_piece"] = ""
+                if field["name"] == "team_number":
+                    team_number = field["value"]
+
+            if team_number is not None:
+                if team_number not in team_data_map:
+                    team_data_map[team_number] = []
+                team_data_map[team_number].append(item.data)
+
+        final_data = [
+            {"team_number": team_number, "data": [fields for fields in fields_list]}
+            for team_number, fields_list in team_data_map.items()
+        ]
+
+        # print(json.dumps(final_data, indent=4))
 
         return JsonResponse(final_data, safe=False, status=200)
     else:

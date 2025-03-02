@@ -299,6 +299,8 @@
                         }
 
                         field_element.setAttribute("scouting_type", field.type)
+                        field_element.setAttribute("scouting_stat_type", field.stat_type)
+                        field_element.setAttribute("scouting_game_piece", field.game_piece)
 
                         field_container.appendChild(label);
                         field_container.appendChild(field_element);
@@ -436,7 +438,9 @@
                                 let data_field = {
                                     "name": field.getAttribute("x-ref"),
                                     "type": field.getAttribute("scouting_type"),
-                                    "value": value
+                                    "value": value,
+                                    "stat_type": field.getAttribute("scouting_stat_type"),
+                                    "game_piece": field.getAttribute("scouting_game_piece")
                                 }
 
                                 data.push(data_field);
@@ -454,7 +458,9 @@
                                 let data_field = {
                                     "name": field.getAttribute("x-ref"),
                                     "type": field.getAttribute("scouting_type"),
-                                    "value": value
+                                    "value": value,
+                                    "stat_type": field.getAttribute("scouting_stat_type"),
+                                    "game_piece": field.getAttribute("scouting_game_piece")
                                 }
 
                                 data.push(data_field);
@@ -472,7 +478,9 @@
                                 let data_field = {
                                     "name": field.getAttribute("x-ref"),
                                     "type": field.getAttribute("scouting_type"),
-                                    "value": value
+                                    "value": value,
+                                    "stat_type": field.getAttribute("scouting_stat_type"),
+                                    "game_piece": field.getAttribute("scouting_game_piece")
                                 }
 
                                 data.push(data_field);
