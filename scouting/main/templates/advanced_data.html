@@ -157,6 +157,7 @@
                     event_results_filtered: [],
                     add_team_open: false,
                     add_event_open: false,
+                    data: [],
 
                     get_query() {
                         var teams_str = "";
@@ -261,11 +262,28 @@
                         }
                     },
 
+                    async get_data() {
+                        var response = await fetch("{{ SERVER_IP }}/get_data_from_query", {
+                            method: "POST",
+                            headers: {
+                                    "X-CSRFToken": "{{ csrf_token }}"
+                                },
+                            body: JSON.stringify({
+                                query: this.query
+                            })
+                        });
+
+                        if (response.ok) {
+                            this.data = await response.json();
+                        }
+                    },
+
                     init() {
                         
                         // Wait to ensure year drop down is populated
                         setTimeout(() => {
                             this.update_results_and_query();
+                            this.get_data();
                         }, 100);
                     }
                 }

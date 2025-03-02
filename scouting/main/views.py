@@ -12,7 +12,7 @@ from . import pit_scouting_questions
 import json
 from datetime import datetime
 import uuid
-from urllib.parse import unquote
+from urllib.parse import unquote, urlparse, parse_qs
 import requests
 import deepdiff
 
@@ -1066,5 +1066,63 @@ def get_events_with_filters(request):
 
         return JsonResponse(event_list, safe=False, status=200)
 
+    else:
+        return HttpResponse(request, "Request is not a POST request!", status=501)
+
+
+def get_data_from_query(request):
+    """
+    For the advanced data view. For the given query, return a list of all of the matching data. Teams should be grouped together
+
+    Example query: `?year=2025&teams=1,2,3&events=alhu,arli`
+
+    Body Parameters:
+        query: The query to filter by
+
+    Returns:
+        A list of all of the data that matches the query
+    """
+    if request.method == "POST":
+        try:
+            body = json.loads(request.body)
+
+        except KeyError:
+            return HttpResponse(request, "No body found in request", status=400)
+
+        query = urlparse(body["query"]).query
+        query_components = parse_qs(query)
+
+        year = query_components.get("year", None)
+        teams = query_components.get("teams", [None])
+        events = query_components.get("events", [None])
+
+        if year is None:
+            return HttpResponse(request, "No year found in query", status=400)
+
+        data = Data.objects.filter(year=year[0])
+
+        if teams[0] is not None:
+            new_data = []
+            for data in data:
+                try:
+                    for item in data.data:
+                        if item["name"] == "team_number":
+                            if item["value"] in teams:
+                                new_data.append(data)
+                            break
+                except (AttributeError, TypeError, KeyError):
+                    pass
+
+            data = new_data
+
+        if events[0] is not None:
+            data = Data.filter(event_model__event_code__in=events)
+
+        final_data = []
+
+        for item in data:
+            final_data.append({"team_number": item.data[0]["value"], "data": item.data})
+
+        return JsonResponse(final_data, safe=False, status=200)
     else:
         return HttpResponse(request, "Request is not a POST request!", status=501)

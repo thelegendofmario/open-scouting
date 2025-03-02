@@ -37,4 +37,5 @@ urlpatterns = [
         views.get_events_with_filters,
         name="get_events_with_filters",
     ),
+    path("get_data_from_query", views.get_data_from_query, name="get_data_from_query"),
 ]
