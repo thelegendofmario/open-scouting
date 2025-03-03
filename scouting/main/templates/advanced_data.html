@@ -209,6 +209,8 @@
                         this.get_teams_with_filters();
                         this.get_events_with_filters();
                         this.get_query();
+
+                        this.get_data();
                     },
 
                     update_team_search() {
@@ -262,6 +264,132 @@
                         }
                     },
 
+                    parse_server_data(data) {
+                        // Parses the data from the server and creates a big object used to display the front end
+                        const final_data = {
+                            auton: {},
+                            teleop: {},
+                            capabilities: {},
+                            other: {}
+                        };
+
+                        for (const team of data) {
+                            const team_number = team.team_number;
+
+                            // Initialize team entries if they don't exist
+                            if (!final_data.auton[team_number]) {
+                                final_data.auton[team_number] = {
+                                    scores: [],
+                                    misses: [],
+                                    total_score: 0,
+                                    total_miss: 0,
+                                    average_score: 0,
+                                    average_miss: 0
+                                };
+                            }
+
+                            if (!final_data.teleop[team_number]) {
+                                final_data.teleop[team_number] = {
+                                    scores: [],
+                                    misses: [],
+                                    total_score: 0,
+                                    total_miss: 0,
+                                    average_score: 0,
+                                    average_miss: 0
+                                };
+                            }
+
+                            if (!final_data.capabilities[team_number]) {
+                                final_data.capabilities[team_number] = {};
+                            }
+
+                            if (!final_data.other[team_number]) {
+                                final_data.other[team_number] = [];
+                            }
+
+                            team.data.forEach(match => {
+                                match.forEach(field => {
+                                    switch (field.stat_type) {
+                                        case "auton_score":
+                                            final_data.auton[team_number].scores.push(field.value);
+                                            final_data.auton[team_number].total_score += field.value;
+                                            break;
+                                        case "auton_miss":
+                                            final_data.auton[team_number].misses.push(field.value);
+                                            final_data.auton[team_number].total_miss += field.value;
+                                            break;
+                                        case "score":
+                                            final_data.teleop[team_number].scores.push(field.value);
+                                            final_data.teleop[team_number].total_score += field.value;
+                                            break;
+                                        case "miss":
+                                            final_data.teleop[team_number].misses.push(field.value);
+                                            final_data.teleop[team_number].total_miss += field.value;
+                                            break;
+                                        case "capability":
+                                            const cap_name = field.name;
+                                            const cap_value = field.value;
+
+                                            if (!final_data.capabilities[team_number][cap_name]) {
+                                                final_data.capabilities[team_number][cap_name] = {};
+                                            }
+
+                                            if (!final_data.capabilities[team_number][cap_name][cap_value]) {
+                                                final_data.capabilities[team_number][cap_name][cap_value] = 0;
+                                            }
+
+                                            final_data.capabilities[team_number][cap_name][cap_value]++;
+                                            break;
+                                        case "other":
+                                            final_data.other[team_number].push(field.value);
+                                            break;
+                                        default:
+                                            break;
+                                    }
+                                });
+                            });
+
+                            // Calculate separate averages for auton
+                            const auton_score_count = final_data.auton[team_number].scores.length;
+                            const auton_miss_count = final_data.auton[team_number].misses.length;
+
+                            final_data.auton[team_number].average_score = auton_score_count > 0
+                                ? final_data.auton[team_number].total_score / auton_score_count
+                                : 0;
+
+                            final_data.auton[team_number].average_miss = auton_miss_count > 0
+                                ? final_data.auton[team_number].total_miss / auton_miss_count
+                                : 0;
+
+                            // Calculate separate averages for teleop
+                            const teleop_score_count = final_data.teleop[team_number].scores.length;
+                            const teleop_miss_count = final_data.teleop[team_number].misses.length;
+
+                            final_data.teleop[team_number].average_score = teleop_score_count > 0
+                                ? final_data.teleop[team_number].total_score / teleop_score_count
+                                : 0;
+
+                            final_data.teleop[team_number].average_miss = teleop_miss_count > 0
+                                ? final_data.teleop[team_number].total_miss / teleop_miss_count
+                                : 0;
+                        }
+
+                        // Now convert raw counts in capabilities to percentages
+                        for (const team_number in final_data.capabilities) {
+                            const team_caps = final_data.capabilities[team_number];
+                            for (const cap_name in team_caps) {
+                                const cap_values = team_caps[cap_name];
+                                const total_entries = Object.values(cap_values).reduce((a, b) => a + b, 0);
+
+                                for (const value in cap_values) {
+                                    cap_values[value] = (cap_values[value] / total_entries) * 100;
+                                }
+                            }
+                        }
+
+                        return final_data;
+                    },
+
                     async get_data() {
                         var response = await fetch("{{ SERVER_IP }}/get_data_from_query", {
                             method: "POST",
@@ -274,7 +402,7 @@
                         });
 
                         if (response.ok) {
-                            this.data = await response.json();
+                            this.data = this.parse_server_data(await response.json());
                         }
                     },
 
