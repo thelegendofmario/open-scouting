@@ -12,8 +12,7 @@
 {% block stylesheets %}{% endblock %}
 
 {% block body %}
-    <div class="flex flex-col h-full min-h-screen w-screen overflow-hidden items-center justify-center">
-
+    <div class="flex flex-col min-h-screen w-screen overflow-y-scroll items-center justify-center">
         <div class="flex flex-row w-full md:w-3/4 lg:w-2/3 mx-8 my-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 items-center justify-center"
              x-data="advanced_data_header()">
             <img class="w-16 h-16 aspect-square m-2 hover:scale-110 transition-all ease-in-out active:scale-95"
@@ -265,7 +264,6 @@
                     },
 
                     parse_server_data(data) {
-                        // Parses the data from the server and creates a big object used to display the front end
                         const final_data = {
                             auton: {},
                             teleop: {},
@@ -277,104 +275,112 @@
                             const team_number = team.team_number;
 
                             // Initialize team entries if they don't exist
-                            if (!final_data.auton[team_number]) {
-                                final_data.auton[team_number] = {
-                                    scores: [],
-                                    misses: [],
-                                    total_score: 0,
-                                    total_miss: 0,
-                                    average_score: 0,
-                                    average_miss: 0
-                                };
-                            }
-
-                            if (!final_data.teleop[team_number]) {
-                                final_data.teleop[team_number] = {
-                                    scores: [],
-                                    misses: [],
-                                    total_score: 0,
-                                    total_miss: 0,
-                                    average_score: 0,
-                                    average_miss: 0
-                                };
-                            }
-
-                            if (!final_data.capabilities[team_number]) {
-                                final_data.capabilities[team_number] = {};
-                            }
-
-                            if (!final_data.other[team_number]) {
-                                final_data.other[team_number] = [];
-                            }
+                            if (!final_data.auton[team_number]) final_data.auton[team_number] = {};
+                            if (!final_data.teleop[team_number]) final_data.teleop[team_number] = {};
+                            if (!final_data.capabilities[team_number]) final_data.capabilities[team_number] = {};
+                            if (!final_data.other[team_number]) final_data.other[team_number] = [];
 
                             team.data.forEach(match => {
                                 match.forEach(field => {
-                                    switch (field.stat_type) {
+                                    const { stat_type, game_piece, name, value } = field;
+
+                                    switch (stat_type) {
                                         case "auton_score":
-                                            final_data.auton[team_number].scores.push(field.value);
-                                            final_data.auton[team_number].total_score += field.value;
-                                            break;
                                         case "auton_miss":
-                                            final_data.auton[team_number].misses.push(field.value);
-                                            final_data.auton[team_number].total_miss += field.value;
+                                            if (!game_piece) break; // skip if no game_piece
+                                            if (!final_data.auton[team_number][game_piece]) {
+                                                final_data.auton[team_number][game_piece] = {
+                                                    scores: [],
+                                                    misses: [],
+                                                    total_score: 0,
+                                                    total_miss: 0,
+                                                    average_score: 0,
+                                                    average_miss: 0
+                                                };
+                                            }
+                                            if (stat_type === "auton_score") {
+                                                final_data.auton[team_number][game_piece].scores.push(value);
+                                                final_data.auton[team_number][game_piece].total_score += value;
+                                            } else {
+                                                final_data.auton[team_number][game_piece].misses.push(value);
+                                                final_data.auton[team_number][game_piece].total_miss += value;
+                                            }
                                             break;
+
                                         case "score":
-                                            final_data.teleop[team_number].scores.push(field.value);
-                                            final_data.teleop[team_number].total_score += field.value;
-                                            break;
                                         case "miss":
-                                            final_data.teleop[team_number].misses.push(field.value);
-                                            final_data.teleop[team_number].total_miss += field.value;
+                                            if (!game_piece) break; // skip if no game_piece
+                                            if (!final_data.teleop[team_number][game_piece]) {
+                                                final_data.teleop[team_number][game_piece] = {
+                                                    scores: [],
+                                                    misses: [],
+                                                    total_score: 0,
+                                                    total_miss: 0,
+                                                    average_score: 0,
+                                                    average_miss: 0
+                                                };
+                                            }
+                                            if (stat_type === "score") {
+                                                final_data.teleop[team_number][game_piece].scores.push(value);
+                                                final_data.teleop[team_number][game_piece].total_score += value;
+                                            } else {
+                                                final_data.teleop[team_number][game_piece].misses.push(value);
+                                                final_data.teleop[team_number][game_piece].total_miss += value;
+                                            }
                                             break;
+
                                         case "capability":
-                                            const cap_name = field.name;
-                                            const cap_value = field.value;
-
-                                            if (!final_data.capabilities[team_number][cap_name]) {
-                                                final_data.capabilities[team_number][cap_name] = {};
+                                            if (!final_data.capabilities[team_number][name]) {
+                                                final_data.capabilities[team_number][name] = {};
                                             }
-
-                                            if (!final_data.capabilities[team_number][cap_name][cap_value]) {
-                                                final_data.capabilities[team_number][cap_name][cap_value] = 0;
+                                            if (!final_data.capabilities[team_number][name][value]) {
+                                                final_data.capabilities[team_number][name][value] = 0;
                                             }
-
-                                            final_data.capabilities[team_number][cap_name][cap_value]++;
+                                            final_data.capabilities[team_number][name][value]++;
                                             break;
+
                                         case "other":
-                                            final_data.other[team_number].push(field.value);
+                                            final_data.other[team_number].push(value);
                                             break;
+
                                         default:
                                             break;
                                     }
                                 });
                             });
 
-                            // Calculate separate averages for auton
-                            const auton_score_count = final_data.auton[team_number].scores.length;
-                            const auton_miss_count = final_data.auton[team_number].misses.length;
+                            // Calculate averages per game piece for auton
+                            for (const game_piece in final_data.auton[team_number]) {
+                                const piece_data = final_data.auton[team_number][game_piece];
+                                const score_count = piece_data.scores.length;
+                                const miss_count = piece_data.misses.length;
 
-                            final_data.auton[team_number].average_score = auton_score_count > 0
-                                ? final_data.auton[team_number].total_score / auton_score_count
-                                : 0;
+                                piece_data.average_score = score_count > 0
+                                    ? piece_data.total_score / score_count
+                                    : 0;
 
-                            final_data.auton[team_number].average_miss = auton_miss_count > 0
-                                ? final_data.auton[team_number].total_miss / auton_miss_count
-                                : 0;
+                                piece_data.average_miss = miss_count > 0
+                                    ? piece_data.total_miss / miss_count
+                                    : 0;
+                            }
 
-                            // Calculate separate averages for teleop
-                            const teleop_score_count = final_data.teleop[team_number].scores.length;
-                            const teleop_miss_count = final_data.teleop[team_number].misses.length;
+                            // Calculate averages per game piece for teleop
+                            for (const game_piece in final_data.teleop[team_number]) {
+                                const piece_data = final_data.teleop[team_number][game_piece];
+                                const score_count = piece_data.scores.length;
+                                const miss_count = piece_data.misses.length;
 
-                            final_data.teleop[team_number].average_score = teleop_score_count > 0
-                                ? final_data.teleop[team_number].total_score / teleop_score_count
-                                : 0;
+                                piece_data.average_score = score_count > 0
+                                    ? piece_data.total_score / score_count
+                                    : 0;
 
-                            final_data.teleop[team_number].average_miss = teleop_miss_count > 0
-                                ? final_data.teleop[team_number].total_miss / teleop_miss_count
-                                : 0;
+                                piece_data.average_miss = miss_count > 0
+                                    ? piece_data.total_miss / miss_count
+                                    : 0;
+                            }
                         }
 
-                        // Now convert raw counts in capabilities to percentages
+                        // Convert capability counts to percentages per team
                         for (const team_number in final_data.capabilities) {
                             const team_caps = final_data.capabilities[team_number];
                             for (const cap_name in team_caps) {
@@ -387,8 +393,11 @@
                             }
                         }
 
+                        console.log(final_data);
+
                         return final_data;
                     },
+
 
                     async get_data() {
                         var response = await fetch("{{ SERVER_IP }}/get_data_from_query", {
@@ -403,10 +412,13 @@
 
                         if (response.ok) {
                             this.data = this.parse_server_data(await response.json());
+                            window.dispatchEvent(new CustomEvent('data', {
+                                detail: { data: this.data }
+                            }));
                         }
                     },
 
-                    init() {
+                    init() {    
                         
                         // Wait to ensure year drop down is populated
                         setTimeout(() => {
@@ -417,7 +429,54 @@
                 }
             }
         </script>
+
+        <div class="flex flex-col w-full md:w-1/2 lg:w-2/3"
+             x-data="advanced_data()"
+             x-init="init()">
+            <div class="flex flex-row px-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 mt-4 items-center">
+                <p class="dark:text-white text-black text-sans text-2xl">
+                    <i class="ph-bold ph-robot"></i> Autonomous
+                </p>
+
+            </div>
+
+            <div class="flex flex-row px-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 items-center">
+                <p class="dark:text-white text-black text-sans text-2xl">
+                    <i class="ph-bold ph-game-controller"></i> Teleoperated
+                </p>
+            </div>
+
+            <div class="flex flex-row px-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 items-center">
+                <p class="dark:text-white text-black text-sans text-2xl">
+                    <i class="ph-bold ph-list-checks"></i> Capabilities
+                </p>
+            </div>
+
+            <div class="flex flex-row px-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 items-center">
+                <p class="dark:text-white text-black text-sans text-2xl">
+                    <i class="ph-bold ph-list"></i> Other
+                </p>
+            </div>
+        </div>
+
+        <script>
+            function advanced_data() {
+                return {
+                    data: {},
+                    
+                    init() {
+                        window.addEventListener('data', (event) => {
+                            event.stopImmediatePropagation();
+                            const { data } = event.detail;
+                            
+                            this.data = data;
+                        });
+                    }
+                }
+            }
+        </script>
     </div>
+
 {% endblock %}
 
 {% block scripts %}
