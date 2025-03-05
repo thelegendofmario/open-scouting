@@ -433,26 +433,45 @@
         <div class="flex flex-col w-full md:w-1/2 lg:w-2/3"
              x-data="advanced_data()"
              x-init="init()">
-            <div class="flex flex-row px-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 mt-4 items-center">
+            <div class="flex flex-col px-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 mt-4 items-left">
                 <p class="dark:text-white text-black text-sans text-2xl">
                     <i class="ph-bold ph-robot"></i> Autonomous
                 </p>
 
+                <template x-for="(team_value, team_key) in data.auton" :key="team_key">
+                    <div class="flex flex-col items-left gap-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg p-4 my-2">
+                        <p class="dark:text-white text-black text-sans text-lg border-b-2 dark:border-slate-700 border-slate-300"
+                           x-text="team_key"></p>
+                        <template x-for="(piece_key, piece_value) in Object.keys(team_value)"
+                                  :key="piece_key">
+                            <div class="flex flex-col">
+                                <p class="dark:text-white text-black text-sans text-lg"
+                                   x-text="piece_key.charAt(0).toUpperCase() + piece_key.slice(1)"></p>
+                                <p class="dark:text-white text-black text-sans text-md"
+                                   x-text="`Average score: ${team_value[piece_key].average_score}`"></p>
+                                <p class="dark:text-white text-black text-sans text-md"
+                                   x-text="`Average miss: ${team_value[piece_key].average_miss}`"></p>
+                                <canvas x-init="create_line_chart($el, team_value[piece_key].scores, team_value[piece_key].misses, `${piece_key}`)"></canvas>
+                            </div>
+
+                        </template>
+                    </div>
+                </template>
             </div>
 
-            <div class="flex flex-row px-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 items-center">
+            <div class="flex flex-col px-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 items-left">
                 <p class="dark:text-white text-black text-sans text-2xl">
                     <i class="ph-bold ph-game-controller"></i> Teleoperated
                 </p>
             </div>
 
-            <div class="flex flex-row px-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 items-center">
+            <div class="flex flex-col px-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 items-left">
                 <p class="dark:text-white text-black text-sans text-2xl">
                     <i class="ph-bold ph-list-checks"></i> Capabilities
                 </p>
             </div>
 
-            <div class="flex flex-row px-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 items-center">
+            <div class="flex flex-col px-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 items-left">
                 <p class="dark:text-white text-black text-sans text-2xl">
                     <i class="ph-bold ph-list"></i> Other
                 </p>
@@ -463,6 +482,72 @@
             function advanced_data() {
                 return {
                     data: {},
+
+                    create_line_chart(canvas, data_scores, data_misses, label) {
+                        const labels = data_scores.map((_, i) => (i + 1).toString());
+                        
+                        const average_scores = data_scores.reduce((acc, val) => acc + val, 0) / data_scores.length;
+                        const average_misses = data_misses.reduce((acc, val) => acc + val, 0) / data_misses.length;
+                        
+                        new Chart(canvas, {
+                            type: "line",
+                            data: {
+                                labels: labels,
+                                datasets: [
+                                    {
+                                        label: `${label} Scores`,
+                                        data: data_scores,
+                                        borderWidth: 2,
+                                        borderColor: "#51ff4e",
+                                        fill: false
+                                    }, 
+                                    {
+                                        label: `${label} Misses`,
+                                        data: data_misses,
+                                        borderWidth: 1,
+                                        borderColor: "#ff5252",
+                                        fill: false
+                                    }, 
+                                    {
+                                        label: "Average Scores",
+                                        data: Array(data_scores.length).fill(average_scores),
+                                        borderWidth: 1,
+                                        borderColor: "#51ff4e",
+                                        borderDash: [5, 5],
+                                        fill: false,
+                                        pointBackgroundColor: "rgba(81, 255, 78, 0.5)"
+                                    },
+                                    {
+                                        label: "Average Misses",
+                                        data: Array(data_misses.length).fill(average_misses),
+                                        borderWidth: 1,
+                                        borderColor: "#ff5252",
+                                        borderDash: [5, 5],
+                                        fill: false,
+                                        pointBackgroundColor: "rgba(255, 82, 82, 0.5)"
+                                    }
+                                ]
+                            },
+                            options: {
+                                scales: {
+                                    x: {
+                                        display: true,
+                                        title: {
+                                            display: true,
+                                            text: 'Reports'
+                                        }
+                                    },
+                                    y: {
+                                        display: true,
+                                        title: {
+                                            display: true,
+                                            text: 'Values'
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    },
                     
                     init() {
                         window.addEventListener('data', (event) => {
