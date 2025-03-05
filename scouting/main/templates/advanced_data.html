@@ -274,7 +274,6 @@
                         for (const team of data) {
                             const team_number = team.team_number;
 
-                            // Initialize team entries if they don't exist
                             if (!final_data.auton[team_number]) final_data.auton[team_number] = {};
                             if (!final_data.teleop[team_number]) final_data.teleop[team_number] = {};
                             if (!final_data.capabilities[team_number]) final_data.capabilities[team_number] = {};
@@ -290,21 +289,18 @@
                                             if (!game_piece) break; // skip if no game_piece
                                             if (!final_data.auton[team_number][game_piece]) {
                                                 final_data.auton[team_number][game_piece] = {
-                                                    scores: [],
-                                                    misses: [],
-                                                    total_score: 0,
-                                                    total_miss: 0,
-                                                    average_score: 0,
-                                                    average_miss: 0
+                                                    score: {},
+                                                    miss: {}
                                                 };
                                             }
-                                            if (stat_type === "auton_score") {
-                                                final_data.auton[team_number][game_piece].scores.push(value);
-                                                final_data.auton[team_number][game_piece].total_score += value;
-                                            } else {
-                                                final_data.auton[team_number][game_piece].misses.push(value);
-                                                final_data.auton[team_number][game_piece].total_miss += value;
+                                            const autonType = stat_type === "auton_score" ? "score" : "miss";
+                                            if (!final_data.auton[team_number][game_piece][autonType][name]) {
+                                                final_data.auton[team_number][game_piece][autonType][name] = {
+                                                    values: [],
+                                                    average: 0
+                                                };
                                             }
+                                            final_data.auton[team_number][game_piece][autonType][name].values.push(value);
                                             break;
 
                                         case "score":
@@ -312,21 +308,18 @@
                                             if (!game_piece) break; // skip if no game_piece
                                             if (!final_data.teleop[team_number][game_piece]) {
                                                 final_data.teleop[team_number][game_piece] = {
-                                                    scores: [],
-                                                    misses: [],
-                                                    total_score: 0,
-                                                    total_miss: 0,
-                                                    average_score: 0,
-                                                    average_miss: 0
+                                                    score: {},
+                                                    miss: {}
                                                 };
                                             }
-                                            if (stat_type === "score") {
-                                                final_data.teleop[team_number][game_piece].scores.push(value);
-                                                final_data.teleop[team_number][game_piece].total_score += value;
-                                            } else {
-                                                final_data.teleop[team_number][game_piece].misses.push(value);
-                                                final_data.teleop[team_number][game_piece].total_miss += value;
+                                            const teleopType = stat_type === "score" ? "score" : "miss";
+                                            if (!final_data.teleop[team_number][game_piece][teleopType][name]) {
+                                                final_data.teleop[team_number][game_piece][teleopType][name] = {
+                                                    values: [],
+                                                    average: 0
+                                                };
                                             }
+                                            final_data.teleop[team_number][game_piece][teleopType][name].values.push(value);
                                             break;
 
                                         case "capability":
@@ -349,34 +342,32 @@
                                 });
                             });
 
-                            // Calculate averages per game piece for auton
+                            // Calculate averages per field for auton
                             for (const game_piece in final_data.auton[team_number]) {
                                 const piece_data = final_data.auton[team_number][game_piece];
-                                const score_count = piece_data.scores.length;
-                                const miss_count = piece_data.misses.length;
-
-                                piece_data.average_score = score_count > 0
-                                    ? piece_data.total_score / score_count
-                                    : 0;
-
-                                piece_data.average_miss = miss_count > 0
-                                    ? piece_data.total_miss / miss_count
-                                    : 0;
+                                ["score", "miss"].forEach(type => {
+                                    for (const field_name in piece_data[type]) {
+                                        const field_data = piece_data[type][field_name];
+                                        const count = field_data.values.length;
+                                        field_data.average = count > 0
+                                            ? field_data.values.reduce((a, b) => a + b, 0) / count
+                                            : 0;
+                                    }
+                                });
                             }
 
-                            // Calculate averages per game piece for teleop
+                            // Calculate averages per field for teleop
                             for (const game_piece in final_data.teleop[team_number]) {
                                 const piece_data = final_data.teleop[team_number][game_piece];
-                                const score_count = piece_data.scores.length;
-                                const miss_count = piece_data.misses.length;
-
-                                piece_data.average_score = score_count > 0
-                                    ? piece_data.total_score / score_count
-                                    : 0;
-
-                                piece_data.average_miss = miss_count > 0
-                                    ? piece_data.total_miss / miss_count
-                                    : 0;
+                                ["score", "miss"].forEach(type => {
+                                    for (const field_name in piece_data[type]) {
+                                        const field_data = piece_data[type][field_name];
+                                        const count = field_data.values.length;
+                                        field_data.average = count > 0
+                                            ? field_data.values.reduce((a, b) => a + b, 0) / count
+                                            : 0;
+                                    }
+                                });
                             }
                         }
 
@@ -397,6 +388,7 @@
 
                         return final_data;
                     },
+
 
 
                     async get_data() {
@@ -439,22 +431,43 @@
                 </p>
 
                 <template x-for="(team_value, team_key) in data.auton" :key="team_key">
-                    <div class="flex flex-col items-left gap-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg p-4 my-2">
+                    <div x-show="Object.keys(team_value).length > 0"
+                         class="flex flex-col items-left gap-4 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg p-4 my-2">
+
+                        <!-- Team Number -->
                         <p class="dark:text-white text-black text-sans text-lg border-b-2 dark:border-slate-700 border-slate-300"
                            x-text="team_key"></p>
-                        <template x-for="(piece_key, piece_value) in Object.keys(team_value)"
-                                  :key="piece_key">
-                            <div class="flex flex-col">
+
+                        <!-- Game Pieces -->
+                        <template x-for="(piece_value, piece_key) in team_value" :key="piece_key">
+                            <div class="flex flex-col gap-2 mt-2">
+                                <!-- Game Piece Name -->
                                 <p class="dark:text-white text-black text-sans text-lg"
                                    x-text="piece_key.charAt(0).toUpperCase() + piece_key.slice(1)"></p>
-                                <p class="dark:text-white text-black text-sans text-md"
-                                   x-text="`Average score: ${team_value[piece_key].average_score}`"></p>
-                                <p class="dark:text-white text-black text-sans text-md"
-                                   x-text="`Average miss: ${team_value[piece_key].average_miss}`"></p>
-                                <canvas x-init="create_line_chart($el, team_value[piece_key].scores, team_value[piece_key].misses, `${piece_key}`)"></canvas>
-                            </div>
 
+                                <!-- Score and Miss Types -->
+                                <template x-for="type in ['score', 'miss']" :key="type">
+                                    <div x-show="Object.keys(piece_value[type]).length > 0"
+                                         class="flex flex-col gap-2 ml-4 mt-1">
+                                        <p class="dark:text-white text-black text-sans text-md font-semibold capitalize"
+                                           x-text="type"></p>
+
+                                        <!-- Fields under Score/Miss -->
+                                        <template x-for="(field_value, field_name) in piece_value[type]"
+                                                  :key="field_name">
+                                            <div class="flex flex-col gap-1 ml-4 mb-2 p-2 border dark:border-slate-700 border-slate-300 rounded-lg">
+                                                <p class="dark:text-white text-black text-sans text-md font-medium"
+                                                   x-text="field_name.replace(/_/g, ' ').replace(/\b\w+\b/g, l => l.charAt(0).toUpperCase() + l.slice(1))"></p>
+                                                <p class="dark:text-white text-black text-sans text-sm"
+                                                   x-text="`Average: ${field_value.average.toFixed(2)}`"></p>
+                                                <canvas x-init="create_line_chart($el, field_value.values, `${field_name}`, type)"></canvas>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
                         </template>
+
                     </div>
                 </template>
             </div>
@@ -483,11 +496,12 @@
                 return {
                     data: {},
 
-                    create_line_chart(canvas, data_scores, data_misses, label) {
-                        const labels = data_scores.map((_, i) => (i + 1).toString());
+                    create_line_chart(canvas, data, label, type) {
+                        const labels = data.map((_, i) => (i + 1).toString());
                         
-                        const average_scores = data_scores.reduce((acc, val) => acc + val, 0) / data_scores.length;
-                        const average_misses = data_misses.reduce((acc, val) => acc + val, 0) / data_misses.length;
+                        const average = data.reduce((acc, val) => acc + val, 0) / data.length;
+                        
+                        const color = type === "score" ? "#51ff4e" : "#ff4e51";
                         
                         new Chart(canvas, {
                             type: "line",
@@ -495,36 +509,21 @@
                                 labels: labels,
                                 datasets: [
                                     {
-                                        label: `${label} Scores`,
-                                        data: data_scores,
+                                        label: `${label} Values`,
+                                        data: data,
                                         borderWidth: 2,
-                                        borderColor: "#51ff4e",
+                                        borderColor: color,
                                         fill: false
                                     }, 
                                     {
-                                        label: `${label} Misses`,
-                                        data: data_misses,
+                                        label: "Average Values",
+                                        data: Array(data.length).fill(average),
                                         borderWidth: 1,
-                                        borderColor: "#ff5252",
-                                        fill: false
-                                    }, 
-                                    {
-                                        label: "Average Scores",
-                                        data: Array(data_scores.length).fill(average_scores),
-                                        borderWidth: 1,
-                                        borderColor: "#51ff4e",
+                                        borderColor: color,
                                         borderDash: [5, 5],
                                         fill: false,
-                                        pointBackgroundColor: "rgba(81, 255, 78, 0.5)"
-                                    },
-                                    {
-                                        label: "Average Misses",
-                                        data: Array(data_misses.length).fill(average_misses),
-                                        borderWidth: 1,
-                                        borderColor: "#ff5252",
-                                        borderDash: [5, 5],
-                                        fill: false,
-                                        pointBackgroundColor: "rgba(255, 82, 82, 0.5)"
+                                        pointRadius: 0,
+                                        pointBackgroundColor: `rgba(${color === "#51ff4e" ? 81 : 255}, ${color === "#51ff4e" ? 255 : 78}, 0.5)`
                                     }
                                 ]
                             },
