@@ -594,6 +594,33 @@
                 <p class="dark:text-white text-black text-sans text-2xl">
                     <i class="ph-bold ph-list"></i> Other
                 </p>
+
+                <template x-for="(team_value, team_key) in data.other" :key="team_key">
+                    <template x-if="team_value.length > 0" x-data="{ open: true }">
+                        <div class="flex flex-col items-left gap-4 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg p-4 my-2">
+
+                            <!-- Team Number -->
+                            <div class="flex flex-row justify-between"
+                                 :class="{ 'border-b-2 dark:border-slate-700 border-slate-300': open }"
+                                 @click="open = !open">
+                                <p class="dark:text-white text-black text-sans text-lg"
+                                   x-text="team_key"></p>
+                                <i class="ph-bold ph-caret-down dark:text-white text-black"
+                                   x-show="open"></i>
+                                <i class="ph-bold ph-caret-up dark:text-white text-black" x-show="!open"></i>
+                            </div>
+
+                            <!-- Other Entries -->
+                            <div x-show="open" x-collapse>
+                                <ul class="list-disc list-inside ml-4">
+                                    <template x-for="(entry, index) in team_value" :key="index">
+                                        <li class="dark:text-white text-black text-sans text-md" x-text="entry"></li>
+                                    </template>
+                                </ul>
+                            </div>
+                        </div>
+                    </template>
+                </template>
             </div>
         </div>
 

@@ -1231,6 +1231,10 @@ select {
   scroll-snap-align: center;
 }
 
+.list-inside {
+  list-style-position: inside;
+}
+
 .list-disc {
   list-style-type: disc;
 }
