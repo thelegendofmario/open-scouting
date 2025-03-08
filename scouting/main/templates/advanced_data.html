@@ -14,7 +14,7 @@
 {% block body %}
     <div class="flex flex-col min-h-screen w-screen overflow-y-scroll items-center justify-center">
         <div class="flex flex-row w-full md:w-3/4 lg:w-2/3 mx-8 my-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 items-center justify-center"
-             x-data="advanced_data_header()"">
+             x-data="advanced_data_header()">
             <img class="w-16 h-16 aspect-square m-2 hover:scale-110 transition-all ease-in-out active:scale-95"
                  src="{% static '/main/images/icon_rounded.png' %}"
                  @click="window.location.href = '{{ SERVER_IP }}'">
@@ -34,7 +34,8 @@
         </script>
 
         <div class="flex flex-col w-full md:w-3/4 lg:w-2/3 mx-8 my-2 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg gap-2"
-             x-data="filters()" x-show="!offline">
+             x-data="filters()"
+             x-show="!offline">
             <p class="dark:text-white text-black text-sans text-2xl ml-4">
                 <i class="ph-bold ph-funnel"></i> Filters
             </p>
@@ -175,6 +176,26 @@
                         }
 
                         this.query = `?year=${this.$refs.year_input.value}${teams_str}${events_str}`;
+
+                        window.history.replaceState({}, '', this.query);
+                    },
+
+                    set_filters_from_query() {
+                        var urlParams = new URLSearchParams(window.location.search);
+                        var teams = urlParams.get('teams');
+                        var events = urlParams.get('events');
+
+                        if (teams) {
+                            this.teams = teams.split(',');
+                        }
+
+                        if (events) {
+                            this.events = events.split(',').map(code => {
+                                return { code: code, name: code };
+                            });
+                        }
+
+                        this.update_results_and_query();
                     },
 
                     clear_filters() {
@@ -414,7 +435,17 @@
                     init() {
                         // Wait to ensure year drop down is populated
                         setTimeout(() => {
-                            this.update_results_and_query();
+                            var urlParams = new URLSearchParams(window.location.search);
+                            var query = urlParams.toString();
+
+                            if (query) {
+                                this.query = query;
+                                this.get_events_with_filters();
+                                
+                                this.set_filters_from_query();
+                                this.update_results_and_query();
+                            }
+
                             this.get_data();
 
                             if (globalThis.offline) {

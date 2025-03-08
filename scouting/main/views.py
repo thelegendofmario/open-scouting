@@ -1116,7 +1116,7 @@ def get_data_from_query(request):
             data = new_data
 
         if events[0] is not None:
-            data = Data.filter(event_model__event_code__in=events)
+            data = Data.objects.filter(event_model__event_code__in=events)
 
         final_data = []
 
