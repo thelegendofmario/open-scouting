@@ -14,7 +14,7 @@
 {% block body %}
     <div class="flex flex-col min-h-screen w-screen overflow-y-scroll items-center justify-center">
         <div class="flex flex-row w-full md:w-3/4 lg:w-2/3 mx-8 my-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 items-center justify-center"
-             x-data="advanced_data_header()">
+             x-data="advanced_data_header()"">
             <img class="w-16 h-16 aspect-square m-2 hover:scale-110 transition-all ease-in-out active:scale-95"
                  src="{% static '/main/images/icon_rounded.png' %}"
                  @click="window.location.href = '{{ SERVER_IP }}'">
@@ -34,7 +34,7 @@
         </script>
 
         <div class="flex flex-col w-full md:w-3/4 lg:w-2/3 mx-8 my-2 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg gap-2"
-             x-data="filters()">
+             x-data="filters()" x-show="!offline">
             <p class="dark:text-white text-black text-sans text-2xl ml-4">
                 <i class="ph-bold ph-funnel"></i> Filters
             </p>
@@ -157,6 +157,7 @@
                     add_team_open: false,
                     add_event_open: false,
                     data: [],
+                    offline: false,
 
                     get_query() {
                         var teams_str = "";
@@ -410,12 +411,17 @@
                         }
                     },
 
-                    init() {    
-                        
+                    init() {
                         // Wait to ensure year drop down is populated
                         setTimeout(() => {
                             this.update_results_and_query();
                             this.get_data();
+
+                            if (globalThis.offline) {
+                                this.offline = true;
+                            } else {
+                                this.offline = false;
+                            }
                         }, 100);
                     }
                 }
@@ -425,7 +431,8 @@
         <div class="flex flex-col w-full md:w-1/2 lg:w-2/3"
              x-data="advanced_data()"
              x-init="init()">
-            <div class="flex flex-col px-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 mt-4 items-left">
+            <div class="flex flex-col px-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 mt-4 items-left"
+                 x-show="!offline">
                 <p class="dark:text-white text-black text-sans text-2xl">
                     <i class="ph-bold ph-robot"></i> Autonomous
                 </p>
@@ -480,7 +487,8 @@
                 </template>
             </div>
 
-            <div class="flex flex-col px-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 items-left">
+            <div class="flex flex-col px-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 items-left"
+                 x-show="!offline">
                 <p class="dark:text-white text-black text-sans text-2xl">
                     <i class="ph-bold ph-game-controller"></i> Teleoperated
                 </p>
@@ -535,7 +543,8 @@
                 </template>
             </div>
 
-            <div class="flex flex-col px-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 items-left">
+            <div class="flex flex-col px-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 items-left"
+                 x-show="!offline">
                 <p class="dark:text-white text-black text-sans text-2xl">
                     <i class="ph-bold ph-list-checks"></i> Capabilities
                 </p>
@@ -590,7 +599,8 @@
 
             </div>
 
-            <div class="flex flex-col px-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 items-left">
+            <div class="flex flex-col px-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 items-left"
+                 x-show="!offline">
                 <p class="dark:text-white text-black text-sans text-2xl">
                     <i class="ph-bold ph-list"></i> Other
                 </p>
@@ -622,12 +632,27 @@
                     </template>
                 </template>
             </div>
+
+            <div class="flex flex-col px-4 py-6 bg-orange-200/50 dark:bg-orange-800/50 backdrop-blur-md dark:border-orange-700 border-orange-300 border-2 rounded-lg items-center"
+                 x-show="offline">
+
+                <div class="flex flex-row dark:text-white text-black text-2xl items-center gap-1">
+                    <i class="ph-bold ph-wifi-slash"></i>
+                    <p class="text-sans mt-1">You're offline</p>
+                </div>
+
+                <p class="dark:text-white text-black text-sans text-lg">You'll need to go back online to get and filter data from the server</p>
+                <button class="ui_button" @click="window.location.href = '{{ SERVER_IP }}'">
+                    <i class="ph-bold ph-house"></i> Go Home
+                </button>
+            </div>
         </div>
 
         <script>
             function advanced_data() {
                 return {
                     data: {},
+                    offline: false,
 
                     create_line_chart(canvas, data, label, type) {
                         const labels = data.map((_, i) => (i + 1).toString());
@@ -715,6 +740,14 @@
                             
                             this.data = data;
                         });
+
+                        setTimeout(() => {
+                            if (globalThis.offline) {
+                                this.offline = true;
+                            } else {
+                                this.offline = false;
+                            }
+                        }, 100);
                     }
                 }
             }
