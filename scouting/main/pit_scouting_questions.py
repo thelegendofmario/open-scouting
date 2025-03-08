@@ -149,4 +149,16 @@ reefscape = [
         "type": "text",
         "answers": [],
     },
+    {
+        "text": "How long does your team strategize for?",
+        "simple_name": "cad",
+        "type": "text",
+        "answers": [],
+    },
+    {
+        "text": "How long does it take before you're building and assembling your robot?",
+        "simple_name": "cad",
+        "type": "text",
+        "answers": [],
+    },
 ]
