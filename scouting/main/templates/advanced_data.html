@@ -182,8 +182,13 @@
 
                     set_filters_from_query() {
                         var urlParams = new URLSearchParams(window.location.search);
+                        var year = urlParams.get('year');
                         var teams = urlParams.get('teams');
                         var events = urlParams.get('events');
+
+                        if (year) {
+                            this.$refs.year_input.value = year;
+                        }
 
                         if (teams) {
                             this.teams = teams.split(',');
