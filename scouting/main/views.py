@@ -1124,18 +1124,22 @@ def get_data_from_query(request):
 
         for item in data:
             team_number = None
-            for field in item.data:
-                if "stat_type" not in field:
-                    field["stat_type"] = "ignore"
-                if "game_piece" not in field:
-                    field["game_piece"] = ""
-                if field["name"] == "team_number":
-                    team_number = field["value"]
+            if type(item.data) is list:
+                for field in item.data:
+                    if "stat_type" not in field:
+                        field["stat_type"] = "ignore"
+                    if "game_piece" not in field:
+                        field["game_piece"] = ""
+                    if field["name"] == "team_number":
+                        try:
+                            team_number = field["value"]
+                        except KeyError:
+                            pass
 
-            if team_number is not None:
-                if team_number not in team_data_map:
-                    team_data_map[team_number] = []
-                team_data_map[team_number].append(item.data)
+                if team_number is not None:
+                    if team_number not in team_data_map:
+                        team_data_map[team_number] = []
+                    team_data_map[team_number].append(item.data)
 
         final_data = [
             {"team_number": team_number, "data": [fields for fields in fields_list]}
