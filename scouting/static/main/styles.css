@@ -761,6 +761,14 @@ select {
   position: absolute;
 }
 
+.relative {
+  position: relative;
+}
+
+.sticky {
+  position: sticky;
+}
+
 .inset-x-0 {
   left: 0px;
   right: 0px;
@@ -808,6 +816,22 @@ select {
 
 .top-3 {
   top: 0.75rem;
+}
+
+.top-4 {
+  top: 1rem;
+}
+
+.top-10 {
+  top: 2.5rem;
+}
+
+.top-14 {
+  top: 3.5rem;
+}
+
+.top-16 {
+  top: 4rem;
 }
 
 .z-10 {
@@ -895,6 +919,11 @@ select {
   margin-bottom: auto;
 }
 
+.my-16 {
+  margin-top: 4rem;
+  margin-bottom: 4rem;
+}
+
 .mb-0 {
   margin-bottom: 0px;
 }
@@ -973,6 +1002,10 @@ select {
 
 .mt-6 {
   margin-top: 1.5rem;
+}
+
+.mt-16 {
+  margin-top: 4rem;
 }
 
 .block {
@@ -1475,6 +1508,11 @@ select {
   background-color: rgb(203 213 225 / var(--tw-bg-opacity));
 }
 
+.bg-blue-500 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(59 130 246 / var(--tw-bg-opacity));
+}
+
 .bg-opacity-80 {
   --tw-bg-opacity: 0.8;
 }
@@ -1594,6 +1632,10 @@ select {
 
 .pt-6 {
   padding-top: 1.5rem;
+}
+
+.pt-16 {
+  padding-top: 4rem;
 }
 
 .\!text-left {
@@ -1815,6 +1857,16 @@ select {
 
 .transition-opacity {
   transition-property: opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.transition-none {
+  transition-property: none;
+}
+
+.transition-\[padding\] {
+  transition-property: padding;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
 }
@@ -2550,6 +2602,11 @@ select {
 
 .dark\:bg-slate-800\/80:where(.dark, .dark *) {
   background-color: rgb(30 41 59 / 0.8);
+}
+
+.dark\:bg-blue-700:where(.dark, .dark *) {
+  --tw-bg-opacity: 1;
+  background-color: rgb(29 78 216 / var(--tw-bg-opacity));
 }
 
 .dark\:bg-gradient-to-br:where(.dark, .dark *) {

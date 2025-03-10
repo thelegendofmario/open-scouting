@@ -12,7 +12,7 @@
 {% block stylesheets %}{% endblock %}
 
 {% block body %}
-    <div class="flex flex-col min-h-screen w-screen overflow-y-scroll items-center justify-center">
+    <div class="flex flex-col min-h-screen w-screen items-center justify-center">
         <div class="flex flex-row w-full md:w-3/4 lg:w-2/3 mx-8 my-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 items-center justify-center"
              x-data="advanced_data_header()">
             <img class="w-16 h-16 aspect-square m-2 hover:scale-110 transition-all ease-in-out active:scale-95"
@@ -470,182 +470,26 @@
              x-data="advanced_data()"
              x-init="init()">
             <div class="flex flex-col px-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 mt-4 items-left"
-                 x-show="!offline">
-                <p class="dark:text-white text-black text-sans text-2xl">
-                    <i class="ph-bold ph-robot"></i> Autonomous
-                </p>
+                 x-show="!offline"
+                 x-data="{ open: true }">
+                <div x-data="{ stuck: false }"
+                     x-init=" let el = $el; window.addEventListener('scroll', () => { stuck = el.getBoundingClientRect().top <= 0; }); "
+                     :class="{ 'dark:bg-slate-800 bg-slate-200 border-2 dark:border-slate-700 border-slate-300 shadow-lg mt-2 px-4': stuck }"
+                     class="sticky top-0 flex flex-row py-4 rounded-lg transition-[padding] justify-between align-middle items-center"
+                     @click="open = !open">
+                    <p class="dark:text-white text-black text-sans text-2xl">
+                        <i class="ph-bold ph-robot"></i> Autonomous
+                    </p>
+                    <i class="ph-bold ph-caret-down dark:text-white text-black"
+                       x-show="open"></i>
+                    <i class="ph-bold ph-caret-up dark:text-white text-black" x-show="!open"></i>
+                </div>
 
-                <template x-for="(team_value, team_key) in data.auton" :key="team_key">
-                    <div x-show="Object.keys(team_value).length > 0"
-                         x-data="{ open: true }"
-                         class="flex flex-col items-left gap-4 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg p-4 my-2">
-
-                        <!-- Team Number -->
-                        <div class="flex flex-row justify-between"
-                             :class="{ 'border-b-2 dark:border-slate-700 border-slate-300': open }"
-                             @click="open = !open">
-                            <p class="dark:text-white text-black text-sans text-lg"
-                               x-text="team_key"></p>
-                            <i class="ph-bold ph-caret-down dark:text-white text-black"
-                               x-show="open"></i>
-                            <i class="ph-bold ph-caret-up dark:text-white text-black" x-show="!open"></i>
-                        </div>
-
-                        <!-- Game Pieces -->
-                        <template x-for="(piece_value, piece_key) in team_value" :key="piece_key">
-                            <div class="flex flex-col gap-2 mt-2" x-show="open" x-collapse>
-                                <!-- Game Piece Name -->
-                                <p class="dark:text-white text-black text-sans text-lg"
-                                   x-text="piece_key.charAt(0).toUpperCase() + piece_key.slice(1)"></p>
-
-                                <!-- Score and Miss Types -->
-                                <template x-for="type in ['score', 'miss']" :key="type">
-                                    <div x-show="Object.keys(piece_value[type]).length > 0"
-                                         class="flex flex-col gap-2 ml-4 mt-1">
-                                        <p class="dark:text-white text-black text-sans text-md font-semibold capitalize"
-                                           x-text="type"></p>
-
-                                        <!-- Fields under Score/Miss -->
-                                        <template x-for="(field_value, field_name) in piece_value[type]"
-                                                  :key="field_name">
-                                            <div class="flex flex-col gap-1 ml-4 mb-2 p-2 border dark:border-slate-700 border-slate-300 rounded-lg">
-                                                <p class="dark:text-white text-black text-sans text-md font-medium"
-                                                   x-text="field_name.replace(/_/g, ' ').replace(/\b\w+\b/g, l => l.charAt(0).toUpperCase() + l.slice(1))"></p>
-                                                <p class="dark:text-white text-black text-sans text-sm"
-                                                   x-text="`Average: ${field_value.average.toFixed(2)}`"></p>
-                                                <canvas x-init="create_line_chart($el, field_value.values, `${field_name}`, type)"></canvas>
-                                            </div>
-                                        </template>
-                                    </div>
-                                </template>
-                            </div>
-                        </template>
-
-                    </div>
-                </template>
-            </div>
-
-            <div class="flex flex-col px-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 items-left"
-                 x-show="!offline">
-                <p class="dark:text-white text-black text-sans text-2xl">
-                    <i class="ph-bold ph-game-controller"></i> Teleoperated
-                </p>
-
-                <template x-for="(team_value, team_key) in data.teleop" :key="team_key">
-                    <div x-show="Object.keys(team_value).length > 0"
-                         x-data="{ open: true }"
-                         class="flex flex-col items-left gap-4 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg p-4 my-2">
-
-                        <!-- Team Number -->
-                        <div class="flex flex-row justify-between"
-                             :class="{ 'border-b-2 dark:border-slate-700 border-slate-300': open }"
-                             @click="open = !open">
-                            <p class="dark:text-white text-black text-sans text-lg"
-                               x-text="team_key"></p>
-                            <i class="ph-bold ph-caret-down dark:text-white text-black"
-                               x-show="open"></i>
-                            <i class="ph-bold ph-caret-up dark:text-white text-black" x-show="!open"></i>
-                        </div>
-
-                        <!-- Game Pieces -->
-                        <template x-for="(piece_value, piece_key) in team_value" :key="piece_key">
-                            <div class="flex flex-col gap-2 mt-2" x-show="open" x-collapse>
-                                <!-- Game Piece Name -->
-                                <p class="dark:text-white text-black text-sans text-lg"
-                                   x-text="piece_key.charAt(0).toUpperCase() + piece_key.slice(1)"></p>
-
-                                <!-- Score and Miss Types -->
-                                <template x-for="type in ['score', 'miss']" :key="type">
-                                    <div x-show="Object.keys(piece_value[type]).length > 0"
-                                         class="flex flex-col gap-2 ml-4 mt-1">
-                                        <p class="dark:text-white text-black text-sans text-md font-semibold capitalize"
-                                           x-text="type"></p>
-
-                                        <!-- Fields under Score/Miss -->
-                                        <template x-for="(field_value, field_name) in piece_value[type]"
-                                                  :key="field_name">
-                                            <div class="flex flex-col gap-1 ml-4 mb-2 p-2 border dark:border-slate-700 border-slate-300 rounded-lg">
-                                                <p class="dark:text-white text-black text-sans text-md font-medium"
-                                                   x-text="field_name.replace(/_/g, ' ').replace(/\b\w+\b/g, l => l.charAt(0).toUpperCase() + l.slice(1))"></p>
-                                                <p class="dark:text-white text-black text-sans text-sm"
-                                                   x-text="`Average: ${field_value.average.toFixed(2)}`"></p>
-                                                <canvas x-init="create_line_chart($el, field_value.values, `${field_name}`, type)"></canvas>
-                                            </div>
-                                        </template>
-                                    </div>
-                                </template>
-                            </div>
-                        </template>
-
-                    </div>
-                </template>
-            </div>
-
-            <div class="flex flex-col px-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 items-left"
-                 x-show="!offline">
-                <p class="dark:text-white text-black text-sans text-2xl">
-                    <i class="ph-bold ph-list-checks"></i> Capabilities
-                </p>
-
-                <template x-for="(team_value, team_key) in data.capabilities" :key="team_key">
-                    <div class="flex flex-col items-left gap-4 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg p-4 my-2"
-                         x-show="Object.keys(team_value).length > 0"
-                         x-data="{ open: true }">
-
-                        <!-- Team Number -->
-                        <div class="flex flex-row justify-between"
-                             :class="{ 'border-b-2 dark:border-slate-700 border-slate-300': open }"
-                             @click="open = !open">
-                            <p class="dark:text-white text-black text-sans text-lg"
-                               x-text="team_key"></p>
-                            <i class="ph-bold ph-caret-down dark:text-white text-black"
-                               x-show="open"></i>
-                            <i class="ph-bold ph-caret-up dark:text-white text-black" x-show="!open"></i>
-                        </div>
-
-                        <!-- Capabilities -->
-                        <template x-for="(capability_value, capability_name) in team_value"
-                                  :key="capability_name">
-                            <div class="flex flex-col gap-2 mt-2 border dark:border-slate-700 border-slate-300 rounded-lg p-2"
-                                 x-show="open"
-                                 x-collapse>
-                                <!-- Capability Name -->
-                                <p class="dark:text-white text-black text-sans text-lg font-semibold"
-                                   x-text="capability_name.replace(/_/g, ' ').replace(/\b\w+\b/g, l => l.charAt(0).toUpperCase() + l.slice(1))"></p>
-
-                                <div class="flex flex-row items-center">
-                                    <!-- Display percentages as text -->
-                                    <div class="w-1/2 flex flex-col justify-center">
-                                        <template x-for="(percentage, value_name) in capability_value"
-                                                  :key="value_name">
-                                            <p class="dark:text-white text-black text-sans text-sm mx-2"
-                                               x-text="`${value_name}: ${percentage.toFixed(1)}%`"></p>
-                                        </template>
-                                    </div>
-
-                                    <div class="w-1/2 flex justify-center">
-                                        <!-- Donut Chart for this capability -->
-                                        <canvas x-init="create_donut_chart($el, Object.values(capability_value), Object.keys(capability_value), capability_name)"></canvas>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </template>
-
-                    </div>
-                </template>
-
-            </div>
-
-            <div class="flex flex-col px-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 items-left"
-                 x-show="!offline">
-                <p class="dark:text-white text-black text-sans text-2xl">
-                    <i class="ph-bold ph-list"></i> Other
-                </p>
-
-                <template x-for="(team_value, team_key) in data.other" :key="team_key">
-                    <template x-if="team_value.length > 0" x-data="{ open: true }">
-                        <div class="flex flex-col items-left gap-4 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg p-4 my-2">
+                <div x-show="open" x-collapse>
+                    <template x-for="(team_value, team_key) in data.auton" :key="team_key">
+                        <div x-show="Object.keys(team_value).length > 0"
+                             x-data="{ open: true }"
+                             class="flex flex-col items-left gap-4 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg p-4 my-2">
 
                             <!-- Team Number -->
                             <div class="flex flex-row justify-between"
@@ -658,17 +502,220 @@
                                 <i class="ph-bold ph-caret-up dark:text-white text-black" x-show="!open"></i>
                             </div>
 
-                            <!-- Other Entries -->
-                            <div x-show="open" x-collapse>
-                                <ul class="list-disc list-inside ml-4">
-                                    <template x-for="(entry, index) in team_value" :key="index">
-                                        <li class="dark:text-white text-black text-sans text-md" x-text="entry"></li>
+                            <!-- Game Pieces -->
+                            <template x-for="(piece_value, piece_key) in team_value" :key="piece_key">
+                                <div class="flex flex-col gap-2 mt-2" x-show="open" x-collapse>
+                                    <!-- Game Piece Name -->
+                                    <p class="dark:text-white text-black text-sans text-lg"
+                                       x-text="piece_key.charAt(0).toUpperCase() + piece_key.slice(1)"></p>
+
+                                    <!-- Score and Miss Types -->
+                                    <template x-for="type in ['score', 'miss']" :key="type">
+                                        <div x-show="Object.keys(piece_value[type]).length > 0"
+                                             class="flex flex-col gap-2 ml-4 mt-1">
+                                            <p class="dark:text-white text-black text-sans text-md font-semibold capitalize"
+                                               x-text="type"></p>
+
+                                            <!-- Fields under Score/Miss -->
+                                            <template x-for="(field_value, field_name) in piece_value[type]"
+                                                      :key="field_name">
+                                                <div class="flex flex-col gap-1 ml-4 mb-2 p-2 border dark:border-slate-700 border-slate-300 rounded-lg">
+                                                    <p class="dark:text-white text-black text-sans text-md font-medium"
+                                                       x-text="field_name.replace(/_/g, ' ').replace(/\b\w+\b/g, l => l.charAt(0).toUpperCase() + l.slice(1))"></p>
+                                                    <p class="dark:text-white text-black text-sans text-sm"
+                                                       x-text="`Average: ${field_value.average.toFixed(2)}`"></p>
+                                                    <canvas x-init="create_line_chart($el, field_value.values, `${field_name}`, type)"></canvas>
+                                                </div>
+                                            </template>
+                                        </div>
                                     </template>
-                                </ul>
-                            </div>
+                                </div>
+                            </template>
+
                         </div>
                     </template>
-                </template>
+                </div>
+            </div>
+
+            <div class="flex flex-col px-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 items-left"
+                 x-show="!offline"
+                 x-data="{ open: true }">
+                <div x-data="{ stuck: false }"
+                     x-init=" let el = $el; window.addEventListener('scroll', () => { stuck = el.getBoundingClientRect().top <= 0; }); "
+                     :class="{ 'dark:bg-slate-800 bg-slate-200 border-2 dark:border-slate-700 border-slate-300 shadow-lg mt-2 px-4': stuck }"
+                     class="sticky top-0 flex flex-row py-4 rounded-lg transition-[padding] justify-between align-middle items-center"
+                     @click="open = !open">
+                    <p class="dark:text-white text-black text-sans text-2xl">
+                        <i class="ph-bold ph-game-controller"></i> Teleoperated
+                    </p>
+                    <i class="ph-bold ph-caret-down dark:text-white text-black"
+                       x-show="open"></i>
+                    <i class="ph-bold ph-caret-up dark:text-white text-black" x-show="!open"></i>
+                </div>
+
+                <div x-show="open" x-collapse>
+                    <template x-for="(team_value, team_key) in data.teleop" :key="team_key">
+                        <div x-show="Object.keys(team_value).length > 0"
+                             x-data="{ open: true }"
+                             class="flex flex-col items-left gap-4 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg p-4 my-2">
+
+                            <!-- Team Number -->
+                            <div class="flex flex-row justify-between"
+                                 :class="{ 'border-b-2 dark:border-slate-700 border-slate-300': open }"
+                                 @click="open = !open">
+                                <p class="dark:text-white text-black text-sans text-lg"
+                                   x-text="team_key"></p>
+                                <i class="ph-bold ph-caret-down dark:text-white text-black"
+                                   x-show="open"></i>
+                                <i class="ph-bold ph-caret-up dark:text-white text-black" x-show="!open"></i>
+                            </div>
+
+                            <!-- Game Pieces -->
+                            <template x-for="(piece_value, piece_key) in team_value" :key="piece_key">
+                                <div class="flex flex-col gap-2 mt-2" x-show="open" x-collapse>
+                                    <!-- Game Piece Name -->
+                                    <p class="dark:text-white text-black text-sans text-lg"
+                                       x-text="piece_key.charAt(0).toUpperCase() + piece_key.slice(1)"></p>
+
+                                    <!-- Score and Miss Types -->
+                                    <template x-for="type in ['score', 'miss']" :key="type">
+                                        <div x-show="Object.keys(piece_value[type]).length > 0"
+                                             class="flex flex-col gap-2 ml-4 mt-1">
+                                            <p class="dark:text-white text-black text-sans text-md font-semibold capitalize"
+                                               x-text="type"></p>
+
+                                            <!-- Fields under Score/Miss -->
+                                            <template x-for="(field_value, field_name) in piece_value[type]"
+                                                      :key="field_name">
+                                                <div class="flex flex-col gap-1 ml-4 mb-2 p-2 border dark:border-slate-700 border-slate-300 rounded-lg">
+                                                    <p class="dark:text-white text-black text-sans text-md font-medium"
+                                                       x-text="field_name.replace(/_/g, ' ').replace(/\b\w+\b/g, l => l.charAt(0).toUpperCase() + l.slice(1))"></p>
+                                                    <p class="dark:text-white text-black text-sans text-sm"
+                                                       x-text="`Average: ${field_value.average.toFixed(2)}`"></p>
+                                                    <canvas x-init="create_line_chart($el, field_value.values, `${field_name}`, type)"></canvas>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <div class="flex flex-col px-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 items-left"
+                 x-show="!offline"
+                 x-data="{ open: true }">
+                <div x-data="{ stuck: false }"
+                     x-init=" let el = $el; window.addEventListener('scroll', () => { stuck = el.getBoundingClientRect().top <= 0; }); "
+                     :class="{ 'dark:bg-slate-800 bg-slate-200 border-2 dark:border-slate-700 border-slate-300 shadow-lg mt-2 px-4': stuck }"
+                     class="sticky top-0 flex flex-row py-4 rounded-lg transition-[padding] justify-between align-middle items-center"
+                     @click="open = !open">
+                    <p class="dark:text-white text-black text-sans text-2xl">
+                        <i class="ph-bold ph-list-checks"></i> Capabilities
+                    </p>
+                    <i class="ph-bold ph-caret-down dark:text-white text-black"
+                       x-show="open"></i>
+                    <i class="ph-bold ph-caret-up dark:text-white text-black" x-show="!open"></i>
+                </div>
+
+                <div x-show="open" x-collapse>
+                    <template x-for="(team_value, team_key) in data.capabilities" :key="team_key">
+                        <div class="flex flex-col items-left gap-4 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg p-4 my-2"
+                             x-show="Object.keys(team_value).length > 0"
+                             x-data="{ open: true }">
+
+                            <!-- Team Number -->
+                            <div class="flex flex-row justify-between"
+                                 :class="{ 'border-b-2 dark:border-slate-700 border-slate-300': open }"
+                                 @click="open = !open">
+                                <p class="dark:text-white text-black text-sans text-lg"
+                                   x-text="team_key"></p>
+                                <i class="ph-bold ph-caret-down dark:text-white text-black"
+                                   x-show="open"></i>
+                                <i class="ph-bold ph-caret-up dark:text-white text-black" x-show="!open"></i>
+                            </div>
+
+                            <!-- Capabilities -->
+                            <template x-for="(capability_value, capability_name) in team_value"
+                                      :key="capability_name">
+                                <div class="flex flex-col gap-2 mt-2 border dark:border-slate-700 border-slate-300 rounded-lg p-2"
+                                     x-show="open"
+                                     x-collapse>
+                                    <!-- Capability Name -->
+                                    <p class="dark:text-white text-black text-sans text-lg font-semibold"
+                                       x-text="capability_name.replace(/_/g, ' ').replace(/\b\w+\b/g, l => l.charAt(0).toUpperCase() + l.slice(1))"></p>
+
+                                    <div class="flex flex-row items-center">
+                                        <!-- Display percentages as text -->
+                                        <div class="w-1/2 flex flex-col justify-center">
+                                            <template x-for="(percentage, value_name) in capability_value"
+                                                      :key="value_name">
+                                                <p class="dark:text-white text-black text-sans text-sm mx-2"
+                                                   x-text="`${value_name}: ${percentage.toFixed(1)}%`"></p>
+                                            </template>
+                                        </div>
+
+                                        <div class="w-1/2 flex justify-center">
+                                            <!-- Donut Chart for this capability -->
+                                            <canvas x-init="create_donut_chart($el, Object.values(capability_value), Object.keys(capability_value), capability_name)"></canvas>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </template>
+
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <div class="flex flex-col px-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 items-left"
+                 x-show="!offline"
+                 x-data="{ open: true }">
+                <div x-data="{ stuck: false }"
+                     x-init=" let el = $el; window.addEventListener('scroll', () => { stuck = el.getBoundingClientRect().top <= 0; }); "
+                     :class="{ 'dark:bg-slate-800 bg-slate-200 border-2 dark:border-slate-700 border-slate-300 shadow-lg mt-2 px-4': stuck }"
+                     class="sticky top-0 flex flex-row py-4 rounded-lg transition-[padding] justify-between align-middle items-center"
+                     @click="open = !open">
+                    <p class="dark:text-white text-black text-sans text-2xl">
+                        <i class="ph-bold ph-list"></i> Other
+                    </p>
+                    <i class="ph-bold ph-caret-down dark:text-white text-black"
+                       x-show="open"></i>
+                    <i class="ph-bold ph-caret-up dark:text-white text-black" x-show="!open"></i>
+                </div>
+
+                <div x-show="open" x-collapse>
+                    <template x-for="(team_value, team_key) in data.other" :key="team_key">
+                        <template x-if="team_value.length > 0" x-data="{ open: true }">
+                            <div class="flex flex-col items-left gap-4 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg p-4 my-2">
+
+                                <!-- Team Number -->
+                                <div class="flex flex-row justify-between"
+                                     :class="{ 'border-b-2 dark:border-slate-700 border-slate-300': open }"
+                                     @click="open = !open">
+                                    <p class="dark:text-white text-black text-sans text-lg"
+                                       x-text="team_key"></p>
+                                    <i class="ph-bold ph-caret-down dark:text-white text-black"
+                                       x-show="open"></i>
+                                    <i class="ph-bold ph-caret-up dark:text-white text-black" x-show="!open"></i>
+                                </div>
+
+                                <!-- Other Entries -->
+                                <div x-show="open" x-collapse>
+                                    <ul class="list-disc list-inside ml-4">
+                                        <template x-for="(entry, index) in team_value" :key="index">
+                                            <li class="dark:text-white text-black text-sans text-md" x-text="entry"></li>
+                                        </template>
+                                    </ul>
+                                </div>
+                            </div>
+                        </template>
+                    </template>
+                </div>
             </div>
 
             <div class="flex flex-col px-4 py-6 bg-orange-200/50 dark:bg-orange-800/50 backdrop-blur-md dark:border-orange-700 border-orange-300 border-2 rounded-lg items-center"
