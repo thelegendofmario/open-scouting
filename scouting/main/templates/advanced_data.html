@@ -1,0 +1,997 @@
+{% extends "base.html" %}
+{% load static %}
+{% block head_title %}Open Scouting{% endblock %}
+
+{% block head_scripts %}
+    <link href="https://unpkg.com/tabulator-tables@6.3.0/dist/css/tabulator.min.css"
+          rel="stylesheet">
+    <script type="text/javascript"
+            src="https://unpkg.com/tabulator-tables@6.3.0/dist/js/tabulator.min.js"></script>
+{% endblock %}
+
+{% block stylesheets %}{% endblock %}
+
+{% block body %}
+    <div class="flex flex-col min-h-screen w-screen items-center justify-center">
+        <div class="flex flex-row w-full md:w-3/4 lg:w-2/3 mx-8 my-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 items-center justify-center"
+             x-data="advanced_data_header()">
+            <img class="w-16 h-16 aspect-square m-2 hover:scale-110 transition-all ease-in-out active:scale-95"
+                 src="{% static '/main/images/icon_rounded.png' %}"
+                 @click="window.location.href = '{{ SERVER_IP }}'">
+
+            <div class="flex flex-col">
+                <div class="flex flex-row items-center">
+                    <p class="dark:text-white text-black text-sans text-2xl">Advanced Data View</p>
+                </div>
+            </div>
+
+        </div>
+
+        <script>
+            function advanced_data_header() {
+                return {}
+            }
+        </script>
+
+        <div class="flex flex-col w-full md:w-3/4 lg:w-2/3 mx-8 my-2 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg gap-2"
+             x-data="filters()"
+             x-show="!offline">
+            <p class="dark:text-white text-black text-sans text-2xl ml-4">
+                <i class="ph-bold ph-funnel"></i> Filters
+            </p>
+            <p class="dark:text-white text-black text-sans text-sm ml-6 opacity-80">
+                Filter results by year and then by both teams and events. If both a team and event is shown, only data from that team recorded at that event is shown
+            </p>
+            <div class="flex flex-row items-center gap-2 ml-6" x-ref="year">
+                <p class="dark:text-white text-black text-sans text-lg">Year</p>
+                <select class="ui_input !w-32"
+                        x-ref="year_input"
+                        @input="update_results_and_query();">
+                    <template x-for="year in YEARS" :key="year">
+                        <option x-text="year"></option>
+                    </template>
+                </select>
+            </div>
+            <div class="flex flex-row items-center gap-2 ml-6 flex-wrap" x-ref="teams">
+                <p class="dark:text-white text-black text-sans text-lg">Teams</p>
+                <template x-for="team in teams" :key="teams.indexOf(team)">
+                    <button class="ui_button_small !flex !flex-row items-center gap-1"
+                            @click="remove_team(team)">
+                        <i class="ph-bold ph-x"></i>
+                        <img class="w-4 h-4 aspect-square rounded-full"
+                             :src='"https://thebluealliance.com/avatar/" + $refs.year_input.value + "/frc" + team + ".png"'
+                             @error="event.target.style.display = 'none'">
+                        <p x-text="team"></p>
+                    </button>
+                </template>
+                <button class="ui_button_small opacity-80"
+                        x-ref="teams_add"
+                        @click="add_team_open = !add_team_open">
+                    <i class="ph-bold ph-plus"></i> Add
+                </button>
+            </div>
+            <div class="dark:bg-slate-800/80 border-2 dark:border-slate-700 bg-slate-200/80 border-slate-300 rounded-xl flex flex-col backdrop-blur-md z-10 p-2 max-w-screen max-h-64 overflow-y-scroll"
+                 x-anchor.offset.5="$refs.teams_add"
+                 x-show="add_team_open"
+                 x-transition
+                 @click.outside="add_team_open = false">
+                <div class="flex flex-row items-center gap-2">
+                    <input class="ui_input !w-full"
+                           type="text"
+                           placeholder="Search for a team..."
+                           x-ref="teams_search"
+                           @input="update_team_search()">
+                    <button class="ui_button_small" @click="add_team_open = false">
+                        <i class="ph-bold ph-x"></i>
+                    </button>
+                </div>
+
+                <template x-for="team in team_results_filtered">
+                    <div class="flex flex-row mx-4 my-1 hover:dark:bg-slate-700/80 hover:bg-slate-200/80 active:dark:bg-slate-600/80 active:bg-slate-100/80 rounded-lg transition-colors"
+                         @click="add_team(team)">
+                        <img class="w-8 h-8 aspect-square m-2"
+                             :src='"https://thebluealliance.com/avatar/" + $refs.year_input.value + "/frc" + team + ".png"'
+                             @error="event.target.style.display = 'none'">
+                        <p class="dark:text-white text-black text-sans text-md m-2"
+                           x-text="team"></p>
+                    </div>
+                </template>
+            </div>
+
+            <div class="flex flex-row items-center gap-2 ml-6 flex-wrap"
+                 x-ref="events">
+                <p class="dark:text-white text-black text-sans text-lg">Events</p>
+                <template x-for="event in events" :key="events.indexOf(event)">
+                    <button class="ui_button_small !flex !flex-row items-center gap-1"
+                            @click="remove_event(event)">
+                        <i class="ph-bold ph-x"></i>
+                        <p x-text="event.name"></p>
+                    </button>
+                </template>
+                <button class="ui_button_small opacity-80"
+                        x-ref="events_add"
+                        @click="add_event_open = !add_event_open">
+                    <i class="ph-bold ph-plus"></i> Add
+                </button>
+            </div>
+            <div class="dark:bg-slate-800/80 border-2 dark:border-slate-700 bg-slate-200/80 border-slate-300 rounded-xl flex flex-col backdrop-blur-md z-10 p-2 max-w-screen max-h-64 overflow-y-scroll"
+                 x-anchor.offset.5="$refs.events_add"
+                 x-show="add_event_open"
+                 x-transition
+                 @click.outside="add_event_open = false">
+                <div class="flex flex-row items-center gap-2">
+                    <input class="ui_input !w-full"
+                           type="text"
+                           placeholder="Search for an event..."
+                           x-ref="events_search"
+                           @input="update_event_search()">
+                    <button class="ui_button_small" @click="add_event_open = false">
+                        <i class="ph-bold ph-x"></i>
+                    </button>
+                </div>
+
+                <template x-for="event in event_results_filtered">
+                    <div class="flex flex-col mx-4 my-1 hover:dark:bg-slate-700/80 hover:bg-slate-200/80 active:dark:bg-slate-600/80 active:bg-slate-100/80 rounded-lg transition-colors"
+                         @click="add_event(event)">
+                        <p class="dark:text-white text-black text-sans text-md m-2"
+                           x-text="event.name"></p>
+                        <p class="dark:text-white text-black text-sans font-mono text-sm opacity-80 ml-2"
+                           x-text="event.code"></p>
+                    </div>
+                </template>
+            </div>
+            <p class="dark:text-white text-black font-mono text-sm ml-6 opacity-60"
+               x-text="query"></p>
+            <button class="ui_button_small ml-6" @click="clear_filters()">
+                <i class="ph-bold ph-trash"></i> Clear Filters
+            </button>
+
+            <p class="dark:text-white text-black text-sans text-2xl ml-4 mt-4">
+                <i class="ph-bold ph-funnel-simple"></i> Sort By
+            </p>
+            <p class="dark:text-white text-black text-sans text-sm ml-6 opacity-80">
+                Sorts the data displayed below by each team by a stat. For example, sort the teams in descending order by the average coral scored during the autonomous period
+            </p>
+            <div class="flex flex-row mx-4 gap-2">
+                <select class="ui_input"
+                        x-ref="sort_field"
+                        @change="update_results_and_query()">
+                    <template x-for="field in sort_fields">
+                        <option :value="field.simple_name" x-text="field.name"></option>
+                    </template>
+                </select>
+                <select class="ui_input"
+                        x-ref="sort_order"
+                        @change="update_results_and_query()">
+                    <option value="descending">Descending (High to low)</option>
+                    <option value="ascending">Ascending (Low to high)</option>
+                </select>
+            </div>
+        </div>
+
+        <script>
+            function filters() {
+                return {
+                    YEARS: JSON.parse('{{ YEARS | safe }}').reverse(),
+                    teams: [],
+                    events: [],
+                    query: "",
+                    team_results: [],
+                    event_results: [],
+                    team_results_filtered: [],
+                    event_results_filtered: [],
+                    add_team_open: false,
+                    add_event_open: false,
+                    data: [],
+                    data_sorted: [],
+                    sort_fields: [],
+                    offline: false,
+
+                    get_query() {
+                        var teams_str = "";
+                        var events_str = "";
+
+                        if (this.teams.length > 0) {
+                            teams_str = "&teams=" + this.teams.join(",");
+                        } else {
+                            teams_str = "";
+                        }
+                        if (this.events.length > 0) {
+                            events_str = "&events=" + this.events.map(event => event.code).join(",");
+                        } else {
+                            events_str = "";
+                        }
+
+                        this.query = `?year=${this.$refs.year_input.value}${teams_str}${events_str}`;
+
+                        window.history.replaceState({}, '', this.query);
+                    },
+
+                    set_filters_from_query() {
+                        var urlParams = new URLSearchParams(window.location.search);
+                        var year = urlParams.get('year');
+                        var teams = urlParams.get('teams');
+                        var events = urlParams.get('events');
+
+                        if (year) {
+                            this.$refs.year_input.value = year;
+                        }
+
+                        if (teams) {
+                            this.teams = teams.split(',');
+                        }
+
+                        if (events) {
+                            this.events = events.split(',').map(code => {
+                                return { code: code, name: code };
+                            });
+                        }
+
+                        this.update_results_and_query();
+                    },
+
+                    clear_filters() {
+                        this.teams = [];
+                        this.events = [];
+                        this.team_results = [];
+                        this.event_results = [];
+                        this.update_results_and_query();
+                    },
+
+                    add_team(team) {
+                        this.teams.push(team);
+                        this.update_results_and_query();
+                    },
+
+                    add_event(event) {
+                        this.events.push(event);
+                        this.update_results_and_query();
+                    },
+
+                    remove_team(team) {
+                        this.teams = this.teams.filter(t => t !== team);
+                        this.update_results_and_query();
+                    },
+
+                    remove_event(event) {
+                        this.events = this.events.filter(e => e !== event);
+                        this.update_results_and_query();
+                    },
+
+                    update_results_and_query() {
+                        this.get_teams_with_filters();
+                        this.get_events_with_filters();
+                        this.get_query();
+
+                        this.get_data();
+                        let data_promise = this.get_data();
+                        data_promise.then(() => {
+                            this.get_sortable_fields();
+                        });
+                    },
+
+                    update_team_search() {
+                        let search = this.$refs.teams_search.value.toLowerCase();
+                        this.team_results_filtered = this.team_results.filter(team => team.toLowerCase().includes(search));
+                    },
+
+                    update_event_search() {
+                        let search = this.$refs.events_search.value.toLowerCase();
+                        this.event_results_filtered = this.event_results.filter(event => event.name.toLowerCase().includes(search));
+                    },
+
+                    get_sortable_fields() {
+                        let sort_fields = {};
+
+                        if (!this.data) {
+                            console.warn("No data available");
+                            return [];
+                        }
+
+                        sort_fields["disabled"] = {
+                            simple_name: "disabled",
+                            name: "Don't sort"
+                        };
+
+                        // Process auton & teleop sections
+                        ["auton", "teleop"].forEach(section => {
+                            if (this.data[section]) {
+                                for (const team_number in this.data[section]) {
+                                    const team_data = this.data[section][team_number];
+
+                                    for (const game_piece in team_data) {
+                                        const game_piece_data = team_data[game_piece];
+
+                                        ["score", "miss"].forEach(type => {
+                                            if (game_piece_data[type]) {
+                                                for (const field in game_piece_data[type]) {
+                                                    sort_fields[field] = {
+                                                        simple_name: field,
+                                                        name: field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+                                                    };
+                                                }
+                                            }
+                                        });
+                                    }
+                                }
+                            }
+                        });
+
+                        // We can't properly sort for all capabilities so they're disabled for now
+                        // if (this.data.capabilities) {
+                        //     for (const team_number in this.data.capabilities) {
+                        //         for (const capability in this.data.capabilities[team_number]) {
+                        //             sort_fields[capability] = {
+                        //                 simple_name: capability,
+                        //                 name: capability.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+                        //             };
+                        //         }
+                        //     }
+                        // }
+
+                        // Convert to array
+                        this.sort_fields = Object.values(sort_fields);
+                    },
+
+
+                    sort_teams_by_field(data) {
+                        // TODO: There's still a chance that the data will be filtered if for some reason there's a field with name "disabled"
+                        if (!this.data) {
+                            console.warn("No data available");
+                        }
+
+                        let field = this.$refs.sort_field.value;
+                        let order = this.$refs.sort_order.value;
+
+                        let teams = new Set();
+
+                        // Collect all team numbers from all sections
+                        ["auton", "teleop", "capabilities", "other"].forEach(section => {
+                            if (data[section]) {
+                                Object.keys(data[section]).forEach(team => teams.add(team));
+                            }
+                        });
+
+                        // Convert Set to an Array
+                        let teamList = Array.from(teams);
+
+                        // Sort the teams based on the selected field
+                        teamList.sort((teamA, teamB) => {
+                            let valueA = this.get_team_field_value(teamA, field);
+                            let valueB = this.get_team_field_value(teamB, field);
+
+                            return order === "ascending" ? valueA - valueB : valueB - valueA;
+                        });
+
+                        // Create a new sorted data object
+                        let sortedData = {};
+                        ["auton", "teleop", "capabilities", "other"].forEach(section => {
+                            sortedData[section] = [];
+
+                            if (data[section]) {
+                                teamList.forEach(team => {
+                                    let teamData = data[section][team] || {}; // Keep empty teams
+                                    sortedData[section].push({ team, data: teamData });
+                                });
+                            }
+                        });
+
+                        return sortedData;
+                    },
+
+                    // Helper function to get a team's value for a given field
+                    get_team_field_value(team, field) {
+                        let value = 0;
+
+                        ["auton", "teleop"].forEach(section => {
+                            if (this.data[section]?.[team]) {
+                                for (const game_piece in this.data[section][team]) {
+                                    ["score", "miss"].forEach(type => {
+                                        if (this.data[section][team][game_piece]?.[type]?.[field]?.average !== undefined) {
+                                            value = this.data[section][team][game_piece][type][field].average;
+                                        }
+                                    });
+                                }
+                            }
+                        });
+
+                        if (this.data.capabilities?.[team]?.[field]) {
+                            // Get any numeric percentage for capabilities
+                            value = Object.values(this.data.capabilities[team][field])[0] || 0;
+                        }
+
+                        return value;
+                    },
+
+                    async get_teams_with_filters() {
+                        var response = await fetch("{{ SERVER_IP }}/get_teams_with_filters", {
+                            method: "POST",
+                            headers: {
+                                    "X-CSRFToken": "{{ csrf_token }}"
+                                },
+                            body: JSON.stringify({
+                                year: this.$refs.year_input.value,
+                                events: JSON.stringify(this.events)
+                            })
+                            });
+
+                        if (response.ok) {
+                            let results = await response.json();
+                            this.team_results = [...new Set(results)].filter(t => !this.teams.includes(t));
+                            this.team_results_filtered = this.team_results;
+                            this.update_team_search();
+                        }
+                    },
+
+                    async get_events_with_filters() {
+                        var response = await fetch("{{ SERVER_IP }}/get_events_with_filters", {
+                            method: "POST",
+                            headers: {
+                                    "X-CSRFToken": "{{ csrf_token }}"
+                                },
+                            body: JSON.stringify({
+                                year: this.$refs.year_input.value,
+                                teams: JSON.stringify(this.teams)
+                            })
+                            });
+
+                        if (response.ok) {
+                            let results = await response.json();
+                            this.event_results = [...new Map(results.map(event => [event.code, event])).values()]
+                                .filter(event => !this.events.some(e => e.code === event.code));
+                            this.event_results_filtered = this.event_results;
+                            this.update_event_search();
+                        }
+                    },
+
+                    parse_server_data(data) {
+                        const final_data = {
+                            auton: {},
+                            teleop: {},
+                            capabilities: {},
+                            other: {}
+                        };
+
+                        for (const team of data) {
+                            const team_number = team.team_number;
+
+                            if (!final_data.auton[team_number]) final_data.auton[team_number] = {};
+                            if (!final_data.teleop[team_number]) final_data.teleop[team_number] = {};
+                            if (!final_data.capabilities[team_number]) final_data.capabilities[team_number] = {};
+                            if (!final_data.other[team_number]) final_data.other[team_number] = [];
+
+                            team.data.forEach(match => {
+                                match.forEach(field => {
+                                    const { stat_type, game_piece, name, value } = field;
+
+                                    switch (stat_type) {
+                                        case "auton_score":
+                                        case "auton_miss":
+                                            if (!game_piece) break; // skip if no game_piece
+                                            if (!final_data.auton[team_number][game_piece]) {
+                                                final_data.auton[team_number][game_piece] = {
+                                                    score: {},
+                                                    miss: {}
+                                                };
+                                            }
+                                            const autonType = stat_type === "auton_score" ? "score" : "miss";
+                                            if (!final_data.auton[team_number][game_piece][autonType][name]) {
+                                                final_data.auton[team_number][game_piece][autonType][name] = {
+                                                    values: [],
+                                                    average: 0
+                                                };
+                                            }
+                                            final_data.auton[team_number][game_piece][autonType][name].values.push(value);
+                                            break;
+
+                                        case "score":
+                                        case "miss":
+                                            if (!game_piece) break; // skip if no game_piece
+                                            if (!final_data.teleop[team_number][game_piece]) {
+                                                final_data.teleop[team_number][game_piece] = {
+                                                    score: {},
+                                                    miss: {}
+                                                };
+                                            }
+                                            const teleopType = stat_type === "score" ? "score" : "miss";
+                                            if (!final_data.teleop[team_number][game_piece][teleopType][name]) {
+                                                final_data.teleop[team_number][game_piece][teleopType][name] = {
+                                                    values: [],
+                                                    average: 0
+                                                };
+                                            }
+                                            final_data.teleop[team_number][game_piece][teleopType][name].values.push(value);
+                                            break;
+
+                                        case "capability":
+                                            if (!final_data.capabilities[team_number][name]) {
+                                                final_data.capabilities[team_number][name] = {};
+                                            }
+                                            if (!final_data.capabilities[team_number][name][value]) {
+                                                final_data.capabilities[team_number][name][value] = 0;
+                                            }
+                                            final_data.capabilities[team_number][name][value]++;
+                                            break;
+
+                                        case "other":
+                                            final_data.other[team_number].push(value);
+                                            break;
+
+                                        default:
+                                            break;
+                                    }
+                                });
+                            });
+
+                            // Calculate averages per field for auton
+                            for (const game_piece in final_data.auton[team_number]) {
+                                const piece_data = final_data.auton[team_number][game_piece];
+                                ["score", "miss"].forEach(type => {
+                                    for (const field_name in piece_data[type]) {
+                                        const field_data = piece_data[type][field_name];
+                                        const count = field_data.values.length;
+                                        field_data.average = count > 0
+                                            ? field_data.values.reduce((a, b) => a + b, 0) / count
+                                            : 0;
+                                    }
+                                });
+                            }
+
+                            // Calculate averages per field for teleop
+                            for (const game_piece in final_data.teleop[team_number]) {
+                                const piece_data = final_data.teleop[team_number][game_piece];
+                                ["score", "miss"].forEach(type => {
+                                    for (const field_name in piece_data[type]) {
+                                        const field_data = piece_data[type][field_name];
+                                        const count = field_data.values.length;
+                                        field_data.average = count > 0
+                                            ? field_data.values.reduce((a, b) => a + b, 0) / count
+                                            : 0;
+                                    }
+                                });
+                            }
+                        }
+
+                        // Convert capability counts to percentages per team
+                        for (const team_number in final_data.capabilities) {
+                            const team_caps = final_data.capabilities[team_number];
+                            for (const cap_name in team_caps) {
+                                const cap_values = team_caps[cap_name];
+                                const total_entries = Object.values(cap_values).reduce((a, b) => a + b, 0);
+
+                                for (const value in cap_values) {
+                                    cap_values[value] = (cap_values[value] / total_entries) * 100;
+                                }
+                            }
+                        }
+
+                        return final_data;
+                    },
+
+                    async get_data() {
+                        var response = await fetch("{{ SERVER_IP }}/get_data_from_query", {
+                            method: "POST",
+                            headers: {
+                                    "X-CSRFToken": "{{ csrf_token }}"
+                                },
+                            body: JSON.stringify({
+                                query: this.query
+                            })
+                        });
+
+                        if (response.ok) {
+                            this.data = this.parse_server_data(await response.json());
+                            this.data_sorted = this.sort_teams_by_field(this.data);
+                            window.dispatchEvent(new CustomEvent('data', {
+                                detail: { data: this.data_sorted }
+                            }));
+                        }
+                    },
+
+                    init() {
+                        // Wait to ensure year drop down is populated
+                        setTimeout(() => {
+                            var urlParams = new URLSearchParams(window.location.search);
+                            var query = urlParams.toString();
+
+                            if (query) {
+                                this.query = query;
+                                this.get_events_with_filters();
+                                
+                                this.set_filters_from_query();
+                                this.update_results_and_query();
+                            } else {
+                                this.update_results_and_query();
+                            }
+
+                            this.get_data();
+
+                            if (globalThis.offline) {
+                                this.offline = true;
+                            } else {
+                                this.offline = false;
+                            }
+                        }, 100);
+                    }
+                }
+            }
+        </script>
+
+        <div class="flex flex-col w-full md:w-1/2 lg:w-2/3"
+             x-data="advanced_data()"
+             x-init="init()">
+            <div class="flex flex-col px-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 mt-4 items-left"
+                 x-show="!offline"
+                 x-data="{ open: true }">
+                <div x-data="{ stuck: false }"
+                     x-init=" let el = $el; window.addEventListener('scroll', () => { stuck = el.getBoundingClientRect().top <= 0; }); "
+                     :class="{ 'dark:bg-slate-800 bg-slate-200 border-2 dark:border-slate-700 border-slate-300 shadow-lg mt-2 px-4': stuck }"
+                     class="sticky top-0 flex flex-row py-4 rounded-lg transition-[padding] justify-between align-middle items-center"
+                     @click="open = !open">
+                    <p class="dark:text-white text-black text-sans text-2xl">
+                        <i class="ph-bold ph-robot"></i> Autonomous
+                    </p>
+                    <i class="ph-bold ph-caret-down dark:text-white text-black"
+                       x-show="open"></i>
+                    <i class="ph-bold ph-caret-up dark:text-white text-black" x-show="!open"></i>
+                </div>
+
+                <div x-show="open" x-collapse>
+                    <template x-for="team in data.auton" :key="team.team">
+                        <div x-show="Object.keys(team.data).length > 0"
+                             x-data="{ open: true }"
+                             class="flex flex-col items-left gap-4 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg p-4 my-2">
+
+                            <!-- Team Number -->
+                            <div class="flex flex-row justify-between"
+                                 :class="{ 'border-b-2 dark:border-slate-700 border-slate-300': open }"
+                                 @click="open = !open">
+                                <p class="dark:text-white text-black text-sans text-lg"
+                                   x-text="team.team"></p>
+                                <i class="ph-bold ph-caret-down dark:text-white text-black"
+                                   x-show="open"></i>
+                                <i class="ph-bold ph-caret-up dark:text-white text-black" x-show="!open"></i>
+                            </div>
+
+                            <!-- Game Pieces -->
+                            <template x-for="(piece_value, piece_key) in team.data" :key="piece_key">
+                                <div class="flex flex-col gap-2 mt-2" x-show="open" x-collapse>
+                                    <!-- Game Piece Name -->
+                                    <p class="dark:text-white text-black text-sans text-lg"
+                                       x-text="piece_key.charAt(0).toUpperCase() + piece_key.slice(1)"></p>
+
+                                    <!-- Score and Miss Types -->
+                                    <template x-for="type in ['score', 'miss']" :key="type">
+                                        <div x-show="Object.keys(piece_value[type] || {}).length > 0"
+                                             class="flex flex-col gap-2 ml-4 mt-1">
+                                            <p class="dark:text-white text-black text-sans text-md font-semibold capitalize"
+                                               x-text="type"></p>
+
+                                            <!-- Fields under Score/Miss -->
+                                            <template x-for="(field_value, field_name) in piece_value[type]"
+                                                      :key="field_name">
+                                                <div class="flex flex-col gap-1 ml-4 mb-2 p-2 border dark:border-slate-700 border-slate-300 rounded-lg">
+                                                    <p class="dark:text-white text-black text-sans text-md font-medium"
+                                                       x-text="field_name.replace(/_/g, ' ').replace(/\b\w+\b/g, l => l.charAt(0).toUpperCase() + l.slice(1))"></p>
+                                                    <p class="dark:text-white text-black text-sans text-sm"
+                                                       x-text="`Average: ${field_value.average.toFixed(2)}`"></p>
+                                                    <canvas x-init="create_line_chart($el, field_value.values, field_name, type)"></canvas>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+
+                        </div>
+                    </template>
+
+                </div>
+            </div>
+
+            <div class="flex flex-col px-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 items-left"
+                 x-show="!offline"
+                 x-data="{ open: true }">
+                <div x-data="{ stuck: false }"
+                     x-init=" let el = $el; window.addEventListener('scroll', () => { stuck = el.getBoundingClientRect().top <= 0; }); "
+                     :class="{ 'dark:bg-slate-800 bg-slate-200 border-2 dark:border-slate-700 border-slate-300 shadow-lg mt-2 px-4': stuck }"
+                     class="sticky top-0 flex flex-row py-4 rounded-lg transition-[padding] justify-between align-middle items-center"
+                     @click="open = !open">
+                    <p class="dark:text-white text-black text-sans text-2xl">
+                        <i class="ph-bold ph-game-controller"></i> Teleoperated
+                    </p>
+                    <i class="ph-bold ph-caret-down dark:text-white text-black"
+                       x-show="open"></i>
+                    <i class="ph-bold ph-caret-up dark:text-white text-black" x-show="!open"></i>
+                </div>
+
+                <div x-show="open" x-collapse>
+                    <template x-for="team in data.teleop" :key="team.team">
+                        <div x-show="Object.keys(team.data).length > 0"
+                             x-data="{ open: true }"
+                             class="flex flex-col items-left gap-4 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg p-4 my-2">
+
+                            <!-- Team Number -->
+                            <div class="flex flex-row justify-between"
+                                 :class="{ 'border-b-2 dark:border-slate-700 border-slate-300': open }"
+                                 @click="open = !open">
+                                <p class="dark:text-white text-black text-sans text-lg"
+                                   x-text="team.team"></p>
+                                <i class="ph-bold ph-caret-down dark:text-white text-black"
+                                   x-show="open"></i>
+                                <i class="ph-bold ph-caret-up dark:text-white text-black" x-show="!open"></i>
+                            </div>
+
+                            <!-- Game Pieces -->
+                            <template x-for="(piece_value, piece_key) in team.data" :key="piece_key">
+                                <div class="flex flex-col gap-2 mt-2" x-show="open" x-collapse>
+                                    <!-- Game Piece Name -->
+                                    <p class="dark:text-white text-black text-sans text-lg"
+                                       x-text="piece_key.charAt(0).toUpperCase() + piece_key.slice(1)"></p>
+
+                                    <!-- Score and Miss Types -->
+                                    <template x-for="type in ['score', 'miss']" :key="type">
+                                        <div x-show="Object.keys(piece_value[type]).length > 0"
+                                             class="flex flex-col gap-2 ml-4 mt-1">
+                                            <p class="dark:text-white text-black text-sans text-md font-semibold capitalize"
+                                               x-text="type"></p>
+
+                                            <!-- Fields under Score/Miss -->
+                                            <template x-for="(field_value, field_name) in piece_value[type]"
+                                                      :key="field_name">
+                                                <div class="flex flex-col gap-1 ml-4 mb-2 p-2 border dark:border-slate-700 border-slate-300 rounded-lg">
+                                                    <p class="dark:text-white text-black text-sans text-md font-medium"
+                                                       x-text="field_name.replace(/_/g, ' ').replace(/\b\w+\b/g, l => l.charAt(0).toUpperCase() + l.slice(1))"></p>
+                                                    <p class="dark:text-white text-black text-sans text-sm"
+                                                       x-text="`Average: ${field_value.average.toFixed(2)}`"></p>
+                                                    <canvas x-init="create_line_chart($el, field_value.values, `${field_name}`, type)"></canvas>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <div class="flex flex-col px-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 items-left"
+                 x-show="!offline"
+                 x-data="{ open: true }">
+                <div x-data="{ stuck: false }"
+                     x-init=" let el = $el; window.addEventListener('scroll', () => { stuck = el.getBoundingClientRect().top <= 0; }); "
+                     :class="{ 'dark:bg-slate-800 bg-slate-200 border-2 dark:border-slate-700 border-slate-300 shadow-lg mt-2 px-4': stuck }"
+                     class="sticky top-0 flex flex-row py-4 rounded-lg transition-[padding] justify-between align-middle items-center"
+                     @click="open = !open">
+                    <p class="dark:text-white text-black text-sans text-2xl">
+                        <i class="ph-bold ph-list-checks"></i> Capabilities
+                    </p>
+                    <i class="ph-bold ph-caret-down dark:text-white text-black"
+                       x-show="open"></i>
+                    <i class="ph-bold ph-caret-up dark:text-white text-black" x-show="!open"></i>
+                </div>
+
+                <div x-show="open" x-collapse>
+                    <template x-for="team in data.capabilities" :key="team.team">
+                        <div class="flex flex-col items-left gap-4 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg p-4 my-2"
+                             x-show="Object.keys(team.data).length > 0"
+                             x-data="{ open: true }">
+
+                            <!-- Team Number -->
+                            <div class="flex flex-row justify-between"
+                                 :class="{ 'border-b-2 dark:border-slate-700 border-slate-300': open }"
+                                 @click="open = !open">
+                                <p class="dark:text-white text-black text-sans text-lg"
+                                   x-text="team.team"></p>
+                                <i class="ph-bold ph-caret-down dark:text-white text-black"
+                                   x-show="open"></i>
+                                <i class="ph-bold ph-caret-up dark:text-white text-black" x-show="!open"></i>
+                            </div>
+
+                            <!-- Capabilities -->
+                            <template x-for="(capability_value, capability_name) in team.data"
+                                      :key="capability_name">
+                                <div class="flex flex-col gap-2 mt-2 border dark:border-slate-700 border-slate-300 rounded-lg p-2"
+                                     x-show="open"
+                                     x-collapse>
+                                    <!-- Capability Name -->
+                                    <p class="dark:text-white text-black text-sans text-lg font-semibold"
+                                       x-text="capability_name.replace(/_/g, ' ').replace(/\b\w+\b/g, l => l.charAt(0).toUpperCase() + l.slice(1))"></p>
+
+                                    <div class="flex flex-row items-center">
+                                        <!-- Display percentages as text -->
+                                        <div class="w-1/2 flex flex-col justify-center">
+                                            <template x-for="(percentage, value_name) in capability_value"
+                                                      :key="value_name">
+                                                <p class="dark:text-white text-black text-sans text-sm mx-2"
+                                                   x-text="`${value_name}: ${percentage.toFixed(1)}%`"></p>
+                                            </template>
+                                        </div>
+
+                                        <div class="w-1/2 flex justify-center">
+                                            <!-- Donut Chart for this capability -->
+                                            <canvas x-init="create_donut_chart($el, Object.values(capability_value), Object.keys(capability_value), capability_name)"></canvas>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </template>
+
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <div class="flex flex-col px-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 items-left"
+                 x-show="!offline"
+                 x-data="{ open: true }">
+                <div x-data="{ stuck: false }"
+                     x-init=" let el = $el; window.addEventListener('scroll', () => { stuck = el.getBoundingClientRect().top <= 0; }); "
+                     :class="{ 'dark:bg-slate-800 bg-slate-200 border-2 dark:border-slate-700 border-slate-300 shadow-lg mt-2 px-4': stuck }"
+                     class="sticky top-0 flex flex-row py-4 rounded-lg transition-[padding] justify-between align-middle items-center"
+                     @click="open = !open">
+                    <p class="dark:text-white text-black text-sans text-2xl">
+                        <i class="ph-bold ph-list"></i> Other
+                    </p>
+                    <i class="ph-bold ph-caret-down dark:text-white text-black"
+                       x-show="open"></i>
+                    <i class="ph-bold ph-caret-up dark:text-white text-black" x-show="!open"></i>
+                </div>
+
+                <div x-show="open" x-collapse>
+                    <template x-for="team in data.other" :key="team.team">
+                        <template x-if="Object.keys(team.data).length > 0" x-data="{ open: true }">
+                            <div class="flex flex-col items-left gap-4 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg p-4 my-2">
+
+                                <!-- Team Number -->
+                                <div class="flex flex-row justify-between"
+                                     :class="{ 'border-b-2 dark:border-slate-700 border-slate-300': open }"
+                                     @click="open = !open">
+                                    <p class="dark:text-white text-black text-sans text-lg"
+                                       x-text="team.team"></p>
+                                    <i class="ph-bold ph-caret-down dark:text-white text-black"
+                                       x-show="open"></i>
+                                    <i class="ph-bold ph-caret-up dark:text-white text-black" x-show="!open"></i>
+                                </div>
+
+                                <!-- Other Entries -->
+                                <div x-show="open" x-collapse>
+                                    <ul class="list-disc list-inside ml-4">
+                                        <template x-for="(entry, index) in team.data" :key="index">
+                                            <li class="dark:text-white text-black text-sans text-md" x-text="entry"></li>
+                                        </template>
+                                    </ul>
+                                </div>
+                            </div>
+                        </template>
+                    </template>
+                </div>
+            </div>
+
+            <div class="flex flex-col px-4 py-6 bg-orange-200/50 dark:bg-orange-800/50 backdrop-blur-md dark:border-orange-700 border-orange-300 border-2 rounded-lg items-center"
+                 x-show="offline">
+
+                <div class="flex flex-row dark:text-white text-black text-2xl items-center gap-1">
+                    <i class="ph-bold ph-wifi-slash"></i>
+                    <p class="text-sans mt-1">You're offline</p>
+                </div>
+
+                <p class="dark:text-white text-black text-sans text-lg">You'll need to go back online to get and filter data from the server</p>
+                <button class="ui_button" @click="window.location.href = '{{ SERVER_IP }}'">
+                    <i class="ph-bold ph-house"></i> Go Home
+                </button>
+            </div>
+        </div>
+
+        <script>
+            function advanced_data() {
+                return {
+                    data: {},
+                    offline: false,
+
+                    create_line_chart(canvas, data, label, type) {
+                        const labels = data.map((_, i) => (i + 1).toString());
+                        
+                        const average = data.reduce((acc, val) => acc + val, 0) / data.length;
+                        
+                        const color = type === "score" ? "#51ff4e" : "#ff4e51";
+                        
+                        new Chart(canvas, {
+                            type: "line",
+                            data: {
+                                labels: labels,
+                                datasets: [
+                                    {
+                                        label: `${label} Values`,
+                                        data: data,
+                                        borderWidth: 2,
+                                        borderColor: color,
+                                        fill: false
+                                    }, 
+                                    {
+                                        label: "Average Values",
+                                        data: Array(data.length).fill(average),
+                                        borderWidth: 1,
+                                        borderColor: color,
+                                        borderDash: [5, 5],
+                                        fill: false,
+                                        pointRadius: 0,
+                                        pointBackgroundColor: `rgba(${color === "#51ff4e" ? 81 : 255}, ${color === "#51ff4e" ? 255 : 78}, 0.5)`
+                                    }
+                                ]
+                            },
+                            options: {
+                                scales: {
+                                    x: {
+                                        display: true,
+                                        title: {
+                                            display: true,
+                                            text: 'Reports'
+                                        }
+                                    },
+                                    y: {
+                                        display: true,
+                                        title: {
+                                            display: true,
+                                            text: 'Values'
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    },
+
+                    create_donut_chart(element, data, labels, title) {
+                        new Chart(element, {
+                            type: 'doughnut',
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    data: data,
+                                }],
+                            },
+                            options: {
+                                aspectRatio: 1,
+                                plugins: {
+                                    title: {
+                                        display: true,
+                                        text: title.charAt(0).toUpperCase() + title.slice(1).replace(/_/g, ' '),
+                                    },
+                                    legend: {
+                                        position: 'bottom',
+                                        labels: {
+                                            boxWidth: 10,
+                                        }
+                                    },
+                                }
+                            },
+                        });
+                    },
+                    
+                    init() {
+                        window.addEventListener('data', (event) => {
+                            event.stopImmediatePropagation();
+                            const { data } = event.detail;
+                            
+                            this.data = data;
+                        });
+
+                        setTimeout(() => {
+                            if (globalThis.offline) {
+                                this.offline = true;
+                            } else {
+                                this.offline = false;
+                            }
+                        }, 100);
+                    }
+                }
+            }
+        </script>
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}

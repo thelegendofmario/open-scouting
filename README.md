@@ -29,7 +29,7 @@
 - Tie multiple clients together into a "session" so all the devices can be sent to the next match simultaneously
   - This will iterate the match number and help autofill some additional information
 - Auto jump to the next section that needs filled out
-- Have an custom interface for viewing all the collected data
+- View all data from an event in a table
 - Have a system for quickly setting up all the required data entries for a new season
   - Have fields to quickly set up and provide to the user when scouting, e.g. "text", "boolean", "data" ect.
 - Allow other teams to view and contribute data to the same server
@@ -37,6 +37,8 @@
 - Keep backups of scouting reports locally
 - Dark/light mode theme support
 - Manually go offline in case of bad connection
+- Scout team's pits at competition
+- View and filter data for multiple teams at multiple events and filter that data by a specific recorded stat
 
 ## Installation
 The installation and deployment process uses docker for simplicity.

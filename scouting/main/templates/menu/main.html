@@ -196,6 +196,7 @@
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
+                            "X-CSRFToken": "{{ csrf_token }}"
                         },
                         body: JSON.stringify({
                             data: encodeURIComponent(JSON.stringify(report_list)),
@@ -307,7 +308,8 @@
                                 var response = await fetch("{{ SERVER_IP }}/update_pits", {
                                     method: "POST",
                                     headers: {
-                                            "Content-Type": "application/json"
+                                            "Content-Type": "application/json",
+                                            "X-CSRFToken": "{{ csrf_token }}"
                                         },
                                     body: JSON.stringify({
                                         event_name: encodeURIComponent(reports[report].event_name),

@@ -1,329 +1,321 @@
 {% extends "base.html" %}
 {% load static %}
-{% block head_title %}Open Scouting{% endblock %}
+{% block head_title %}
+    Open Scouting
+{% endblock head_title %}
 
 {% block head_scripts %}{% endblock %}
 
 {% block stylesheets %}{% endblock %}
 
 {% block body %}
-    <div class="flex h-screen justify-center items-center flex-col w-screen">
+    <div class="snap-y snap-mandatory h-screen overflow-y-scroll" id="index">
+        <div class="flex h-screen justify-center items-center flex-col w-screen snap-center px-4">
 
-        <div x-data="header()">
-            <div class="flex flex-col justify-center items-center"
-                 x-show="basic"
-                 x-transition>
-                <img class="w-full md:w-1/2 xl:w-2/6 px-10 hidden dark:block"
-                     src="{% static '/main/images/logo_light.png' %}">
-                <img class="w-full md:w-1/2 xl:w-2/6 px-10 dark:hidden block"
-                     src="{% static '/main/images/logo_dark.png' %}">
-                <p class="font-sans dark:text-white mt-2 text-black text-center mb-8">An open source application for easier scouting at First Robotics competitions</p>
-            </div>
-            <div class="flex flex-row dark:bg-slate-800 dark:border-slate-700 bg-slate-200 border-slate-300 border-2 rounded-lg w-full px-6 justify-center items-center py-4 mt-6"
-                 x-show="!basic"
-                 x-transition>
-                <img class="w-16 h-16 aspect-square m-2 hover:scale-110 transition-all ease-in-out active:scale-95"
-                     src="{% static '/main/images/icon_rounded.png' %}"
-                     @click="start_over()">
-
-                <button class="ui_button_icon" @click="start_over()">
-                    <i class="ph-bold ph-arrow-clockwise"></i>
-                </button>
-
-                <div class="flex flex-col" x-show="!demo">
-                    <div class="flex flex-row items-center">
-                        <i class="ph-bold ph-user-circle-dashed dark:text-white text-black font-sans px-1"></i>
-                        <p class=" dark:text-white text-black font-sans text-md font-bold px-1"
-                           x-text="username"></p>
-                        <p class=" dark:text-white text-black font-mono text-sm px-1 opacity-70"
-                           x-text="team_number"></p>
-                    </div>
-
-                    <div class="flex flex-row items-center">
-                        <i class="ph-bold ph-calendar-blank dark:text-white text-black font-sans px-1"
-                           x-show="!custom_event"></i>
-                        <i class="ph-bold ph-calendar-star dark:text-white text-black font-sans px-1"
-                           x-show="custom_event"></i>
-                        <p class=" dark:text-white text-black font-sans text-md font-bold px-1"
-                           x-text="event_name"></p>
-                        <p class=" dark:text-white text-black font-mono text-sm px-1 opacity-70 max-w-14 overflow-x-hidden"
-                           x-text="event_code"></p>
-                    </div>
-                </div>
-
-                <div x-show="demo">
-                    <p class="p-2 ml-2 rounded-full dark:text-white text-black font-sans text-md border-solid border-2 dark:border-slate-600 dark:bg-purple-900/50 border-slate-300 bg-purple-200/50">
-                        <i class="ph-bold ph-test-tube"></i> Open Scouting is in demo mode
-                    </p>
-                </div>
-            </div>
-
-        </div>
-
-        <script>
-    function header() {
-        return {
-            basic: true,
-            username: "",
-            team_number: "",
-            event_name: "",
-            event_code: "",
-            custom_event: false,
-            year: "",
-            demo: false,
-
-            start_over() {
-                window.dispatchEvent(new CustomEvent('start_over'));
-                this.basic = true;
-                this.username = "";
-                this.team_number = "";
-                this.event_name = "";
-                this.event_code = "";
-                this.year = "";
-                this.demo = false;
-            },
-
-            init() {
-                window.addEventListener('header_username', (event) => {
-                    event.stopImmediatePropagation();
-                    const { username, team_number } = event.detail;
-                    this.username = username;
-                    this.team_number = team_number;
-
-                    this.basic = false;
-                });
-
-                window.addEventListener('header_event', (event) => {
-                    event.stopImmediatePropagation();
-                    const { event_name, event_code } = event.detail;
-
-                    this.event_name = event_name;
-                    this.event_code = event_code;
-                });
-
-                window.addEventListener('header_year', (event) => {
-                    const { year } = event.detail;
-                    this.year = year;
-                });
-
-                window.addEventListener('header_custom_event', (event) => {
-                    event.stopImmediatePropagation();
-                    const { event_name, event_code } = event.detail;
-
-                    this.event_name = event_name;
-                    this.event_code = event_code;
-                    this.custom_event = true;
-                });
-
-                window.addEventListener('header_demo', (event) => {
-                    event.stopImmediatePropagation();
-                    const { year } = event.detail;
-
-                    this.basic = false;
-
-                    this.year = year;
-                    this.demo = true;
-                    this.username = "demo";
-                    this.team_number = "0000";
-                    this.event_name = "";
-                    this.event_code = "";
-                    this.custom_event = false;
-                })
-
-                window.addEventListener('get_header_data', (event) => {
-                    event.stopImmediatePropagation();
-                    const { load_page } = event.detail;
-
-                    let username = this.username;
-                    let team_number = this.team_number;
-                    let event_name = this.event_name;
-                    let event_code = this.event_code;
-                    let load_page_var = load_page;
-                    let custom = this.custom_event;
-                    let year = this.year;
-                    let demo = this.demo;
-
-                    window.dispatchEvent(new CustomEvent('header_data', {
-                        detail: { username, team_number, event_name, event_code, load_page, custom, year, demo }
-                    }));
-                });
-
-                window.addEventListener('get_link_data', (event) => {
-                    event.stopImmediatePropagation();
-
-                    let username = this.username;
-                    let team_number = this.team_number;
-                    let event_name = this.event_name;
-                    let event_code = this.event_code;
-                    let custom = this.custom_event;
-                    let year = this.year;
-                    let demo = this.demo;
-
-                    window.dispatchEvent(new CustomEvent('link_data', {
-                        detail: { username, team_number, event_name, event_code, custom, year, demo }
-                    }));
-                });
-            }
-        }
-    }
-        </script>
-
-        <div x-data="index()">
-            <div class="flex flex-col"
-                 x-data="authentication_box()"
-                 x-show="page == 1"
-                 x-transition>
-
-                <div x-show="!authenticated">
-                    <button class="ui_button w-full" @click="sign_in()">
-                        <i class="ph-bold ph-user-circle"></i> Sign In
-                    </button>
-                </div>
-
-                <div x-show="authenticated">
-                    <div class="flex flex-row dark:bg-slate-800 dark:border-slate-700 bg-slate-200 border-slate-300 border-2 rounded-2xl p-2 justify-between items-center align-middle">
-                        <p class="dark:text-white text-black font-sans text-md font-bold p-2"
-                           x-text="'Continue as ' + display_name"></p>
-                        <button class="ui_button_icon mx-1" @click="continue_with_account()">
-                            <i class="ph-bold ph-check-circle"></i>
-                        </button>
-                        <button class="ui_button_icon mx-1" @click="sign_out()">
-                            <i class="ph-bold ph-sign-out"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <button class="ui_button" @click="open = !open" x-show="!authenticated">
-                    <i class="ph-bold ph-user-circle-dashed"></i> Continue without account
-                </button>
-
+            <div x-data="header()">
                 <div class="flex flex-col justify-center items-center"
-                     x-show="open"
-                     x-collapse>
-                    <input class="ui_input"
-                           type="text"
-                           placeholder="Temporary user name"
-                           @input="check()"
-                           x-ref="username">
-                    <input class="ui_input"
-                           type="text"
-                           placeholder="Your team number"
-                           @input="check()"
-                           x-ref="team_number">
-                    <button class="ui_button" x-ref="next" @click="submit()" disabled>
-                        <i class="ph-bold ph-arrow-circle-right"></i> Next
+                     x-show="basic"
+                     x-transition>
+                    <img class="w-full md:w-1/2 xl:w-2/6 px-10 hidden dark:block"
+                         src="{% static '/main/images/logo_light.png' %}">
+                    <img class="w-full md:w-1/2 xl:w-2/6 px-10 dark:hidden block"
+                         src="{% static '/main/images/logo_dark.png' %}">
+                    <p class="font-sans dark:text-white mt-2 text-black text-center">An open source application for easier scouting at First Robotics competitions</p>
+                    <div class="flex flex-row mt-4 mb-8">
+                        <a class="dark:text-white text-black text-lg mx-2 hover:scale-105 transition-all opacity-80 hover:opacity-100"
+                           href="https://github.com/FRC-Team3484/open-scouting"><i class="ph-bold ph-github-logo"></i> Source Code</a>
+                        <a class="dark:text-white text-black text-lg mx-2 hover:scale-105 transition-all opacity-80 hover:opacity-100"
+                           href="https://github.com/FRC-Team3484/open-scouting/issues"><i class="ph-bold ph-bug"></i> Issues</a>
+                        <a class="dark:text-white text-black text-lg mx-2 hover:scale-105 transition-all opacity-80 hover:opacity-100"
+                           href="https://github.com/FRC-Team3484/open-scouting/releases"><i class="ph-bold ph-app-window"></i> Releases</a>
+                    </div>
+                </div>
+                <div class="flex flex-row dark:bg-slate-800 dark:border-slate-700 bg-slate-200 border-slate-300 border-2 rounded-lg w-full px-6 justify-center items-center py-4 mt-6"
+                     x-show="!basic"
+                     x-transition>
+                    <img class="w-16 h-16 aspect-square m-2 hover:scale-110 transition-all ease-in-out active:scale-95"
+                         src="{% static '/main/images/icon_rounded.png' %}"
+                         @click="start_over()">
+
+                    <button class="ui_button_icon" @click="start_over()">
+                        <i class="ph-bold ph-arrow-clockwise"></i>
                     </button>
+
+                    <div class="flex flex-col" x-show="!demo">
+                        <div class="flex flex-row items-center">
+                            <i class="ph-bold ph-user-circle-dashed dark:text-white text-black font-sans px-1"></i>
+                            <p class=" dark:text-white text-black font-sans text-md font-bold px-1"
+                               x-text="username"></p>
+                            <p class=" dark:text-white text-black font-mono text-sm px-1 opacity-70"
+                               x-text="team_number"></p>
+                        </div>
+
+                        <div class="flex flex-row items-center">
+                            <i class="ph-bold ph-calendar-blank dark:text-white text-black font-sans px-1"
+                               x-show="!custom_event"></i>
+                            <i class="ph-bold ph-calendar-star dark:text-white text-black font-sans px-1"
+                               x-show="custom_event"></i>
+                            <p class=" dark:text-white text-black font-sans text-md font-bold px-1"
+                               x-text="event_name"></p>
+                            <p class=" dark:text-white text-black font-mono text-sm px-1 opacity-70 max-w-14 overflow-x-hidden"
+                               x-text="event_code"></p>
+                        </div>
+                    </div>
+
+                    <div x-show="demo">
+                        <p class="p-2 ml-2 rounded-full dark:text-white text-black font-sans text-md border-solid border-2 dark:border-slate-600 dark:bg-purple-900/50 border-slate-300 bg-purple-200/50">
+                            <i class="ph-bold ph-test-tube"></i> Open Scouting is in demo mode
+                        </p>
+                    </div>
                 </div>
 
-                <p class="text-black dark:text-white font-sans text-center mt-2">Or...</p>
-
-                <button class="border-solid border-2 dark:border-slate-600 dark:bg-purple-900/50 dark:hover:bg-purple-900/80 dark:active:bg-purple-800/80 dark:text-white border-slate-300 bg-purple-200/50 hover:bg-purple-200/80 active:bg-purple-300/80 text-black rounded-xl py-2 px-8 transition backdrop-blur-lg my-2 disabled:scale-95 disabled:opacity-80"
-                        @click="start_demo()">
-                    <i class="ph-bold ph-test-tube"></i> Try Open Scouting
-                </button>
             </div>
 
             <script>
-                function authentication_box() {
+                function header() {
                     return {
-                        open: false,
-                        YEARS: JSON.parse(`{{ YEARS|safe }}`),
-                        authenticated: false,
+                        basic: true,
                         username: "",
-                        display_name: "",
                         team_number: "",
+                        event_name: "",
+                        event_code: "",
+                        custom_event: false,
+                        year: "",
+                        demo: false,
 
-                        check() {
-                            if (this.$refs.username.value && this.$refs.team_number.value) {
-                                this.$refs.next.disabled = false;
-                            } else {
-                                this.$refs.next.disabled = true;
-                            }
+                        start_over() {
+                            window.dispatchEvent(new CustomEvent('start_over'));
+                            this.basic = true;
+                            this.username = "";
+                            this.team_number = "";
+                            this.event_name = "";
+                            this.event_code = "";
+                            this.year = "";
+                            this.demo = false;
                         },
 
-                        submit() {
-                            username = this.$refs.username.value;
-                            team_number = this.$refs.team_number.value;
+                        init() {
+                            window.addEventListener('header_username', (event) => {
+                                event.stopImmediatePropagation();
+                                const { username, team_number } = event.detail;
+                                this.username = username;
+                                this.team_number = team_number;
 
-                            window.dispatchEvent(new CustomEvent('header_username', {
-                                detail: { username, team_number }
-                            }));
-                            this.page = 2;
-                        },
+                                this.basic = false;
+                            });
 
-                        start_demo() {
-                            window.dispatchEvent(new CustomEvent('header_demo', {
-                                detail: { year: this.YEARS.at(-1) }
-                            }));
+                            window.addEventListener('header_event', (event) => {
+                                event.stopImmediatePropagation();
+                                const { event_name, event_code } = event.detail;
 
-                            this.page = 4;
-                        },
+                                this.event_name = event_name;
+                                this.event_code = event_code;
+                            });
 
-                        sign_in() {
-                            window.location.href = "{{ SERVER_IP }}/authentication";
-                        },
+                            window.addEventListener('header_year', (event) => {
+                                const { year } = event.detail;
+                                this.year = year;
+                            });
 
-                        continue_with_account() {
-                            username = this.username;
-                            team_number = this.team_number;
+                            window.addEventListener('header_custom_event', (event) => {
+                                event.stopImmediatePropagation();
+                                const { event_name, event_code } = event.detail;
 
-                            window.dispatchEvent(new CustomEvent('header_username', {
-                                detail: { username, team_number }
-                            }));
+                                this.event_name = event_name;
+                                this.event_code = event_code;
+                                this.custom_event = true;
+                            });
 
-                            const urlParams = new URLSearchParams(window.location.search);
-                            const year = urlParams.get('year');
-                            const event_name = urlParams.get('event_name');
-                            const event_code = urlParams.get('event_code');
+                            window.addEventListener('header_demo', (event) => {
+                                event.stopImmediatePropagation();
+                                const { year } = event.detail;
 
-                            if (year && event_name && event_code) {
-                                window.dispatchEvent(new CustomEvent('header_year', {
-                                    detail: { year }
+                                this.basic = false;
+
+                                this.year = year;
+                                this.demo = true;
+                                this.username = "demo";
+                                this.team_number = "0000";
+                                this.event_name = "";
+                                this.event_code = "";
+                                this.custom_event = false;
+                            })
+
+                            window.addEventListener('get_header_data', (event) => {
+                                event.stopImmediatePropagation();
+                                const { load_page } = event.detail;
+
+                                let username = this.username;
+                                let team_number = this.team_number;
+                                let event_name = this.event_name;
+                                let event_code = this.event_code;
+                                let load_page_var = load_page;
+                                let custom = this.custom_event;
+                                let year = this.year;
+                                let demo = this.demo;
+
+                                window.dispatchEvent(new CustomEvent('header_data', {
+                                    detail: { username, team_number, event_name, event_code, load_page, custom, year, demo }
                                 }));
+                            });
 
-                                window.dispatchEvent(new CustomEvent('header_event', {
-                                    detail: { event_name, event_code }
+                            window.addEventListener('get_link_data', (event) => {
+                                event.stopImmediatePropagation();
+
+                                let username = this.username;
+                                let team_number = this.team_number;
+                                let event_name = this.event_name;
+                                let event_code = this.event_code;
+                                let custom = this.custom_event;
+                                let year = this.year;
+                                let demo = this.demo;
+
+                                window.dispatchEvent(new CustomEvent('link_data', {
+                                    detail: { username, team_number, event_name, event_code, custom, year, demo }
                                 }));
+                            });
+                        }
+                    }
+                }
+            </script>
 
-                                window.dispatchEvent(new CustomEvent('scouting_notification', {
-                                    detail: { title:"Event autofilled", body:"Autofilled the event and year from the provided link data", icon:"lightning" }
+            <div x-data="index()">
+                <div class="flex flex-col"
+                     x-data="authentication_box()"
+                     x-show="page == 1"
+                     x-transition>
+
+                    <div x-show="!authenticated">
+                        <button class="ui_button w-full" @click="sign_in()">
+                            <i class="ph-bold ph-user-circle"></i> Sign In
+                        </button>
+                    </div>
+
+                    <div x-show="authenticated">
+                        <div class="flex flex-row dark:bg-slate-800 dark:border-slate-700 bg-slate-200 border-slate-300 border-2 rounded-2xl p-2 justify-between items-center align-middle">
+                            <p class="dark:text-white text-black font-sans text-md font-bold p-2"
+                               x-text="'Continue as ' + display_name"></p>
+                            <button class="ui_button_icon mx-1" @click="continue_with_account()">
+                                <i class="ph-bold ph-check-circle"></i>
+                            </button>
+                            <button class="ui_button_icon mx-1" @click="sign_out()">
+                                <i class="ph-bold ph-sign-out"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button class="ui_button" @click="open = !open" x-show="!authenticated">
+                        <i class="ph-bold ph-user-circle-dashed"></i> Continue without account
+                    </button>
+
+                    <div class="flex flex-col justify-center items-center"
+                         x-show="open"
+                         x-collapse>
+                        <input class="ui_input"
+                               type="text"
+                               placeholder="Temporary user name"
+                               @input="check()"
+                               x-ref="username">
+                        <input class="ui_input"
+                               type="text"
+                               placeholder="Your team number"
+                               @input="check()"
+                               x-ref="team_number">
+                        <button class="ui_button" x-ref="next" @click="submit()" disabled>
+                            <i class="ph-bold ph-arrow-circle-right"></i> Next
+                        </button>
+                    </div>
+
+                    <p class="text-black dark:text-white font-sans text-center mt-2">Or...</p>
+
+                    <button class="ui_button" @click="advanced_data_view()">
+                        <i class="ph-bold ph-hard-drives"></i> Advanced Data View
+                    </button>
+
+                    <button class="border-solid border-2 dark:border-slate-600 dark:bg-purple-900/50 dark:hover:bg-purple-900/80 dark:active:bg-purple-800/80 dark:text-white border-slate-300 bg-purple-200/50 hover:bg-purple-200/80 active:bg-purple-300/80 text-black rounded-xl py-2 px-8 transition backdrop-blur-lg my-2 disabled:scale-95 disabled:opacity-80"
+                            @click="start_demo()">
+                        <i class="ph-bold ph-test-tube"></i> Try Open Scouting
+                    </button>
+                </div>
+
+                <script>
+                    function authentication_box() {
+                        return {
+                            open: false,
+                            YEARS: JSON.parse(`{{ YEARS|safe }}`),
+                            authenticated: false,
+                            username: "",
+                            display_name: "",
+                            team_number: "",
+
+                            check() {
+                                if (this.$refs.username.value && this.$refs.team_number.value) {
+                                    this.$refs.next.disabled = false;
+                                } else {
+                                    this.$refs.next.disabled = true;
+                                }
+                            },
+
+                            submit() {
+                                username = this.$refs.username.value;
+                                team_number = this.$refs.team_number.value;
+
+                                window.dispatchEvent(new CustomEvent('header_username', {
+                                    detail: { username, team_number }
+                                }));
+                                this.page = 2;
+                            },
+
+                            start_demo() {
+                                window.dispatchEvent(new CustomEvent('header_demo', {
+                                    detail: { year: this.YEARS.at(-1) }
                                 }));
 
                                 this.page = 4;
-                            } else {
-                                this.page = 2;
-                            }
-                        },
+                            },
 
-                        async sign_out() {
-                            var response = await fetch("{{ SERVER_IP }}/authentication/sign_out", {
-                            method: "POST",
-                            headers: {
-                                    "X-CSRFToken": "{{ csrf_token }}",
+                            advanced_data_view() {
+                                window.location.href = "{{ SERVER_IP }}/advanced_data";
+                            },
+
+                            sign_in() {
+                                window.location.href = "{{ SERVER_IP }}/authentication";
+                            },
+
+                            continue_with_account() {
+                                username = this.username;
+                                team_number = this.team_number;
+
+                                window.dispatchEvent(new CustomEvent('header_username', {
+                                    detail: { username, team_number }
+                                }));
+
+                                const urlParams = new URLSearchParams(window.location.search);
+                                const year = urlParams.get('year');
+                                const event_name = urlParams.get('event_name');
+                                const event_code = urlParams.get('event_code');
+
+                                if (year && event_name && event_code) {
+                                    window.dispatchEvent(new CustomEvent('header_year', {
+                                        detail: { year }
+                                    }));
+
+                                    window.dispatchEvent(new CustomEvent('header_event', {
+                                        detail: { event_name, event_code }
+                                    }));
+
+                                    window.dispatchEvent(new CustomEvent('scouting_notification', {
+                                        detail: { title:"Event autofilled", body:"Autofilled the event and year from the provided link data", icon:"lightning" }
+                                    }));
+
+                                    this.page = 4;
+                                } else {
+                                    this.page = 2;
                                 }
-                            });
+                            },
 
-                            if (response.ok) {
-                                response.text().then(async (text) => {
-                                    let auth_json = {
-                                        authenticated: false,
-                                        username: "",
-                                        display_name: "",
-                                        team_number: ""
-                                    }
-
-                                    localStorage.setItem("authenticated", JSON.stringify(auth_json));
-                                    window.location.reload();
-                                });
-                            } else {
-                                console.log("Error signing out");
-                            }
-                        },
-
-                        async check_authentication_status() {
-                            if (globalThis.offline == false) {
-                                // Ask server for status
-                                var response = await fetch("{{ SERVER_IP }}/authentication/get_authentication_status", {
+                            async sign_out() {
+                                var response = await fetch("{{ SERVER_IP }}/authentication/sign_out", {
                                 method: "POST",
                                 headers: {
                                         "X-CSRFToken": "{{ csrf_token }}",
@@ -331,749 +323,857 @@
                                 });
 
                                 if (response.ok) {
-                                    response.json().then(async (json) => {
-                                        if (json.authenticated == true) {
-                                            this.authenticated = true;
-                                            let auth_json = {
-                                                authenticated: json.authenticated,
-                                                username: json.username,
-                                                display_name: json.display_name,
-                                                team_number: json.team_number
-                                            }
-
-                                            this.username = json.username;
-                                            this.display_name = json.display_name;
-                                            this.team_number = json.team_number;
-                                            localStorage.setItem("authenticated", JSON.stringify(auth_json));
-                                            
-                                        } else {
-                                            this.authenticated = false;
-                                            let auth_json = {
-                                                authenticated: json.authenticated,
-                                                username: json.username,
-                                                display_name: json.display_name,
-                                                team_number: json.team_number
-                                            }
-
-                                            this.username = json.username;
-                                            this.display_name = json.display_name;
-                                            this.team_number = json.team_number;
-                                            localStorage.setItem("authenticated", JSON.stringify(auth_json));
+                                    response.text().then(async (text) => {
+                                        let auth_json = {
+                                            authenticated: false,
+                                            username: "",
+                                            display_name: "",
+                                            team_number: ""
                                         }
+
+                                        localStorage.setItem("authenticated", JSON.stringify(auth_json));
+                                        window.location.reload();
                                     });
                                 } else {
-                                    console.log("Error getting authentication status");
-                                    this.authenticated = false;
-                                    let auth_json = {
-                                        authenticated: false,
-                                        username: "",
-                                        display_name: "",
-                                        team_number: ""
+                                    console.log("Error signing out");
+                                }
+                            },
+
+                            async check_authentication_status() {
+                                if (globalThis.offline == false) {
+                                    // Ask server for status
+                                    var response = await fetch("{{ SERVER_IP }}/authentication/get_authentication_status", {
+                                    method: "POST",
+                                    headers: {
+                                            "X-CSRFToken": "{{ csrf_token }}",
+                                        }
+                                    });
+
+                                    if (response.ok) {
+                                        response.json().then(async (json) => {
+                                            if (json.authenticated == true) {
+                                                this.authenticated = true;
+                                                let auth_json = {
+                                                    authenticated: json.authenticated,
+                                                    username: json.username,
+                                                    display_name: json.display_name,
+                                                    team_number: json.team_number
+                                                }
+
+                                                this.username = json.username;
+                                                this.display_name = json.display_name;
+                                                this.team_number = json.team_number;
+                                                localStorage.setItem("authenticated", JSON.stringify(auth_json));
+                                                
+                                            } else {
+                                                this.authenticated = false;
+                                                let auth_json = {
+                                                    authenticated: json.authenticated,
+                                                    username: json.username,
+                                                    display_name: json.display_name,
+                                                    team_number: json.team_number
+                                                }
+
+                                                this.username = json.username;
+                                                this.display_name = json.display_name;
+                                                this.team_number = json.team_number;
+                                                localStorage.setItem("authenticated", JSON.stringify(auth_json));
+                                            }
+                                        });
+                                    } else {
+                                        console.log("Error getting authentication status");
+                                        this.authenticated = false;
+                                        let auth_json = {
+                                            authenticated: false,
+                                            username: "",
+                                            display_name: "",
+                                            team_number: ""
+                                        }
+                                        localStorage.setItem("authenticated", JSON.stringify(auth_json));
                                     }
-                                    localStorage.setItem("authenticated", JSON.stringify(auth_json));
-                                }
-                                
-                            } else {
-                                // Check local storage for status
-                                if (JSON.parse(localStorage.getItem("authenticated")).authenticated) {
-                                    this.authenticated = true;
+                                    
                                 } else {
-                                    this.authenticated = false;
+                                    // Check local storage for status
+                                    if (JSON.parse(localStorage.getItem("authenticated")).authenticated) {
+                                        this.authenticated = true;
+                                        this.username = JSON.parse(localStorage.getItem("authenticated")).username;
+                                        this.display_name = JSON.parse(localStorage.getItem("authenticated")).display_name;
+                                        this.team_number = JSON.parse(localStorage.getItem("authenticated")).team_number;
+                                    } else {
+                                        this.authenticated = false;
+                                    }
                                 }
+                            },
+
+                            init() {
+                                setTimeout(() => {
+                                    this.check_authentication_status();
+                                }, 100);
                             }
-                        },
+                        };
+                    }
+                </script>
 
-                        init() {
-                            setTimeout(() => {
-                                this.check_authentication_status();
-                            }, 100);
-                        }
-                    };
-                }
-            </script>
+                <div class="flex flex-col justify-center items-center"
+                     x-data="year_select()"
+                     x-show="page == 2"
+                     x-transition>
+                    <p class="text-center dark:text-white text-black font-sans text-2xl mt-6 mb-4">
+                        <i class="ph-bold ph-calendar-dots"></i> Select year
+                    </p>
 
-            <div class="flex flex-col justify-center items-center"
-                 x-data="year_select()"
-                 x-show="page == 2"
-                 x-transition>
-                <p class="text-center dark:text-white text-black font-sans text-2xl mt-6 mb-4">
-                    <i class="ph-bold ph-calendar-dots"></i> Select year
-                </p>
+                    <select class="ui_input"
+                            placeholder="Year"
+                            x-ref="year"
+                            @change="update_selected_year()">
+                        <template x-for="year in YEARS" :key="year">
+                            <option x-text="year"></option>
+                        </template>
+                    </select>
 
-                <select class="ui_input"
-                        placeholder="Year"
-                        x-ref="year"
-                        @change="update_selected_year()">
-                    <template x-for="year in YEARS" :key="year">
-                        <option x-text="year"></option>
-                    </template>
-                </select>
+                    <div class="flex flex-row mt-2">
+                        <p class="dark:text-white text-black font-sans text-md font-bold px-1"
+                           x-text="number_of_events"></p>
+                        <p class="dark:text-white text-black font-sans text-md font px-0.5"
+                           x-text="number_of_events == 1 ? 'event' : 'events'"></p>
+                        <p class="dark:text-white text-black font-sans text-md font px-0.5">with data this year</p>
+                    </div>
 
-                <div class="flex flex-row mt-2">
-                    <p class="dark:text-white text-black font-sans text-md font-bold px-1"
-                       x-text="number_of_events"></p>
-                    <p class="dark:text-white text-black font-sans text-md font px-0.5"
-                       x-text="number_of_events == 1 ? 'event' : 'events'"></p>
-                    <p class="dark:text-white text-black font-sans text-md font px-0.5">with data this year</p>
+                    <button class="ui_button" @click="next()">
+                        <i class="ph-bold ph-arrow-circle-right"></i> Next
+                    </button>
                 </div>
 
-                <button class="ui_button" @click="next()">
-                    <i class="ph-bold ph-arrow-circle-right"></i> Next
-                </button>
-            </div>
+                <script>
+                    function year_select() {
+                        return {
+                            YEARS: JSON.parse(`{{ YEARS|safe }}`).reverse(),
+                            selected_year: new Date().getFullYear(),
+                            number_of_events: 0,
 
-            <script>
-                function year_select() {
-                    return {
-                        YEARS: JSON.parse(`{{ YEARS|safe }}`).reverse(),
-                        selected_year: new Date().getFullYear(),
-                        number_of_events: 0,
+                            update_selected_year() {
+                                this.selected_year = this.$refs.year.value;
+                                this.get_year_data();
+                            },
 
-                        update_selected_year() {
-                            this.selected_year = this.$refs.year.value;
-                            this.get_year_data();
-                        },
+                            async get_year_data() {
+                                var response = await fetch("{{ SERVER_IP }}/get_year_data", {
+                                        method: "POST",
+                                        headers: {
+                                            "Content-Type": "application/json",
+                                            "X-CSRFToken": "{{ csrf_token }}"
+                                        },
+                                        body: JSON.stringify({
+                                            year: this.selected_year
+                                        })
+                                    });
+                            
+                                let year_data = JSON.parse(await response.json());
+                                this.number_of_events = year_data["events"];
+                            },
 
-                        async get_year_data() {
-                            var response = await fetch("{{ SERVER_IP }}/get_year_data", {
+                            next() {
+                                this.selected_year = this.$refs.year.value;
+
+                                window.dispatchEvent(new CustomEvent('header_year', {
+                                    detail: { year: this.selected_year }
+                                }));
+                                this.page = 3;
+                            },
+
+                            init() {
+                                setTimeout(() => {
+                                    this.selected_year = this.$refs.year.value;
+
+                                    this.get_year_data();
+                                }, 100)
+                                
+                            }
+                        };
+                    }
+                </script>
+
+                <div class="flex flex-col justify-center items-center"
+                     x-data="events()"
+                     x-show="page == 3"
+                     x-transition>
+                    <p class="text-center dark:text-white text-black font-sans text-2xl mt-4">
+                        <i class="ph-bold ph-calendar-blank"></i> Select event
+                    </p>
+                    <div class="flex flex-row mt-2 justify-center align-middle items-center">
+                        <input class="ui_checkbox"
+                               type="checkbox"
+                               x-ref="show_past_events"
+                               @input="update_filters()">
+                        <p class="dark:text-white text-black ml-2">Show past events</p>
+                        <!-- TODO: Be able to see data from previous years -->
+                    </div>
+
+                    <input class="ui_input"
+                           placeholder="Search for an event..."
+                           x-ref="event_search"
+                           @input="update_filters()">
+
+                    <div class="my-4">
+                        <button class="dark:bg-slate-700 bg-slate-200 border-2 dark:border-slate-600 border-slate-300 text-black dark:text-white rounded-t-md px-4 py-2 ml-4 disabled:opacity-50 hover:enabled:px-5 active:enabled:px-3 transition-all whitespace-nowrap"
+                                :disabled="!show_custom_events"
+                                @click="show_custom_events = false">
+                            <i class="ph-bold ph-check-circle"></i>
+                            <span class="dark:text-white text-black">TBA Events</span>
+                            <span class="dark:text-white text-black bg-slate-200 dark:bg-slate-600 py-1 px-3 rounded-full border-slate-300 dark:border-slate-700 max-w-4 aspect-square my-2 text-sm border-2"
+                                  x-text="filtered_events.length"></span>
+                        </button>
+
+                        <button class="dark:bg-slate-700 bg-slate-200 border-2 dark:border-slate-600 border-slate-300 text-black dark:text-white rounded-t-md px-4 py-2 disabled:opacity-50 hover:enabled:px-5 active:enabled:px-3 transition-all whitespace-nowrap"
+                                :disabled="show_custom_events"
+                                @click="show_custom_events = true">
+                            <i class="ph-bold ph-star"></i>
+                            <span class="dark:text-white text-black">Custom Events</span>
+                            <span class="dark:text-white text-black bg-slate-200 dark:bg-slate-600 py-1 px-3 rounded-full border-slate-300 dark:border-slate-700 max-w-4 aspect-square my-2 text-sm border-2"
+                                  x-text="custom_filtered_events.length"></span>
+                        </button>
+
+                        <div class="h-[50vh] overflow-y-auto dark:bg-slate-700 bg-slate-200 dark:border-slate-600 border-slate-300 border-1 mx-2 p-2 rounded-md">
+                            <div x-show="!show_custom_events">
+                                <template x-for="(event, index) in filtered_events" :key="index">
+                                    <div class="p-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-300 border-slate-400 m-1 rounded-lg flex flex-row justify-between">
+                                        <div class="flex flex-col">
+                                            <p class="dark:text-white text-black font-sans" x-text="event.name"></p>
+                                            <div class="flex flex-row">
+                                                <p class="dark:text-white text-black font-sans font-bold text-sm"
+                                                   x-text="event.event_type_string"></p>
+                                                <p class="dark:text-white text-black font-sans text-sm mx-1">-</p>
+                                                <p class="dark:text-white text-black font-sans text-sm"
+                                                   x-text="event.city"></p>
+                                                <p class="dark:text-white text-black font-sans text-sm mr-1">,</p>
+                                                <p class="dark:text-white text-black font-sans text-sm"
+                                                   x-text="event.country"></p>
+                                            </div>
+                                            <div class="flex flex-row">
+                                                <p class="dark:text-white text-black font-sans font-light"
+                                                   x-text="event.start_date"></p>
+                                                <p class="dark:text-white text-black font-sans font-light mx-1">-</p>
+                                                <p class="dark:text-white text-black font-sans font-light"
+                                                   x-text="event.end_date"></p>
+                                            </div>
+                                        </div>
+                                        <div class="flex flex-col">
+                                            <button class="ui_button_icon"
+                                                    @click="select_event(event.name, event.event_code)">
+                                                <i class="ph-bold ph-check-circle"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <p class="dark:text-white text-black text-center text-lg"
+                                   x-show="no_events"
+                                   x-transition>
+                                    <i class="ph-bold ph-smiley-sad"></i> No events found
+                                </p>
+                                <button class="ui_button w-full" @click="create_custom_event()">
+                                    <i class="ph-bold ph-plus"></i> Create a custom Event
+                                </button>
+                            </div>
+
+                            <div x-show="show_custom_events">
+                                <template x-for="(event, index) in custom_filtered_events" :key="index">
+                                    <div class="p-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-300 border-slate-400 m-1 rounded-lg flex flex-row justify-between">
+                                        <div class="flex flex-col">
+                                            <p class="dark:text-white text-black font-sans" x-text="event.name"></p>
+                                            <div class="flex flex-row">
+                                                <!-- <p class="dark:text-white text-black font-sans font-bold text-sm" x-text="event.event_type_string"></p><p class="dark:text-white text-black font-sans text-sm mx-1">-</p> -->
+                                                <p class="dark:text-white text-black font-sans font-bold text-sm"
+                                                   x-text="event.type || 'Custom Event'"></p>
+                                                <p class="dark:text-white text-black font-sans text-sm mx-1">-</p>
+                                                <p class="dark:text-white text-black font-sans text-sm"
+                                                   x-text="event.location"></p>
+                                            </div>
+                                            <div class="flex flex-row">
+                                                <p class="dark:text-white text-black font-sans font-light"
+                                                   x-text="event.start_date"></p>
+                                                <p class="dark:text-white text-black font-sans font-light mx-1">-</p>
+                                                <p class="dark:text-white text-black font-sans font-light"
+                                                   x-text="event.end_date"></p>
+                                            </div>
+                                        </div>
+                                        <div class="flex flex-col">
+                                            <button class="ui_button_icon"
+                                                    @click="select_custom_event(event.name, event.event_code)">
+                                                <i class="ph-bold ph-check-circle"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <p class="dark:text-white text-black text-center text-lg"
+                                   x-show="no_custom_events"
+                                   x-transition>
+                                    <i class="ph-bold ph-smiley-sad"></i> No events found
+                                </p>
+                                <button class="ui_button w-full" @click="create_custom_event()">
+                                    <i class="ph-bold ph-plus"></i> Create a custom Event
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <script>
+                    function events() {
+                        return {
+                            events: [],
+                            custom_events: [],
+                            filtered_events: [],
+                            custom_filtered_events: [],
+                            no_events: true,
+                            no_custom_events: true,
+                            show_custom_events: false,
+                            year: new Date().getFullYear(),
+
+                            async get_events() {
+                                var response = await fetch(`https://www.thebluealliance.com/api/v3/events/${this.year}`, {
+                                method: "GET",
+                                headers: {
+                                        "X-TBA-Auth-Key": "{{ TBA_API_KEY }}"
+                                    }
+                                });
+                        
+                                let data = await response.json();
+                                this.events = data;
+                                this.update_filters();
+
+                                var response = await fetch("{{ SERVER_IP }}/get_custom_events", {
                                     method: "POST",
                                     headers: {
                                         "Content-Type": "application/json",
+                                        "X-CSRFToken": "{{ csrf_token }}"
                                     },
                                     body: JSON.stringify({
-                                        year: this.selected_year
+                                        year: this.year
                                     })
                                 });
                         
-                            let year_data = JSON.parse(await response.json());
-                            this.number_of_events = year_data["events"];
-                        },
+                                let custom_data = JSON.parse(await response.json());
+                                this.custom_events = custom_data;
 
-                        next() {
-                            this.selected_year = this.$refs.year.value;
+                                this.update_filters();
+                            },
 
-                            window.dispatchEvent(new CustomEvent('header_year', {
-                                detail: { year: this.selected_year }
-                            }));
-                            this.page = 3;
-                        },
+                            update_filters() {
+                                if (this.$refs.show_past_events.checked == false) {
+                                    let today = new Date();
 
-                        init() {
-                            setTimeout(() => {
-                                this.selected_year = this.$refs.year.value;
+                                    this.filtered_events = this.events.filter(event => {
+                                        let eventDate = new Date(event.end_date);
+                                        return eventDate >= today;
+                                    });
 
-                                this.get_year_data();
-                            }, 100)
-                            
-                        }
-                    };
-                }
-            </script>
+                                    this.custom_filtered_events = this.custom_events.filter(event => {
+                                        let eventDate = new Date(event.end_date);
+                                        return eventDate >= today;
+                                    });
 
-            <div class="flex flex-col justify-center items-center"
-                 x-data="events()"
-                 x-show="page == 3"
-                 x-transition>
-                <p class="text-center dark:text-white text-black font-sans text-2xl mt-4">
-                    <i class="ph-bold ph-calendar-blank"></i> Select event
-                </p>
-                <div class="flex flex-row mt-2 justify-center align-middle items-center">
-                    <input class="ui_checkbox"
-                           type="checkbox"
-                           x-ref="show_past_events"
-                           @input="update_filters()">
-                    <p class="dark:text-white text-black ml-2">Show past events</p>
-                    <!-- TODO: Be able to see data from previous years -->
-                </div>
-
-                <input class="ui_input"
-                       placeholder="Search for an event..."
-                       x-ref="event_search"
-                       @input="update_filters()">
-
-                <div class="my-4">
-                    <button class="dark:bg-slate-700 bg-slate-200 border-2 dark:border-slate-600 border-slate-300 text-black dark:text-white rounded-t-md px-4 py-2 ml-4 disabled:opacity-50 hover:enabled:px-5 active:enabled:px-3 transition-all whitespace-nowrap"
-                            :disabled="!show_custom_events"
-                            @click="show_custom_events = false">
-                        <i class="ph-bold ph-check-circle"></i>
-                        <span class="dark:text-white text-black">TBA Events</span>
-                        <span class="dark:text-white text-black bg-slate-200 dark:bg-slate-600 py-1 px-3 rounded-full border-slate-300 dark:border-slate-700 max-w-4 aspect-square my-2 text-sm border-2"
-                              x-text="filtered_events.length"></span>
-                    </button>
-
-                    <button class="dark:bg-slate-700 bg-slate-200 border-2 dark:border-slate-600 border-slate-300 text-black dark:text-white rounded-t-md px-4 py-2 disabled:opacity-50 hover:enabled:px-5 active:enabled:px-3 transition-all whitespace-nowrap"
-                            :disabled="show_custom_events"
-                            @click="show_custom_events = true">
-                        <i class="ph-bold ph-star"></i>
-                        <span class="dark:text-white text-black">Custom Events</span>
-                        <span class="dark:text-white text-black bg-slate-200 dark:bg-slate-600 py-1 px-3 rounded-full border-slate-300 dark:border-slate-700 max-w-4 aspect-square my-2 text-sm border-2"
-                              x-text="custom_filtered_events.length"></span>
-                    </button>
-
-                    <div class="h-[50vh] overflow-y-auto dark:bg-slate-700 bg-slate-200 dark:border-slate-600 border-slate-300 border-1 mx-2 p-2 rounded-md">
-                        <div x-show="!show_custom_events">
-                            <template x-for="(event, index) in filtered_events" :key="index">
-                                <div class="p-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-300 border-slate-400 m-1 rounded-lg flex flex-row justify-between">
-                                    <div class="flex flex-col">
-                                        <p class="dark:text-white text-black font-sans" x-text="event.name"></p>
-                                        <div class="flex flex-row">
-                                            <p class="dark:text-white text-black font-sans font-bold text-sm"
-                                               x-text="event.event_type_string"></p>
-                                            <p class="dark:text-white text-black font-sans text-sm mx-1">-</p>
-                                            <p class="dark:text-white text-black font-sans text-sm"
-                                               x-text="event.city"></p>
-                                            <p class="dark:text-white text-black font-sans text-sm mr-1">,</p>
-                                            <p class="dark:text-white text-black font-sans text-sm"
-                                               x-text="event.country"></p>
-                                        </div>
-                                        <div class="flex flex-row">
-                                            <p class="dark:text-white text-black font-sans font-light"
-                                               x-text="event.start_date"></p>
-                                            <p class="dark:text-white text-black font-sans font-light mx-1">-</p>
-                                            <p class="dark:text-white text-black font-sans font-light"
-                                               x-text="event.end_date"></p>
-                                        </div>
-                                    </div>
-                                    <div class="flex flex-col">
-                                        <button class="ui_button_icon"
-                                                @click="select_event(event.name, event.event_code)">
-                                            <i class="ph-bold ph-check-circle"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </template>
-
-                            <p class="dark:text-white text-black text-center text-lg"
-                               x-show="no_events"
-                               x-transition>
-                                <i class="ph-bold ph-smiley-sad"></i> No events found
-                            </p>
-                            <button class="ui_button w-full" @click="create_custom_event()">
-                                <i class="ph-bold ph-plus"></i> Create a custom Event
-                            </button>
-                        </div>
-
-                        <div x-show="show_custom_events">
-                            <template x-for="(event, index) in custom_filtered_events" :key="index">
-                                <div class="p-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-300 border-slate-400 m-1 rounded-lg flex flex-row justify-between">
-                                    <div class="flex flex-col">
-                                        <p class="dark:text-white text-black font-sans" x-text="event.name"></p>
-                                        <div class="flex flex-row">
-                                            <!-- <p class="dark:text-white text-black font-sans font-bold text-sm" x-text="event.event_type_string"></p><p class="dark:text-white text-black font-sans text-sm mx-1">-</p> -->
-                                            <p class="dark:text-white text-black font-sans font-bold text-sm"
-                                               x-text="event.type || 'Custom Event'"></p>
-                                            <p class="dark:text-white text-black font-sans text-sm mx-1">-</p>
-                                            <p class="dark:text-white text-black font-sans text-sm"
-                                               x-text="event.location"></p>
-                                        </div>
-                                        <div class="flex flex-row">
-                                            <p class="dark:text-white text-black font-sans font-light"
-                                               x-text="event.start_date"></p>
-                                            <p class="dark:text-white text-black font-sans font-light mx-1">-</p>
-                                            <p class="dark:text-white text-black font-sans font-light"
-                                               x-text="event.end_date"></p>
-                                        </div>
-                                    </div>
-                                    <div class="flex flex-col">
-                                        <button class="ui_button_icon"
-                                                @click="select_custom_event(event.name, event.event_code)">
-                                            <i class="ph-bold ph-check-circle"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </template>
-
-                            <p class="dark:text-white text-black text-center text-lg"
-                               x-show="no_custom_events"
-                               x-transition>
-                                <i class="ph-bold ph-smiley-sad"></i> No events found
-                            </p>
-                            <button class="ui_button w-full" @click="create_custom_event()">
-                                <i class="ph-bold ph-plus"></i> Create a custom Event
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            <script>
-                function events() {
-                    return {
-                        events: [],
-                        custom_events: [],
-                        filtered_events: [],
-                        custom_filtered_events: [],
-                        no_events: true,
-                        no_custom_events: true,
-                        show_custom_events: false,
-                        year: new Date().getFullYear(),
-
-                        async get_events() {
-                            var response = await fetch(`https://www.thebluealliance.com/api/v3/events/${this.year}`, {
-                            method: "GET",
-                            headers: {
-                                    "X-TBA-Auth-Key": "{{ TBA_API_KEY }}"
+                                } else {
+                                    this.filtered_events = this.events;
+                                    this.custom_filtered_events = this.custom_events;
                                 }
-                            });
-                    
-                            let data = await response.json();
-                            this.events = data;
-                            this.update_filters();
 
-                            var response = await fetch("{{ SERVER_IP }}/get_custom_events", {
-                                method: "POST",
-                                headers: {
-                                    "Content-Type": "application/json",
-                                },
-                                body: JSON.stringify({
-                                    year: this.year
-                                })
-                            });
-                    
-                            let custom_data = JSON.parse(await response.json());
-                            this.custom_events = custom_data;
+                                let search = this.$refs.event_search.value.toLowerCase();
 
-                            this.update_filters();
-                        },
+                                if (search != "") {
+                                    this.filtered_events = this.filtered_events.filter(event => {
+                                        let name = event.name ? event.name.toLowerCase() : '';
+                                        let city = event.city ? event.city.toLowerCase() : '';
+                                        let country = event.country ? event.country.toLowerCase() : '';
+                                        let location_name = event.location_name ? event.location_name.toLowerCase() : '';
 
-                        update_filters() {
-                            if (this.$refs.show_past_events.checked == false) {
-                                let today = new Date();
+                                        return (
+                                            name.includes(search) ||
+                                            city.includes(search) ||
+                                            country.includes(search) ||
+                                            location_name.includes(search)
+                                        );
+                                    });
 
-                                this.filtered_events = this.events.filter(event => {
-                                    let eventDate = new Date(event.end_date);
-                                    return eventDate >= today;
-                                });
+                                    this.custom_filtered_events = this.custom_filtered_events.filter(event => {
+                                        let name = event.name ? event.name.toLowerCase() : '';
+                                        let location = event.location ? event.location.toLowerCase() : '';
 
-                                this.custom_filtered_events = this.custom_events.filter(event => {
-                                    let eventDate = new Date(event.end_date);
-                                    return eventDate >= today;
-                                });
+                                        return (
+                                            name.includes(search) ||
+                                            location.includes(search)
+                                        );
+                                    });
+                                }
 
-                            } else {
-                                this.filtered_events = this.events;
-                                this.custom_filtered_events = this.custom_events;
-                            }
+                                if (this.filtered_events.length == 0) {
+                                    this.no_events = true;
+                                } else {
+                                    this.no_events = false;
+                                }
 
-                            let search = this.$refs.event_search.value.toLowerCase();
+                                if (this.custom_filtered_events.length == 0) {
+                                    this.no_custom_events = true;
+                                } else {
+                                    this.no_custom_events = false;
+                                }
+                            },
 
-                            if (search != "") {
-                                this.filtered_events = this.filtered_events.filter(event => {
-                                    let name = event.name ? event.name.toLowerCase() : '';
-                                    let city = event.city ? event.city.toLowerCase() : '';
-                                    let country = event.country ? event.country.toLowerCase() : '';
-                                    let location_name = event.location_name ? event.location_name.toLowerCase() : '';
+                            select_event(event_name, event_code) {
+                                window.dispatchEvent(new CustomEvent('header_event', {
+                                    detail: { event_name, event_code }
+                                }));
+                                this.page = 4;
+                            },
 
-                                    return (
-                                        name.includes(search) ||
-                                        city.includes(search) ||
-                                        country.includes(search) ||
-                                        location_name.includes(search)
-                                    );
-                                });
+                            select_custom_event(event_name, event_code ) {
+                                window.dispatchEvent(new CustomEvent('header_custom_event', {
+                                    detail: { event_name, event_code }
+                                }));
+                                this.page = 4;
+                            },
 
-                                this.custom_filtered_events = this.custom_filtered_events.filter(event => {
-                                    let name = event.name ? event.name.toLowerCase() : '';
-                                    let location = event.location ? event.location.toLowerCase() : '';
+                            create_custom_event() {
+                                window.dispatchEvent(new CustomEvent('open_create_custom_event'));
+                            },
 
-                                    return (
-                                        name.includes(search) ||
-                                        location.includes(search)
-                                    );
-                                });
-                            }
-
-                            if (this.filtered_events.length == 0) {
-                                this.no_events = true;
-                            } else {
-                                this.no_events = false;
-                            }
-
-                            if (this.custom_filtered_events.length == 0) {
-                                this.no_custom_events = true;
-                            } else {
-                                this.no_custom_events = false;
-                            }
-                        },
-
-                        select_event(event_name, event_code) {
-                            window.dispatchEvent(new CustomEvent('header_event', {
-                                detail: { event_name, event_code }
-                            }));
-                            this.page = 4;
-                        },
-
-                        select_custom_event(event_name, event_code ) {
-                            window.dispatchEvent(new CustomEvent('header_custom_event', {
-                                detail: { event_name, event_code }
-                            }));
-                            this.page = 4;
-                        },
-
-                        create_custom_event() {
-                            window.dispatchEvent(new CustomEvent('open_create_custom_event'));
-                        },
-
-                        init() {
-                            this.get_events();
-
-                            window.addEventListener('refresh_event_list', (event) => {
-                                event.stopImmediatePropagation();
+                            init() {
                                 this.get_events();
-                            });
 
-                            window.addEventListener('header_year', (event) => {
-                                const { year } = event.detail;
-                                this.year = year;
+                                window.addEventListener('refresh_event_list', (event) => {
+                                    event.stopImmediatePropagation();
+                                    this.get_events();
+                                });
 
-                                this.get_events();
-                            });
+                                window.addEventListener('header_year', (event) => {
+                                    const { year } = event.detail;
+                                    this.year = year;
+
+                                    this.get_events();
+                                });
+                            }
                         }
                     }
-                }
-            </script>
+                </script>
 
-            <div class="flex flex-col justify-center items-center"
-                 x-show="page == 4"
-                 x-data="{ contribute_open: false }"
-                 x-transition>
-                <p class="text-center dark:text-white text-black font-sans text-2xl mb-4 mt-6">
-                    <i class="ph-bold ph-sliders-horizontal"></i> Choose an Operation
-                </p>
-                <!-- TODO: Support scouting in sessions -->
-                <!-- <button class="ui_button" @click="contribute_open = !contribute_open">
-                    <i class="ph-bold ph-pencil-simple-line"></i> Contribute Data
-                </button>
-                <div class="flex flex-col justify-center items-center mb-6" x-show="contribute_open" x-collapse>
-                    <button class="ui_button" disabled>
-                        <i class="ph-bold ph-link"></i> Create a session
-                    </button>
-                    <p class="dark:text-white text-black opacity-80 text-sm text-center">
-                        Create a session with one scout as the host to allow some more information to be autofilled and managed by the head scout
+                <div class="flex flex-col justify-center items-center"
+                     x-show="page == 4"
+                     x-data="{ contribute_open: false }"
+                     x-transition>
+                    <p class="text-center dark:text-white text-black font-sans text-2xl mb-4 mt-6">
+                        <i class="ph-bold ph-sliders-horizontal"></i> Choose an Operation
                     </p>
+                    <!-- TODO: Support scouting in sessions -->
+                    <!-- <button class="ui_button" @click="contribute_open = !contribute_open">
+                    <i class="ph-bold ph-pencil-simple-line"></i> Contribute Data
+                    </button>
+                    <div class="flex flex-col justify-center items-center mb-6" x-show="contribute_open" x-collapse>
+                        <button class="ui_button" disabled>
+                            <i class="ph-bold ph-link"></i> Create a session
+                        </button>
+                        <p class="dark:text-white text-black opacity-80 text-sm text-center">
+                            Create a session with one scout as the host to allow some more information to be autofilled and managed by the head scout
+                        </p>
+                        <button class="ui_button" @click="get_header_data('contribute_separately')">
+                            <i class="ph-bold ph-pencil"></i> Contribute separately
+                        </button>
+                        <p class="dark:text-white text-black opacity-80 text-sm text-center">Contribute data without a session</p>
+</div> -->
+
                     <button class="ui_button" @click="get_header_data('contribute_separately')">
                         <i class="ph-bold ph-pencil"></i> Contribute separately
                     </button>
                     <p class="dark:text-white text-black opacity-80 text-sm text-center">Contribute data without a session</p>
-</div> -->
+                    <button class="ui_button" @click="get_header_data('view_data')">
+                        <i class="ph-bold ph-database"></i> View All Data
+                    </button>
+                    <p class="dark:text-white text-black opacity-80 text-sm text-center">View all data for this event</p>
+                    <button class="ui_button" @click="get_header_data('pit_scouting')">
+                        <i class="ph-bold ph-garage"></i> Pit Scouting
+                    </button>
+                    <p class="dark:text-white text-black opacity-80 text-sm text-center">View or contribute pit scouting data for this event</p>
 
-                <button class="ui_button" @click="get_header_data('contribute_separately')">
-                    <i class="ph-bold ph-pencil"></i> Contribute separately
-                </button>
-                <p class="dark:text-white text-black opacity-80 text-sm text-center">Contribute data without a session</p>
-                <button class="ui_button" @click="get_header_data('view_data')">
-                    <i class="ph-bold ph-database"></i> View All Data
-                </button>
-                <p class="dark:text-white text-black opacity-80 text-sm text-center">View all data for this event</p>
-                <button class="ui_button" @click="get_header_data('pit_scouting')">
-                    <i class="ph-bold ph-garage"></i> Pit Scouting
-                </button>
-                <p class="dark:text-white text-black opacity-80 text-sm text-center">View or contribute pit scouting data for this event</p>
-
-                <p class="text-center dark:text-white text-black font-sans text-xl mb-1 mt-6">
-                    <i class="ph-bold ph-export"></i> Share a link to this event
-                </p>
-                <p class="dark:text-white text-black opacity-80 text-sm text-center mb-6">Sharing a link allows scouts to easily get to the correct event to quickly begin scouting</p>
-
-                <button class="ui_button" @click="get_link_data()">
-                    <i class="ph-bold ph-link"></i> Copy Link
-                </button>
-
-                <div class="flex flex-col dark:bg-green-800/70 bg-green-400/70 dark:border-green-700 border-green-500 border-2 rounded-lg w-full px-6 py-4"
-                     x-show="link"
-                     x-transition>
-                    <p class="dark:text-white text-black text-lg text-bold">
-                        <i class="ph-bold ph-check-circle"></i> Link copied!
+                    <p class="text-center dark:text-white text-black font-sans text-xl mb-1 mt-6">
+                        <i class="ph-bold ph-export"></i> Share a link to this event
                     </p>
+                    <p class="dark:text-white text-black opacity-80 text-sm text-center mb-6">Sharing a link allows scouts to easily get to the correct event to quickly begin scouting</p>
+
+                    <button class="ui_button" @click="get_link_data()">
+                        <i class="ph-bold ph-link"></i> Copy Link
+                    </button>
+
+                    <div class="flex flex-col dark:bg-green-800/70 bg-green-400/70 dark:border-green-700 border-green-500 border-2 rounded-lg w-full px-6 py-4"
+                         x-show="link"
+                         x-transition>
+                        <p class="dark:text-white text-black text-lg text-bold">
+                            <i class="ph-bold ph-check-circle"></i> Link copied!
+                        </p>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <script>
-            function index() {
-                return {
-                    page: 1,
-                    link: "",
+            <script>
+                function index() {
+                    return {
+                        page: 1,
+                        link: "",
 
-                    get_header_data(load_page) {
-                        window.dispatchEvent(new CustomEvent('get_header_data', {
-                            detail: { load_page }
-                        }));
-                    },
+                        get_header_data(load_page) {
+                            window.dispatchEvent(new CustomEvent('get_header_data', {
+                                detail: { load_page }
+                            }));
+                        },
 
-                    get_link_data() {
-                        window.dispatchEvent(new CustomEvent('get_link_data'));
-                    },
+                        get_link_data() {
+                            window.dispatchEvent(new CustomEvent('get_link_data'));
+                        },
 
-                    load_page(page) {
-                        if (!this.demo) {
-                            if (page == "session") {
-                                console.log("This feature is coming soon");
-                            } else if (page == "contribute_separately") {
-                                
-                                if (!this.custom) {
-                                    window.location.href = `{{ SERVER_IP }}/contribute?username=${encodeURIComponent(this.username)}&team_number=${encodeURIComponent(this.team_number)}&event_name=${encodeURIComponent(this.event_name)}&event_code=${this.event_code}&year=${this.year}&`;
-                                } else {
-                                    window.location.href = `{{ SERVER_IP }}/contribute?username=${encodeURIComponent(this.username)}&team_number=${encodeURIComponent(this.team_number)}&event_name=${encodeURIComponent(this.event_name)}&event_code=${this.event_code}&year=${this.year}&custom=true&`;
+                        load_page(page) {
+                            if (!this.demo) {
+                                if (page == "session") {
+                                    console.log("This feature is coming soon");
+                                } else if (page == "contribute_separately") {
+                                    
+                                    if (!this.custom) {
+                                        window.location.href = `{{ SERVER_IP }}/contribute?username=${encodeURIComponent(this.username)}&team_number=${encodeURIComponent(this.team_number)}&event_name=${encodeURIComponent(this.event_name)}&event_code=${this.event_code}&year=${this.year}&`;
+                                    } else {
+                                        window.location.href = `{{ SERVER_IP }}/contribute?username=${encodeURIComponent(this.username)}&team_number=${encodeURIComponent(this.team_number)}&event_name=${encodeURIComponent(this.event_name)}&event_code=${this.event_code}&year=${this.year}&custom=true&`;
+                                    }
+                                } else if (page == "view_data") {
+                                    if (!this.custom) {
+                                        window.location.href = `{{ SERVER_IP }}/data?username=${encodeURIComponent(this.username)}&team_number=${encodeURIComponent(this.team_number)}&event_name=${encodeURIComponent(this.event_name)}&event_code=${this.event_code}&year=${this.year}&`;
+                                    } else {
+                                        window.location.href = `{{ SERVER_IP }}/data?username=${encodeURIComponent(this.username)}&team_number=${encodeURIComponent(this.team_number)}&event_name=${encodeURIComponent(this.event_name)}&event_code=${this.event_code}&year=${this.year}&custom=true&`;
+                                    }
+                                } else if (page == "pit_scouting") {
+                                    if (!this.custom) {
+                                        window.location.href = `{{ SERVER_IP }}/pits?username=${encodeURIComponent(this.username)}&team_number=${encodeURIComponent(this.team_number)}&event_name=${encodeURIComponent(this.event_name)}&event_code=${this.event_code}&year=${this.year}&`;
+                                    } else {
+                                        window.location.href = `{{ SERVER_IP }}/pits?username=${encodeURIComponent(this.username)}&team_number=${encodeURIComponent(this.team_number)}&event_name=${encodeURIComponent(this.event_name)}&event_code=${this.event_code}&year=${this.year}&custom=true&`;
+                                    }
                                 }
-                            } else if (page == "view_data") {
-                                if (!this.custom) {
-                                    window.location.href = `{{ SERVER_IP }}/data?username=${encodeURIComponent(this.username)}&team_number=${encodeURIComponent(this.team_number)}&event_name=${encodeURIComponent(this.event_name)}&event_code=${this.event_code}&year=${this.year}&`;
-                                } else {
-                                    window.location.href = `{{ SERVER_IP }}/data?username=${encodeURIComponent(this.username)}&team_number=${encodeURIComponent(this.team_number)}&event_name=${encodeURIComponent(this.event_name)}&event_code=${this.event_code}&year=${this.year}&custom=true&`;
-                                }
-                            } else if (page == "pit_scouting") {
-                                if (!this.custom) {
-                                    window.location.href = `{{ SERVER_IP }}/pits?username=${encodeURIComponent(this.username)}&team_number=${encodeURIComponent(this.team_number)}&event_name=${encodeURIComponent(this.event_name)}&event_code=${this.event_code}&year=${this.year}&`;
-                                } else {
-                                    window.location.href = `{{ SERVER_IP }}/pits?username=${encodeURIComponent(this.username)}&team_number=${encodeURIComponent(this.team_number)}&event_name=${encodeURIComponent(this.event_name)}&event_code=${this.event_code}&year=${this.year}&custom=true&`;
+                            } else {
+                                if (page == "session") {
+                                    console.log("This feature is coming soon");
+                                    
+                                } else if (page == "contribute_separately") {
+                                    window.location.href = `{{ SERVER_IP }}/contribute?year=${this.year}&demo=true&`;
+
+                                } else if (page == "view_data") {
+                                    window.location.href = `{{ SERVER_IP }}/data?year=${this.year}&demo=true&`;
+
+                                } else if (page == "pit_scouting") {
+                                    window.location.href = `{{ SERVER_IP }}/pits?year=${this.year}&demo=true&`;
                                 }
                             }
-                        } else {
-                            if (page == "session") {
-                                console.log("This feature is coming soon");
-                                
-                            } else if (page == "contribute_separately") {
-                                window.location.href = `{{ SERVER_IP }}/contribute?year=${this.year}&demo=true&`;
+                        },
 
-                            } else if (page == "view_data") {
-                                window.location.href = `{{ SERVER_IP }}/data?year=${this.year}&demo=true&`;
+                        async copy_event_link() {
+                            let link_to_event = `{{ SERVER_IP }}/?year=${this.year}&event_name=${encodeURIComponent(this.event_name)}&event_code=${this.event_code}`;
 
-                            } else if (page == "pit_scouting") {
-                                window.location.href = `{{ SERVER_IP }}/pits?year=${this.year}&demo=true&`;
+                            try {
+                                await navigator.clipboard.writeText(link_to_event);
+                                this.link = link_to_event;
+
+                            } catch (err) {
+                                console.error('Failed to copy: ', err);
                             }
+                        },
+
+                        init() {
+                            window.addEventListener('start_over', (event) => {
+                                this.page = 1
+                            });
+
+                            window.addEventListener('header_data', (event) => {
+                                event.stopImmediatePropagation();
+                                const { username, team_number, event_name, event_code, load_page, custom, year, demo } = event.detail;
+
+                                this.username = username;
+                                this.team_number = team_number;
+                                this.event_name = event_name;
+                                this.event_code = event_code;
+                                this.custom = custom;
+                                this.year = year;
+                                this.demo = demo;
+                                this.load_page(load_page);
+                            });
+
+                            window.addEventListener('link_data', (event) => {
+                                event.stopImmediatePropagation();
+                                const { username, team_number, event_name, event_code, custom, year, demo } = event.detail;
+
+                                this.username = username;
+                                this.team_number = team_number;
+                                this.event_name = event_name;
+                                this.event_code = event_code;
+                                this.custom = custom;
+                                this.year = year;
+                                this.demo = demo;
+                                this.copy_event_link();
+                            });
                         }
-                    },
-
-                    async copy_event_link() {
-                        let link_to_event = `{{ SERVER_IP }}/?year=${this.year}&event_name=${encodeURIComponent(this.event_name)}&event_code=${this.event_code}`;
-
-                        try {
-                            await navigator.clipboard.writeText(link_to_event);
-                            this.link = link_to_event;
-
-                        } catch (err) {
-                            console.error('Failed to copy: ', err);
-                        }
-                    },
-
-                    init() {
-                        window.addEventListener('start_over', (event) => {
-                            this.page = 1
-                        });
-
-                        window.addEventListener('header_data', (event) => {
-                            event.stopImmediatePropagation();
-                            const { username, team_number, event_name, event_code, load_page, custom, year, demo } = event.detail;
-
-                            this.username = username;
-                            this.team_number = team_number;
-                            this.event_name = event_name;
-                            this.event_code = event_code;
-                            this.custom = custom;
-                            this.year = year;
-                            this.demo = demo;
-                            this.load_page(load_page);
-                        });
-
-                        window.addEventListener('link_data', (event) => {
-                            event.stopImmediatePropagation();
-                            const { username, team_number, event_name, event_code, custom, year, demo } = event.detail;
-
-                            this.username = username;
-                            this.team_number = team_number;
-                            this.event_name = event_name;
-                            this.event_code = event_code;
-                            this.custom = custom;
-                            this.year = year;
-                            this.demo = demo;
-                            this.copy_event_link();
-                        });
                     }
                 }
-            }
-        </script>
+            </script>
 
-        <div class="fixed z-50 h-[80%] bottom-0 md:bottom-auto w-screen md:h-[80%] md:w-[80%] md:mx-4 md:my-8 dark:bg-slate-800/60 dark:border-slate-700 border-slate-300 border-2 md:rounded-2xl rounded-t-xl bg-slate-200/60 backdrop-blur-md p-4 md:p-8 overflow-y-auto"
-             x-data="create_custom_event()"
-             x-init="init()"
-             x-show="shown"
-             @click.outside="close_dialog()"
-             x-transition>
-            <div class="flex flex-row justify-between">
-                <div class="flex flex-col max-w-sm md:max-w-xl lg:max-w-3xl">
-                    <p class="text-black dark:text-white text-sans text-2xl font-bold">Create Custom Event</p>
-                    <p class="text-black dark:text-white text-sans text-sm">
-                        Custom events are used when an event isn't present in The Blue Alliance. Creating a custom event makes this event available to all users across Open Scouting to contribute and view data for.
-                    </p>
-                </div>
-                <button class="dark:text-white text-black text-3xl hover:scale-105 active:scale-95 transition-all dark:bg-slate-700 border-2 bg-slate-200 dark:border-slate-600 border-slate-400 aspect-square rounded-full my-auto p-2 mxr-2"
-                        @click="close_dialog()">
-                    <i class="ph-bold ph-x"></i>
-                </button>
+            <div class="absolute bottom-4 animate-bounce"
+                 x-data="scroll_indicator()"
+                 x-show="scroll_value == 0"
+                 x-transition>
+                <p class="text-center dark:text-white text-black text-md opacity-60 hover:opacity-100 active:opacity-100 transition-opacity">
+                    <i class="ph-bold ph-mouse-scroll"></i> Scroll for info
+                </p>
             </div>
 
-            <div class="flex flex-col items-center mt-4 h-full">
-                <input class="ui_input"
-                       placeholder="Name"
-                       x-ref="name"
-                       @input="check_fields">
-                <p class="text-black dark:text-white/80 font-sans text-xs text-left mb-2">Enter the name for this event</p>
+            <script>
+                function scroll_indicator() {
+                    return {
+                        scroll_value: 0,
 
-                <select class="ui_input"
-                        placeholder="Year"
-                        x-ref="year"
-                        @change="update_date_fields">
-                    <template x-for="year in YEARS" :key="year">
-                        <option x-text="year"></option>
-                    </template>
-                </select>
-                <p class="text-black dark:text-white/80 font-sans text-xs text-left mb-2"
-                   @input="check_fields">What year did this event take place?</p>
+                        init() {
+                            document.querySelector("#index").addEventListener('scroll', (event) => {
+                                this.scroll_value = document.querySelector("#index").scrollTop;
+                            });
+                        }
+                    }
+                }
+            </script>
 
-                <input class="ui_input"
-                       type="date"
-                       placeholder="Event begins"
-                       x-ref="date_begins"
-                       @click.outside="check_date_fields()"
-                       @input="check_fields">
-                <p class="text-black dark:text-white/80 font-sans text-xs text-left mb-2">What day does this event begin?</p>
+            <div class="fixed z-50 h-[80%] bottom-0 md:bottom-auto w-screen md:h-[80%] md:w-[80%] md:mx-4 md:my-8 dark:bg-slate-800/60 dark:border-slate-700 border-slate-300 border-2 md:rounded-2xl rounded-t-xl bg-slate-200/60 backdrop-blur-md p-4 md:p-8 overflow-y-auto"
+                 x-data="create_custom_event()"
+                 x-init="init()"
+                 x-show="shown"
+                 @click.outside="close_dialog()"
+                 x-transition>
+                <div class="flex flex-row justify-between">
+                    <div class="flex flex-col max-w-sm md:max-w-xl lg:max-w-3xl">
+                        <p class="text-black dark:text-white text-sans text-2xl font-bold">Create Custom Event</p>
+                        <p class="text-black dark:text-white text-sans text-sm">
+                            Custom events are used when an event isn't present in The Blue Alliance. Creating a custom event makes this event available to all users across Open Scouting to contribute and view data for.
+                        </p>
+                    </div>
+                    <button class="dark:text-white text-black text-3xl hover:scale-105 active:scale-95 transition-all dark:bg-slate-700 border-2 bg-slate-200 dark:border-slate-600 border-slate-400 aspect-square rounded-full my-auto p-2 mxr-2"
+                            @click="close_dialog()">
+                        <i class="ph-bold ph-x"></i>
+                    </button>
+                </div>
 
-                <input class="ui_input"
-                       type="date"
-                       placeholder="Event ends"
-                       x-ref="date_ends"
-                       @click.outside="check_date_fields()"
-                       @input="check_fields">
-                <p class="text-black dark:text-white/80 font-sans text-xs text-left mb-2">What day does this event end?</p>
+                <div class="flex flex-col items-center mt-4 h-full">
+                    <input class="ui_input"
+                           placeholder="Name"
+                           x-ref="name"
+                           @input="check_fields">
+                    <p class="text-black dark:text-white/80 font-sans text-xs text-left mb-2">Enter the name for this event</p>
 
-                <input class="ui_input"
-                       placeholder="Event location"
-                       x-ref="location"
-                       @input="check_fields">
-                <p class="text-black dark:text-white/80 font-sans text-xs text-left mb-2">Where will this event be held?</p>
+                    <select class="ui_input"
+                            placeholder="Year"
+                            x-ref="year"
+                            @change="update_date_fields">
+                        <template x-for="year in YEARS" :key="year">
+                            <option x-text="year"></option>
+                        </template>
+                    </select>
+                    <p class="text-black dark:text-white/80 font-sans text-xs text-left mb-2"
+                       @input="check_fields">What year did this event take place?</p>
 
-                <select class="ui_input"
-                        placeholder="Year"
-                        x-ref="type"
-                        @change="check_fields">
-                    <option value="N/A">Select an Event Type</option>
-                    <option value="District">District Event</option>
-                    <option value="Regional">Regional Event</option>
-                    <option value="Preseason">Preseason Event</option>
-                    <option value="Offseason">Offseason Event</option>
-                    <option value="Other Event">Other Event</option>
-                </select>
-                <p class="text-black dark:text-white/80 font-sans text-xs text-left mb-2"
-                   @input="check_fields">What kind of event is this?</p>
+                    <input class="ui_input"
+                           type="date"
+                           placeholder="Event begins"
+                           x-ref="date_begins"
+                           @click.outside="check_date_fields()"
+                           @input="check_fields">
+                    <p class="text-black dark:text-white/80 font-sans text-xs text-left mb-2">What day does this event begin?</p>
 
-                <button class="ui_button" :disabled="!able_to_submit" @click="create_event">
-                    <i class="ph-bold ph-check"></i> Create new Custom Event
-                </button>
+                    <input class="ui_input"
+                           type="date"
+                           placeholder="Event ends"
+                           x-ref="date_ends"
+                           @click.outside="check_date_fields()"
+                           @input="check_fields">
+                    <p class="text-black dark:text-white/80 font-sans text-xs text-left mb-2">What day does this event end?</p>
+
+                    <input class="ui_input"
+                           placeholder="Event location"
+                           x-ref="location"
+                           @input="check_fields">
+                    <p class="text-black dark:text-white/80 font-sans text-xs text-left mb-2">Where will this event be held?</p>
+
+                    <select class="ui_input"
+                            placeholder="Year"
+                            x-ref="type"
+                            @change="check_fields">
+                        <option value="N/A">Select an Event Type</option>
+                        <option value="District">District Event</option>
+                        <option value="Regional">Regional Event</option>
+                        <option value="Preseason">Preseason Event</option>
+                        <option value="Offseason">Offseason Event</option>
+                        <option value="Other Event">Other Event</option>
+                    </select>
+                    <p class="text-black dark:text-white/80 font-sans text-xs text-left mb-2"
+                       @input="check_fields">What kind of event is this?</p>
+
+                    <button class="ui_button" :disabled="!able_to_submit" @click="create_event">
+                        <i class="ph-bold ph-check"></i> Create new Custom Event
+                    </button>
+                </div>
+            </div>
+
+            <script>
+                function create_custom_event() {
+                    return {
+                        shown: false,
+                        YEARS: JSON.parse(`{{ YEARS|safe }}`),
+                        selected_year: null,
+                        able_to_submit: false,
+
+                        update_date_fields(e) {
+                            this.selected_year = e.target.value;
+
+                            this.$refs.date_begins.min = `${this.selected_year}-01-01`;
+                            this.$refs.date_begins.max = `${this.selected_year}-12-31`;
+                            this.$refs.date_ends.min = `${this.selected_year}-01-01`;
+                            this.$refs.date_ends.max = `${this.selected_year}-12-31`;
+                        },
+
+                        check_date_fields() {
+                            let date_begins_value = new Date(Date.parse(this.$refs.date_begins.value));
+                            let date_ends_value = new Date(Date.parse(this.$refs.date_ends.value));
+                            let valid = false;
+
+                            if (!this.$refs.date_begins.checkValidity()) {
+                                this.$refs.date_begins.value = `${this.selected_year}-${date_begins_value.getMonth()}-${date_begins_value.getDate()}`;
+                            }
+
+                            if (!this.$refs.date_ends.checkValidity()) {
+                                this.$refs.date_ends.value = `${this.selected_year}-${date_begins_value.getMonth()}-${date_begins_value.getDate()}`;
+                            }
+
+                            this.check_fields();
+                        },
+
+                        check_fields() {
+                            if (this.$refs.date_begins.value == "" || this.$refs.date_ends.value == "" || this.$refs.name.value == "" || this.$refs.location.value == "" || this.$refs.type.value == "N/A") {
+                                valid = false;
+                            } else {
+                                valid = true;
+                            }
+
+                            if (valid) {
+                                this.able_to_submit = true;
+                            } else {
+                                this.able_to_submit = false;
+                            }
+                        },
+
+                        async create_event() {
+                            var response = await fetch("{{ SERVER_IP }}/create_custom_event", {
+                                method: "POST",
+                                headers: {
+                                        "Content-Type": "application/json",
+                                        "X-CSRFToken": "{{ csrf_token }}"
+                                    },
+                                body: JSON.stringify({
+                                        name: this.$refs.name.value,
+                                        year: this.$refs.year.value,
+                                        date_begins: this.$refs.date_begins.value,
+                                        date_ends: this.$refs.date_ends.value,
+                                        location: this.$refs.location.value,
+                                        type: this.$refs.type.value,
+                                    })
+                                });
+
+                                response.text().then(async (text) => {
+                                    if (response.ok) {
+                                        this.close_dialog();
+                                        window.dispatchEvent(new CustomEvent('refresh_event_list'));
+                                    }
+                                });
+                        },
+
+                        close_dialog() {
+                            this.shown = false;
+
+                            this.$refs.name.value = "";
+                            this.$refs.date_begins.value = "";
+                            this.$refs.date_ends.value = "";
+                            this.$refs.location.value = "";
+                            this.$refs.type.value = "N/A";
+                        },
+
+                        init() {
+                            window.addEventListener('open_create_custom_event', (event) => {
+                                event.stopImmediatePropagation();
+                                
+                                this.shown = true;
+                            });
+
+                            this.selected_year = this.YEARS[0]
+                            this.$refs.date_begins.min = `${this.selected_year}-01-01`;
+                            this.$refs.date_begins.max = `${this.selected_year}-12-31`;
+                            this.$refs.date_ends.min = `${this.selected_year}-01-01`;
+                            this.$refs.date_ends.max = `${this.selected_year}-12-31`;
+                        },
+                    }
+                }
+            </script>
+
+        </div>
+
+        <div class="h-screen w-screen max-w-screen snap-center flex flex-col lg:flex-row justify-center items-center px-6 lg:px-24">
+            <div class="flex flex-col ml-0 lg:ml-12">
+                <p class="text-black dark:text-white font-sans text-4xl">
+                    <i class="ph-bold ph-list-dashes"></i> Features
+                </p>
+                <p class="text-black dark:text-white font-sans text-lg mb-4 opacity-80">Open Scouting is an open source application for easier scouting at FIRST Robotics competitions</p>
+                <ul class="list-disc ml-4 text-black dark:text-white">
+                    <li>Gather pit scouting data</li>
+                    <li>Anyone can contribute data, and anyone can view it, no account needed</li>
+                    <li>Works offline in case of poor connection in the stands</li>
+                    <li>Uses The Blue Alliance to autofill data for faster scouting</li>
+                    <li>Create custom events if an event isn't in TBA</li>
+                    <li>Manually go offline in case of bad connection</li>
+                    <li>Demo mode to let scouts try out the app</li>
+                    <li>Share links to an event to start scouting as fast as possible</li>
+                    <li>Create an account to verify your scouting reports</li>
+                </ul>
+
+            </div>
+            <div>
+                <img class="w-128 h-auto" src="{% static '/main/images/mobile.png' %}">
             </div>
         </div>
 
-        <script>
-            function create_custom_event() {
-                return {
-                    shown: false,
-                    YEARS: JSON.parse(`{{ YEARS|safe }}`),
-                    selected_year: null,
-                    able_to_submit: false,
+        <div class="h-screen w-screen max-w-screen snap-center flex flex-col justify-end items-left px-6 lg:px-24 py-8 lg:py-28 backdrop-blur-sm"
+             style="background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 15%, rgba(0, 0, 0, 0.4) 100%)"
+             x-data="">
+            <img class="height-auto w-72 hidden dark:block cursor-pointer hover:scale-105 active:scale-95 transition-all"
+                 src="{% static '/main/images/logo_light.png' %}"
+                 @click="document.querySelector('#index').scrollTo({top: 0, behavior: 'smooth'})">
+            <img class="height-auto w-72 dark:hidden block cursor-pointer hover:scale-105 active:scale-95 transition-all"
+                 src="{% static '/main/images/logo_dark.png' %}"
+                 @click="win=document.querySelector('#index').scrollTo({top: 0, behavior: 'smooth'})">
+            <div class="flex flex-col ml-8 mt-6">
+                <a class="text-black dark:text-white font-sans text-lg opacity-80 hover:opacity-100 active:opacity-100 transition-opacity font-bold"
+                   href="{{ SERVER_IP }}/authentication"><i class="ph-bold ph-lock"></i> Log In</a>
+            </div>
+            <div class="flex flex-col ml-8 mt-6">
+                <a class="text-black dark:text-white font-sans text-md opacity-80 hover:opacity-100 active:opacity-100 transition-opacity"
+                   href="https://github.com/FRC-Team3484/open-scouting"><i class="ph-bold ph-github-logo"></i> Source Code</a>
+                <a class="text-black dark:text-white font-sans text-md opacity-80 hover:opacity-100 active:opacity-100 transition-opacity"
+                   href="https://github.com/FRC-Team3484/open-scouting/issues"><i class="ph-bold ph-bug"></i> Issues</a>
+                <a class="text-black dark:text-white font-sans text-md opacity-80 hover:opacity-100 active:opacity-100 transition-opacity"
+                   href="https://github.com/FRC-Team3484/open-scouting/releases"><i class="ph-bold ph-app-window"></i> Releases</a>
+            </div>
+            <div class="flex flex-col ml-8 mt-6">
+                <a class="text-black dark:text-white font-sans text-md opacity-80 hover:opacity-100 active:opacity-100 transition-opacity"
+                   href="https://github.com/FRC-Team3484/open-scouting/tree/main/docs"><i class="ph-bold ph-newspaper"></i> Documentation</a>
+                <a class="text-black dark:text-white font-sans text-md opacity-80 hover:opacity-100 active:opacity-100 transition-opacity"
+                   href="https://github.com/FRC-Team3484/open-scouting/tree/development"><i class="ph-bold ph-hammer"></i> Development Branch</a>
+            </div>
+        </div>
+    {% endblock %}
 
-                    update_date_fields(e) {
-                        this.selected_year = e.target.value;
-
-                        this.$refs.date_begins.min = `${this.selected_year}-01-01`;
-                        this.$refs.date_begins.max = `${this.selected_year}-12-31`;
-                        this.$refs.date_ends.min = `${this.selected_year}-01-01`;
-                        this.$refs.date_ends.max = `${this.selected_year}-12-31`;
-                    },
-
-                    check_date_fields() {
-                        let date_begins_value = new Date(Date.parse(this.$refs.date_begins.value));
-                        let date_ends_value = new Date(Date.parse(this.$refs.date_ends.value));
-                        let valid = false;
-
-                        if (!this.$refs.date_begins.checkValidity()) {
-                            this.$refs.date_begins.value = `${this.selected_year}-${date_begins_value.getMonth()}-${date_begins_value.getDate()}`;
-                        }
-
-                        if (!this.$refs.date_ends.checkValidity()) {
-                            this.$refs.date_ends.value = `${this.selected_year}-${date_begins_value.getMonth()}-${date_begins_value.getDate()}`;
-                        }
-
-                        this.check_fields();
-                    },
-
-                    check_fields() {
-                        if (this.$refs.date_begins.value == "" || this.$refs.date_ends.value == "" || this.$refs.name.value == "" || this.$refs.location.value == "" || this.$refs.type.value == "N/A") {
-                            valid = false;
-                        } else {
-                            valid = true;
-                        }
-
-                        if (valid) {
-                            this.able_to_submit = true;
-                        } else {
-                            this.able_to_submit = false;
-                        }
-                    },
-
-                    async create_event() {
-                        var response = await fetch("{{ SERVER_IP }}/create_custom_event", {
-                            method: "POST",
-                            headers: {
-                                    "Content-Type": "application/json",
-                                },
-                            body: JSON.stringify({
-                                    name: this.$refs.name.value,
-                                    year: this.$refs.year.value,
-                                    date_begins: this.$refs.date_begins.value,
-                                    date_ends: this.$refs.date_ends.value,
-                                    location: this.$refs.location.value,
-                                    type: this.$refs.type.value,
-                                })
-                            });
-
-                            response.text().then(async (text) => {
-                                if (response.ok) {
-                                    this.close_dialog();
-                                    window.dispatchEvent(new CustomEvent('refresh_event_list'));
-                                }
-                            });
-                    },
-
-                    close_dialog() {
-                        this.shown = false;
-
-                        this.$refs.name.value = "";
-                        this.$refs.date_begins.value = "";
-                        this.$refs.date_ends.value = "";
-                        this.$refs.location.value = "";
-                        this.$refs.type.value = "N/A";
-                    },
-
-                    init() {
-                        window.addEventListener('open_create_custom_event', (event) => {
-                            event.stopImmediatePropagation();
-                            
-                            this.shown = true;
-                        });
-
-                        this.selected_year = this.YEARS[0]
-                        this.$refs.date_begins.min = `${this.selected_year}-01-01`;
-                        this.$refs.date_begins.max = `${this.selected_year}-12-31`;
-                        this.$refs.date_ends.min = `${this.selected_year}-01-01`;
-                        this.$refs.date_ends.max = `${this.selected_year}-12-31`;
-                    },
-                }
-            }
-        </script>
-
-    </div>
-{% endblock %}
-
-{% block scripts %}
-{% endblock %}
+    {% block scripts %}{% endblock %}

@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% load static %}
-{% block head_title %}Open Scouting{% endblock %}
+{% block head_title %}
+    Open Scouting | Pit Scouting
+{% endblock head_title %}
 
 {% block head_scripts %}{% endblock %}
 
@@ -467,7 +469,8 @@
                                     var response = await fetch("{{ SERVER_IP }}/update_pits", {
                                         method: "POST",
                                         headers: {
-                                                "Content-Type": "application/json"
+                                                "Content-Type": "application/json",
+                                                "X-CSRFToken": "{{ csrf_token }}"
                                             },
                                         body: JSON.stringify({
                                             event_name: encodeURIComponent("{{ event_name }}"),
@@ -509,7 +512,8 @@
                             var response = await fetch("{{ SERVER_IP }}/update_pits", {
                                 method: "POST",
                                 headers: {
-                                        "Content-Type": "application/json"
+                                        "Content-Type": "application/json",
+                                        "X-CSRFToken": "{{ csrf_token }}"
 ,                                    },
                                 body: JSON.stringify({
                                     event_name: encodeURIComponent("{{ event_name }}"),
@@ -525,6 +529,7 @@
                                     method: "POST",
                                     headers: {
                                             "Content-Type": "application/json",
+                                            "X-CSRFToken": "{{ csrf_token }}"
                                         },
                                     body: JSON.stringify({
                                             event_name: encodeURIComponent("{{ event_name }}"),
@@ -754,6 +759,7 @@
                                     method: "POST",
                                     headers: {
                                             "Content-Type": "application/json",
+                                            "X-CSRFToken": "{{ csrf_token }}"
                                         },
                                     body: JSON.stringify({
                                             event_name: encodeURIComponent("{{ event_name }}"),
@@ -781,6 +787,7 @@
                                     method: "POST",
                                     headers: {
                                             "Content-Type": "application/json",
+                                            "X-CSRFToken": "{{ csrf_token }}"
                                         },
                                     body: JSON.stringify({
                                             year: "{{ year }}"

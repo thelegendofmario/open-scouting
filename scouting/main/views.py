@@ -12,7 +12,7 @@ from . import pit_scouting_questions
 import json
 from datetime import datetime
 import uuid
-from urllib.parse import unquote
+from urllib.parse import unquote, urlparse, parse_qs
 import requests
 import deepdiff
 
@@ -286,6 +286,23 @@ def pits(request):
     return render(request, "pits.html", context)
 
 
+def advanced_data(request):
+    """
+    Returns the advanced data page
+    """
+    request.session["username"] = request.GET.get("username", "unknown")
+    request.session["team_number"] = request.GET.get("team_number", "unknown")
+
+    context = {
+        "SERVER_IP": settings.SERVER_IP,
+        "TBA_API_KEY": settings.TBA_API_KEY,
+        "SERVER_MESSAGE": settings.SERVER_MESSAGE,
+        "YEARS": json.dumps(YEARS),
+    }
+
+    return render(request, "advanced_data.html", context)
+
+
 def service_worker(request):
     """
     Returns the service worker file to the client for installation
@@ -294,7 +311,6 @@ def service_worker(request):
     return HttpResponse(open(sw_path).read(), content_type="application/javascript")
 
 
-@csrf_exempt
 def submit(request):
     """
     Submits a scouting report to the server
@@ -357,7 +373,6 @@ def submit(request):
         return HttpResponse(request, "Request is not a POST request!", status=501)
 
 
-@csrf_exempt
 def get_data(request):
     """
     Gets the scouting data for an event from the server
@@ -437,7 +452,6 @@ def get_data(request):
         return HttpResponse("Request is not a POST request!", status=501)
 
 
-@csrf_exempt
 def get_custom_events(request):
     """
     Gets the custom events from the server for a year
@@ -474,7 +488,6 @@ def get_custom_events(request):
         return HttpResponse("Request is not a POST request!", status=501)
 
 
-@csrf_exempt
 def create_custom_event(request):
     """
     Creates a custom event
@@ -533,7 +546,6 @@ def create_custom_event(request):
         return HttpResponse(request, "Request is not a POST request!", status=501)
 
 
-@csrf_exempt
 def get_year_data(request):
     """
     Gets the number of events with data for a year
@@ -559,7 +571,6 @@ def get_year_data(request):
         return HttpResponse("Request is not a POST request!", status=501)
 
 
-@csrf_exempt
 def check_local_backup_reports(request):
     """
     Checks if local backup reports saved in the client exist on the server
@@ -636,7 +647,6 @@ def check_local_backup_reports(request):
         return HttpResponse("Request is not a POST request!", status=501)
 
 
-@csrf_exempt
 def upload_offline_reports(request):
     """
     Uploads offline reports saved to the client to the server
@@ -714,7 +724,6 @@ def upload_offline_reports(request):
         return HttpResponse("Request is not a POST request!", status=501)
 
 
-@csrf_exempt
 def get_pits(request):
     """
     Returns the pits and their data for a given event as JSON
@@ -806,7 +815,6 @@ def get_pits(request):
         return HttpResponse(request, "Request is not a POST request!", status=501)
 
 
-@csrf_exempt
 def update_pits(request):
     """
     Takes a pit db (json), compares the received one with the one in the server, and apply the changes to the database
@@ -910,7 +918,6 @@ def update_pits(request):
         return HttpResponse(request, "Request is not a POST request!", status=501)
 
 
-@csrf_exempt
 def get_pit_questions(request):
     """
     Returns the master list of pit scouting questions for a given year
@@ -934,5 +941,213 @@ def get_pit_questions(request):
             status=200,
         )
 
+    else:
+        return HttpResponse(request, "Request is not a POST request!", status=501)
+
+
+def get_teams_with_filters(request):
+    """
+    For the advanced data view. For the given year and events, returns a list of all of the teams that match the filters on the server
+
+    Body Parameters:
+        year: The year that this event is from
+        events: The list of events to filter by
+
+    Returns:
+        A list of all of the teams that match the filters as JSON
+    """
+
+    if request.method == "POST":
+        try:
+            body = json.loads(request.body)
+            events = [event["code"] for event in json.loads(body["events"])]
+        except KeyError:
+            return HttpResponse(request, "No body found in request", status=400)
+
+        team_list = []
+
+        if len(events) > 0:
+            event_list = Event.objects.filter(event_code__in=events)
+
+            datas = data_list = Data.objects.filter(
+                event_model__in=event_list,
+                year=body["year"],
+            )
+            data_list = []
+
+            for data in datas:
+                try:
+                    for item in data.data:
+                        if item["name"] == "team_number":
+                            if item["value"] not in data_list:
+                                data_list.append(item["value"])
+                            break
+                except (AttributeError, TypeError, KeyError):
+                    pass
+        else:
+            datas = Data.objects.filter(year=body["year"])
+            data_list = []
+
+            for data in datas:
+                try:
+                    for item in data.data:
+                        if item["name"] == "team_number":
+                            if item["value"] not in data_list:
+                                data_list.append(item["value"])
+                            break
+                except (AttributeError, TypeError, KeyError):
+                    pass
+
+        for team_number in data_list:
+            team_list.append(team_number)
+
+        return JsonResponse(team_list, safe=False, status=200)
+
+    else:
+        return HttpResponse(request, "Request is not a POST request!", status=501)
+
+
+def get_events_with_filters(request):
+    """
+    For the advanced data view. For the given year and events, returns a list of all of the events in that year
+    If teams are specified, only show events where there's data for those teams
+
+    Body Parameters:
+        year: The year that this event is from
+        teams: The list of teams to filter by
+
+    Returns:
+        A list of all of the events that match the filters as JSON
+    """
+
+    if request.method == "POST":
+        try:
+            body = json.loads(request.body)
+            teams = json.loads(body["teams"])
+        except KeyError:
+            return HttpResponse(request, "No body found in request", status=400)
+
+        event_list = []
+
+        if len(teams) > 0:
+            events_with_data = Data.objects.filter(
+                year=body["year"],
+            )
+
+            for data in events_with_data:
+                try:
+                    for item in data.data:
+                        if item["name"] == "team_number":
+                            if str(item["value"]) in teams:
+                                if data.event_model.event_code not in event_list:
+                                    event_list.append(
+                                        {
+                                            "name": data.event_model.name,
+                                            "code": data.event_model.event_code,
+                                        }
+                                    )
+                                break
+                except (AttributeError, TypeError, KeyError):
+                    pass
+
+        else:
+            events_with_data = Data.objects.filter(year=body["year"])
+
+            for data in events_with_data:
+                try:
+                    event_info = {
+                        "name": data.event_model.name,
+                        "code": data.event_model.event_code,
+                    }
+                    if event_info not in event_list:
+                        event_list.append(event_info)
+                except AttributeError:
+                    pass
+
+        return JsonResponse(event_list, safe=False, status=200)
+
+    else:
+        return HttpResponse(request, "Request is not a POST request!", status=501)
+
+
+def get_data_from_query(request):
+    """
+    For the advanced data view. For the given query, return a list of all of the matching data. Teams should be grouped together
+
+    Example query: `?year=2025&teams=1,2,3&events=alhu,arli`
+
+    Body Parameters:
+        query: The query to filter by
+
+    Returns:
+        A list of all of the data that matches the query
+    """
+    if request.method == "POST":
+        try:
+            body = json.loads(request.body)
+
+        except KeyError:
+            return HttpResponse(request, "No body found in request", status=400)
+
+        query = urlparse(body["query"]).query
+        query_components = parse_qs(query)
+
+        year = query_components.get("year", None)
+        teams = query_components.get("teams", [None])
+        events = query_components.get("events", [None])
+
+        if year is None:
+            return HttpResponse(request, "No year found in query", status=400)
+
+        data = Data.objects.filter(year=year[0])
+
+        if teams[0] is not None:
+            new_data = []
+            for data in data:
+                try:
+                    for item in data.data:
+                        if item["name"] == "team_number":
+                            if item["value"] in teams:
+                                new_data.append(data)
+                            break
+                except (AttributeError, TypeError, KeyError):
+                    pass
+
+            data = new_data
+
+        if events[0] is not None:
+            data = Data.objects.filter(event_model__event_code__in=events)
+
+        final_data = []
+
+        team_data_map = {}
+
+        for item in data:
+            team_number = None
+            if type(item.data) is list:
+                for field in item.data:
+                    if "stat_type" not in field:
+                        field["stat_type"] = "ignore"
+                    if "game_piece" not in field:
+                        field["game_piece"] = ""
+                    if field["name"] == "team_number":
+                        try:
+                            team_number = field["value"]
+                        except KeyError:
+                            pass
+
+                if team_number is not None:
+                    if team_number not in team_data_map:
+                        team_data_map[team_number] = []
+                    team_data_map[team_number].append(item.data)
+
+        final_data = [
+            {"team_number": team_number, "data": [fields for fields in fields_list]}
+            for team_number, fields_list in team_data_map.items()
+        ]
+
+        # print(json.dumps(final_data, indent=4))
+
+        return JsonResponse(final_data, safe=False, status=200)
     else:
         return HttpResponse(request, "Request is not a POST request!", status=501)
