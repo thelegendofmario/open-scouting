@@ -581,7 +581,6 @@
 
                         if (response.ok) {
                             this.data = this.parse_server_data(await response.json());
-                            console.log(this.data);
                             this.data_sorted = this.sort_teams_by_field(this.data);
                             window.dispatchEvent(new CustomEvent('data', {
                                 detail: { data: this.data_sorted }
