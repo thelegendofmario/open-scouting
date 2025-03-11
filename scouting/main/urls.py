@@ -7,6 +7,7 @@ urlpatterns = [
     path("contribute", views.contribute, name="contribute"),
     path("data", views.data, name="data"),
     path("pits", views.pits, name="pits"),
+    path("advanced_data", views.advanced_data, name="advanced_data"),
     path("sw.js", views.service_worker),
     path("submit", views.submit, name="submit"),
     path("get_data", views.get_data, name="get_data"),
@@ -26,4 +27,15 @@ urlpatterns = [
     path("get_pits", views.get_pits, name="get_pits"),
     path("update_pits", views.update_pits, name="update_pits"),
     path("get_pit_questions", views.get_pit_questions, name="get_pit_questions"),
+    path(
+        "get_teams_with_filters",
+        views.get_teams_with_filters,
+        name="get_teams_with_filters",
+    ),
+    path(
+        "get_events_with_filters",
+        views.get_events_with_filters,
+        name="get_events_with_filters",
+    ),
+    path("get_data_from_query", views.get_data_from_query, name="get_data_from_query"),
 ]

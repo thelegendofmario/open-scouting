@@ -86,6 +86,26 @@ class PitsPageTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
 
+class AdvancedDataPageTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+        user = User.objects.create_user("test", "test", "test")
+        user.save()
+
+        profile = Profile(user=user, display_name="test", team_number="1234")
+        profile.save()
+
+    def test_advanced_data_anonymous(self):
+        response = self.client.get("/advanced_data")
+        self.assertEqual(response.status_code, 200)
+
+    def test_advanced_data_authenticated(self):
+        self.client.login(username="test", password="test")
+        response = self.client.get("/advanced_data")
+        self.assertEqual(response.status_code, 200)
+
+
 class ServiceWorkerPageTest(TestCase):
     def setUp(self):
         self.client = Client()
@@ -687,3 +707,119 @@ class GetPitQuestions(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response["Content-Type"], "application/json")
+
+
+class GetTeamsWithFilters(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+        event = Event(year=2024, name="test", event_code="test")
+        event.save()
+
+        data = Data(year=2024, event="test", event_code="test")
+        data.save()
+        data = Data(year=2024, event="test something", event_code="test something")
+        data.save()
+
+    def test_get_teams_with_filters(self):
+        data = json.dumps({"year": 2024, "events": json.dumps([])})
+
+        response = self.client.post(
+            "/get_teams_with_filters", data, content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "application/json")
+
+        response_json = json.loads(response.content)
+        self.assertEqual(len(response_json), 0)
+
+
+class GetEventsWithFilters(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+        event = Event(year=2024, name="test", event_code="test")
+        event.save()
+
+        data = Data(year=2024, event="test", event_code="test")
+        data.data = [
+            {
+                "name": "team_number",
+                "type": "large_integer",
+                "value": "1234",
+                "stat_type": "ignore",
+                "game_piece": "",
+            }
+        ]
+        data.save()
+        data = Data(year=2024, event="test something", event_code="test something")
+        data.data = [
+            {
+                "name": "team_number",
+                "type": "large_integer",
+                "value": "0000",
+                "stat_type": "ignore",
+                "game_piece": "",
+            }
+        ]
+        data.save()
+
+    def test_get_events_with_filters(self):
+        data = json.dumps({"year": 2024, "teams": json.dumps([])})
+
+        response = self.client.post(
+            "/get_events_with_filters", data, content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "application/json")
+
+        response_json = json.loads(response.content)
+        self.assertEqual(len(response_json), 0)
+
+
+class GetDataFromQuery(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+        event = Event(year=2024, name="test", event_code="test")
+        event.save()
+
+        data = Data(year=2024, event="test", event_code="test")
+        data.data = [
+            {
+                "name": "team_number",
+                "type": "large_integer",
+                "value": "1234",
+                "stat_type": "ignore",
+                "game_piece": "",
+            }
+        ]
+        data.save()
+
+    def test_get_data_from_query(self):
+        data = {"query": "?year=2024"}
+
+        response = self.client.post(
+            "/get_data_from_query", data, content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "application/json")
+
+        response_json = json.loads(response.content)
+        self.assertEqual(len(response_json), 1)
+
+    def test_get_data_from_query_filtered(self):
+        data = {"query": "?year=2024&teams=1234"}
+
+        response = self.client.post(
+            "/get_data_from_query", data, content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "application/json")
+
+        response_json = json.loads(response.content)
+        self.assertEqual(len(response_json), 1)
