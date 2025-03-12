@@ -515,21 +515,21 @@
                            @input="update_filters()">
 
                     <div class="my-4">
-                        <button class="dark:bg-slate-700 bg-slate-200 border-2 dark:border-slate-600 border-slate-300 text-black dark:text-white rounded-t-md px-4 py-2 ml-4 disabled:opacity-50 hover:enabled:px-5 active:enabled:px-3 transition-all whitespace-nowrap"
+                        <button class="dark:bg-slate-700 bg-slate-200 border-2 dark:border-slate-600 border-slate-300 text-black dark:text-white rounded-t-md px-2 py-1 md:px-4 md:py-2 ml-4 disabled:opacity-50 hover:enabled:px-5 active:enabled:px-3 transition-all whitespace-nowrap"
                                 :disabled="!show_custom_events"
                                 @click="show_custom_events = false">
                             <i class="ph-bold ph-check-circle"></i>
-                            <span class="dark:text-white text-black">TBA Events</span>
-                            <span class="dark:text-white text-black bg-slate-200 dark:bg-slate-600 py-1 px-3 rounded-full border-slate-300 dark:border-slate-700 max-w-4 aspect-square my-2 text-sm border-2"
+                            <span class="dark:text-white text-black text-sm md:text-md">TBA Events</span>
+                            <span class="dark:text-white text-black bg-slate-200 dark:bg-slate-600 py-1 px-1 md:px-3 rounded-full border-slate-300 dark:border-slate-700 max-w-4 aspect-square my-2 text-sm border-2"
                                   x-text="filtered_events.length"></span>
                         </button>
 
-                        <button class="dark:bg-slate-700 bg-slate-200 border-2 dark:border-slate-600 border-slate-300 text-black dark:text-white rounded-t-md px-4 py-2 disabled:opacity-50 hover:enabled:px-5 active:enabled:px-3 transition-all whitespace-nowrap"
+                        <button class="dark:bg-slate-700 bg-slate-200 border-2 dark:border-slate-600 border-slate-300 text-black dark:text-white rounded-t-md px-2 py-1 md:px-4 md:py-2 disabled:opacity-50 hover:enabled:px-5 active:enabled:px-3 transition-all whitespace-nowrap"
                                 :disabled="show_custom_events"
                                 @click="show_custom_events = true">
                             <i class="ph-bold ph-star"></i>
-                            <span class="dark:text-white text-black">Custom Events</span>
-                            <span class="dark:text-white text-black bg-slate-200 dark:bg-slate-600 py-1 px-3 rounded-full border-slate-300 dark:border-slate-700 max-w-4 aspect-square my-2 text-sm border-2"
+                            <span class="dark:text-white text-black text-sm md:text-md">Custom Events</span>
+                            <span class="dark:text-white text-black bg-slate-200 dark:bg-slate-600 py-1 px-1 md:px-3 rounded-full border-slate-300 dark:border-slate-700 max-w-4 aspect-square my-2 text-sm border-2"
                                   x-text="custom_filtered_events.length"></span>
                         </button>
 
@@ -919,11 +919,11 @@
                 }
             </script>
 
-            <div class="absolute bottom-4 animate-bounce"
+            <div class="absolute bottom-1 md:bottom-4 animate-bounce"
                  x-data="scroll_indicator()"
                  x-show="scroll_value == 0"
                  x-transition>
-                <p class="text-center dark:text-white text-black text-md opacity-60 hover:opacity-100 active:opacity-100 transition-opacity">
+                <p class="text-center dark:text-white text-black text-md opacity-60 hover:opacity-100 active:opacity-100 transition-opacity text-sm md:text-md">
                     <i class="ph-bold ph-mouse-scroll"></i> Scroll for info
                 </p>
             </div>
@@ -1122,13 +1122,15 @@
 
         </div>
 
-        <div class="h-screen w-screen max-w-screen snap-center flex flex-col lg:flex-row justify-center items-center px-6 lg:px-24">
+        <div class="h-screen w-screen max-w-screen snap-center flex flex-col lg:flex-row justify-center items-center px-6 lg:px-24 overflow-hidden">
             <div class="flex flex-col ml-0 lg:ml-12">
-                <p class="text-black dark:text-white font-sans text-4xl">
+                <p class="text-black dark:text-white font-sans text-2xl md:text-4xl">
                     <i class="ph-bold ph-list-dashes"></i> Features
                 </p>
-                <p class="text-black dark:text-white font-sans text-lg mb-4 opacity-80">Open Scouting is an open source application for easier scouting at FIRST Robotics competitions</p>
-                <ul class="list-disc ml-4 text-black dark:text-white">
+                <p class="text-black dark:text-white font-sans text-md md:text-lg mb-4 opacity-80">
+                    Open Scouting is an open source application for easier scouting at FIRST Robotics competitions
+                </p>
+                <ul class="list-disc ml-4 text-black dark:text-white text-sm md:text-md">
                     <li>Gather pit scouting data</li>
                     <li>Anyone can contribute data, and anyone can view it, no account needed</li>
                     <li>Works offline in case of poor connection in the stands</li>
@@ -1142,7 +1144,8 @@
 
             </div>
             <div>
-                <img class="w-128 h-auto" src="{% static '/main/images/mobile.png' %}">
+                <img class="w-128 h-auto hidden sm:block"
+                     src="{% static '/main/images/mobile.png' %}">
             </div>
         </div>
 
