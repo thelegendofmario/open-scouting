@@ -273,6 +273,7 @@
                     create_account_error: "",
                     sending_email: false,
                     sign_in_error: "",
+                    EMAIL_ENABLED: "{{ EMAIL_ENABLED }}",
 
                     create_account_start_over() {
                         this.$refs.create_display_name.value = '';
@@ -359,27 +360,31 @@
 
                         this.$refs.create_email_next.disabled = true;
 
-                        var response = await fetch("{{ SERVER_IP }}/authentication/send_verification_code", {
-                        method: "POST",
-                        headers: {
-                                "X-CSRFToken": "{{ csrf_token }}",
-                                "Content-Type": "application/json"
-                            },
-                        body: JSON.stringify({
-                                uuid: this.user.uuid,
-                                email: this.$refs.create_email.value,
-                                display_name: this.$refs.create_display_name.value,
-                            })
-                        });
+                        if (this.EMAIL_ENABLED) {
+                            var response = await fetch("{{ SERVER_IP }}/authentication/send_verification_code", {
+                            method: "POST",
+                            headers: {
+                                    "X-CSRFToken": "{{ csrf_token }}",
+                                    "Content-Type": "application/json"
+                                },
+                            body: JSON.stringify({
+                                    uuid: this.user.uuid,
+                                    email: this.$refs.create_email.value,
+                                    display_name: this.$refs.create_display_name.value,
+                                })
+                            });
 
-                        if (response.ok) {
-                            response.json().then(async (json) => {
-                                this.create_account_page = 3;
-                            });
+                            if (response.ok) {
+                                response.json().then(async (json) => {
+                                    this.create_account_page = 3;
+                                });
+                            } else {
+                                response.text().then(async (text) => {
+                                    console.log("Unable to send verification code")
+                                });
+                            }
                         } else {
-                            response.text().then(async (text) => {
-                                console.log("Unable to send verification code")
-                            });
+                            this.create_account_page = 4;
                         }
                     },
 
@@ -483,6 +488,7 @@
                                 team_number: this.$refs.create_team_number.value,
                                 email: this.$refs.create_email.value,
                                 password: this.$refs.create_password.value,
+                                verify: this.EMAIL_ENABLED
                             })
                         });
 
@@ -503,7 +509,7 @@
                                     this.create_account_error = "There was an issue creating your account"
                                 } else {
                                     this.create_account_error = "There was an unknown issue creating your account"
-
+                                    console.log(text);
                                 }
                             });
                         }
@@ -555,7 +561,7 @@
                     },
 
                     init() {
-
+                        this.EMAIL_ENABLED = (this.EMAIL_ENABLED == "True")
                     }
                 }
             }
