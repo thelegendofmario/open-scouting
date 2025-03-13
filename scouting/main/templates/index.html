@@ -263,7 +263,29 @@
                                 window.dispatchEvent(new CustomEvent('header_username', {
                                     detail: { username, team_number }
                                 }));
-                                this.page = 2;
+                                
+                                const urlParams = new URLSearchParams(window.location.search);
+                                const year = urlParams.get('year');
+                                const event_name = urlParams.get('event_name');
+                                const event_code = urlParams.get('event_code');
+
+                                if (year && event_name && event_code) {
+                                    window.dispatchEvent(new CustomEvent('header_year', {
+                                        detail: { year }
+                                    }));
+
+                                    window.dispatchEvent(new CustomEvent('header_event', {
+                                        detail: { event_name, event_code }
+                                    }));
+
+                                    window.dispatchEvent(new CustomEvent('scouting_notification', {
+                                        detail: { title:"Event autofilled", body:"Autofilled the event and year from the provided link data", icon:"lightning" }
+                                    }));
+
+                                    this.page = 4;
+                                } else {
+                                    this.page = 2;
+                                }
                             },
 
                             start_demo() {
