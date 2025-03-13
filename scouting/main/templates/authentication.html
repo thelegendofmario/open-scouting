@@ -497,7 +497,7 @@
                                 console.log("Account has been created!");
                                 
                                 this.create_account_page = 5;
-                                setTimeout(this.go_to_index(), 10000);
+                                setTimeout(() => this.go_to_index(), 10000);
                             });
                         } else {
                             response.text().then(async (text) => {
