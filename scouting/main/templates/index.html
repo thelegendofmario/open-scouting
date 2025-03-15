@@ -263,7 +263,29 @@
                                 window.dispatchEvent(new CustomEvent('header_username', {
                                     detail: { username, team_number }
                                 }));
-                                this.page = 2;
+                                
+                                const urlParams = new URLSearchParams(window.location.search);
+                                const year = urlParams.get('year');
+                                const event_name = urlParams.get('event_name');
+                                const event_code = urlParams.get('event_code');
+
+                                if (year && event_name && event_code) {
+                                    window.dispatchEvent(new CustomEvent('header_year', {
+                                        detail: { year }
+                                    }));
+
+                                    window.dispatchEvent(new CustomEvent('header_event', {
+                                        detail: { event_name, event_code }
+                                    }));
+
+                                    window.dispatchEvent(new CustomEvent('scouting_notification', {
+                                        detail: { title:"Event autofilled", body:"Autofilled the event and year from the provided link data", icon:"lightning" }
+                                    }));
+
+                                    this.page = 4;
+                                } else {
+                                    this.page = 2;
+                                }
                             },
 
                             start_demo() {
@@ -515,21 +537,21 @@
                            @input="update_filters()">
 
                     <div class="my-4">
-                        <button class="dark:bg-slate-700 bg-slate-200 border-2 dark:border-slate-600 border-slate-300 text-black dark:text-white rounded-t-md px-4 py-2 ml-4 disabled:opacity-50 hover:enabled:px-5 active:enabled:px-3 transition-all whitespace-nowrap"
+                        <button class="dark:bg-slate-700 bg-slate-200 border-2 dark:border-slate-600 border-slate-300 text-black dark:text-white rounded-t-md px-2 py-1 md:px-4 md:py-2 ml-4 disabled:opacity-50 hover:enabled:px-5 active:enabled:px-3 transition-all whitespace-nowrap"
                                 :disabled="!show_custom_events"
                                 @click="show_custom_events = false">
                             <i class="ph-bold ph-check-circle"></i>
-                            <span class="dark:text-white text-black">TBA Events</span>
-                            <span class="dark:text-white text-black bg-slate-200 dark:bg-slate-600 py-1 px-3 rounded-full border-slate-300 dark:border-slate-700 max-w-4 aspect-square my-2 text-sm border-2"
+                            <span class="dark:text-white text-black text-sm md:text-md">TBA Events</span>
+                            <span class="dark:text-white text-black bg-slate-200 dark:bg-slate-600 py-1 px-1 md:px-3 rounded-full border-slate-300 dark:border-slate-700 max-w-4 aspect-square my-2 text-sm border-2"
                                   x-text="filtered_events.length"></span>
                         </button>
 
-                        <button class="dark:bg-slate-700 bg-slate-200 border-2 dark:border-slate-600 border-slate-300 text-black dark:text-white rounded-t-md px-4 py-2 disabled:opacity-50 hover:enabled:px-5 active:enabled:px-3 transition-all whitespace-nowrap"
+                        <button class="dark:bg-slate-700 bg-slate-200 border-2 dark:border-slate-600 border-slate-300 text-black dark:text-white rounded-t-md px-2 py-1 md:px-4 md:py-2 disabled:opacity-50 hover:enabled:px-5 active:enabled:px-3 transition-all whitespace-nowrap"
                                 :disabled="show_custom_events"
                                 @click="show_custom_events = true">
                             <i class="ph-bold ph-star"></i>
-                            <span class="dark:text-white text-black">Custom Events</span>
-                            <span class="dark:text-white text-black bg-slate-200 dark:bg-slate-600 py-1 px-3 rounded-full border-slate-300 dark:border-slate-700 max-w-4 aspect-square my-2 text-sm border-2"
+                            <span class="dark:text-white text-black text-sm md:text-md">Custom Events</span>
+                            <span class="dark:text-white text-black bg-slate-200 dark:bg-slate-600 py-1 px-1 md:px-3 rounded-full border-slate-300 dark:border-slate-700 max-w-4 aspect-square my-2 text-sm border-2"
                                   x-text="custom_filtered_events.length"></span>
                         </button>
 
@@ -758,58 +780,54 @@
                     }
                 </script>
 
-                <div class="flex flex-col justify-center items-center"
+                <div class="flex flex-col w-full mt-2"
                      x-show="page == 4"
                      x-data="{ contribute_open: false }"
                      x-transition>
-                    <p class="text-center dark:text-white text-black font-sans text-2xl mb-4 mt-6">
-                        <i class="ph-bold ph-sliders-horizontal"></i> Choose an Operation
-                    </p>
-                    <!-- TODO: Support scouting in sessions -->
-                    <!-- <button class="ui_button" @click="contribute_open = !contribute_open">
-                    <i class="ph-bold ph-pencil-simple-line"></i> Contribute Data
-                    </button>
-                    <div class="flex flex-col justify-center items-center mb-6" x-show="contribute_open" x-collapse>
-                        <button class="ui_button" disabled>
-                            <i class="ph-bold ph-link"></i> Create a session
-                        </button>
-                        <p class="dark:text-white text-black opacity-80 text-sm text-center">
-                            Create a session with one scout as the host to allow some more information to be autofilled and managed by the head scout
+                    <div class="flex flex-col justify-center items-center dark:bg-slate-800/80 bg-slate-200 rounded-lg border-2 dark:border-slate-700 border-slate-300 my-2 p-2 md:p-6">
+                        <p class="text-center dark:text-white text-black font-sans text-lg md:text-2xl mb-1 md:mb-4">
+                            <i class="ph-bold ph-sliders-horizontal"></i> Event Actions
                         </p>
-                        <button class="ui_button" @click="get_header_data('contribute_separately')">
-                            <i class="ph-bold ph-pencil"></i> Contribute separately
+                        <!-- TODO: Support scouting in sessions -->
+                        <!-- <button class="ui_button" @click="contribute_open = !contribute_open">
+                        <i class="ph-bold ph-pencil-simple-line"></i> Contribute Data
                         </button>
-                        <p class="dark:text-white text-black opacity-80 text-sm text-center">Contribute data without a session</p>
+                        <div class="flex flex-col justify-center items-center mb-6" x-show="contribute_open" x-collapse>
+                            <button class="ui_button" disabled>
+                                <i class="ph-bold ph-link"></i> Create a session
+                            </button>
+                            <p class="dark:text-white text-black opacity-80 text-sm text-center">
+                                Create a session with one scout as the host to allow some more information to be autofilled and managed by the head scout
+                            </p>
+                            <button class="ui_button" @click="get_header_data('contribute_separately')">
+                                <i class="ph-bold ph-pencil"></i> Contribute separately
+                            </button>
+                            <p class="dark:text-white text-black opacity-80 text-sm text-center">Contribute data without a session</p>
 </div> -->
 
-                    <button class="ui_button" @click="get_header_data('contribute_separately')">
-                        <i class="ph-bold ph-pencil"></i> Contribute separately
-                    </button>
-                    <p class="dark:text-white text-black opacity-80 text-sm text-center">Contribute data without a session</p>
-                    <button class="ui_button" @click="get_header_data('view_data')">
-                        <i class="ph-bold ph-database"></i> View All Data
-                    </button>
-                    <p class="dark:text-white text-black opacity-80 text-sm text-center">View all data for this event</p>
-                    <button class="ui_button" @click="get_header_data('pit_scouting')">
-                        <i class="ph-bold ph-garage"></i> Pit Scouting
-                    </button>
-                    <p class="dark:text-white text-black opacity-80 text-sm text-center">View or contribute pit scouting data for this event</p>
+                        <button class="ui_button" @click="get_header_data('contribute_separately')">
+                            <i class="ph-bold ph-pencil"></i> Contribute
+                        </button>
+                        <p class="dark:text-white text-black opacity-80 text-sm text-center">Contribute data to the server</p>
+                        <button class="ui_button" @click="get_header_data('view_data')">
+                            <i class="ph-bold ph-database"></i> View All Data
+                        </button>
+                        <p class="dark:text-white text-black opacity-80 text-sm text-center">View all data for this event</p>
+                        <button class="ui_button" @click="get_header_data('pit_scouting')">
+                            <i class="ph-bold ph-garage"></i> Pit Scouting
+                        </button>
+                        <p class="dark:text-white text-black opacity-80 text-sm text-center">View or contribute pit scouting data for this event</p>
+                    </div>
 
-                    <p class="text-center dark:text-white text-black font-sans text-xl mb-1 mt-6">
-                        <i class="ph-bold ph-export"></i> Share a link to this event
-                    </p>
-                    <p class="dark:text-white text-black opacity-80 text-sm text-center mb-6">Sharing a link allows scouts to easily get to the correct event to quickly begin scouting</p>
-
-                    <button class="ui_button" @click="get_link_data()">
-                        <i class="ph-bold ph-link"></i> Copy Link
-                    </button>
-
-                    <div class="flex flex-col dark:bg-green-800/70 bg-green-400/70 dark:border-green-700 border-green-500 border-2 rounded-lg w-full px-6 py-4"
-                         x-show="link"
-                         x-transition>
-                        <p class="dark:text-white text-black text-lg text-bold">
-                            <i class="ph-bold ph-check-circle"></i> Link copied!
+                    <div class="flex flex-col justify-center items-center dark:bg-slate-800/80 bg-slate-200 rounded-lg border-2 dark:border-slate-700 border-slate-300 my-2 p-2 md:p-6">
+                        <p class="text-center dark:text-white text-black font-sans text-lg md:text-2xl mb-1 md:mb-4">
+                            <i class="ph-bold ph-export"></i> Share a link to this event
                         </p>
+                        <p class="dark:text-white text-black opacity-80 text-sm text-center mb-6">Sharing a link allows scouts to easily get to the correct event to quickly begin scouting</p>
+
+                        <button class="ui_button" @click="get_link_data()">
+                            <i class="ph-bold ph-link"></i> Copy Link
+                        </button>
                     </div>
                 </div>
             </div>
@@ -876,6 +894,9 @@
                             try {
                                 await navigator.clipboard.writeText(link_to_event);
                                 this.link = link_to_event;
+                                window.dispatchEvent(new CustomEvent('scouting_notification', {
+                                    detail: { title:"Link copied", body:"The link to this event and year has been copied to your clipboard", icon:"check-circle" }
+                                }));
 
                             } catch (err) {
                                 console.error('Failed to copy: ', err);
@@ -919,11 +940,11 @@
                 }
             </script>
 
-            <div class="absolute bottom-4 animate-bounce"
+            <div class="absolute bottom-1 md:bottom-4 animate-bounce"
                  x-data="scroll_indicator()"
                  x-show="scroll_value == 0"
                  x-transition>
-                <p class="text-center dark:text-white text-black text-md opacity-60 hover:opacity-100 active:opacity-100 transition-opacity">
+                <p class="text-center dark:text-white text-black text-md opacity-60 hover:opacity-100 active:opacity-100 transition-opacity text-sm md:text-md">
                     <i class="ph-bold ph-mouse-scroll"></i> Scroll for info
                 </p>
             </div>
@@ -1122,13 +1143,15 @@
 
         </div>
 
-        <div class="h-screen w-screen max-w-screen snap-center flex flex-col lg:flex-row justify-center items-center px-6 lg:px-24">
+        <div class="h-screen w-screen max-w-screen snap-center flex flex-col lg:flex-row justify-center items-center px-6 lg:px-24 overflow-hidden">
             <div class="flex flex-col ml-0 lg:ml-12">
-                <p class="text-black dark:text-white font-sans text-4xl">
+                <p class="text-black dark:text-white font-sans text-2xl md:text-4xl">
                     <i class="ph-bold ph-list-dashes"></i> Features
                 </p>
-                <p class="text-black dark:text-white font-sans text-lg mb-4 opacity-80">Open Scouting is an open source application for easier scouting at FIRST Robotics competitions</p>
-                <ul class="list-disc ml-4 text-black dark:text-white">
+                <p class="text-black dark:text-white font-sans text-md md:text-lg mb-4 opacity-80">
+                    Open Scouting is an open source application for easier scouting at FIRST Robotics competitions
+                </p>
+                <ul class="list-disc ml-4 text-black dark:text-white text-sm md:text-md">
                     <li>Gather pit scouting data</li>
                     <li>Anyone can contribute data, and anyone can view it, no account needed</li>
                     <li>Works offline in case of poor connection in the stands</li>
@@ -1142,7 +1165,8 @@
 
             </div>
             <div>
-                <img class="w-128 h-auto" src="{% static '/main/images/mobile.png' %}">
+                <img class="w-128 h-auto hidden sm:block"
+                     src="{% static '/main/images/mobile.png' %}">
             </div>
         </div>
 

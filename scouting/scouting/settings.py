@@ -22,7 +22,7 @@ env = environ.Env(
         str,
         "django-insecure-#8&%8a-xu)r#tv0ax8csheta#%77ir2#5m!aollbu=92r7ltp(",
     ),
-    DJANGO_ALLOWED_HOSTS=(list, ["localhost", "127.0.0.1"]),
+    ALLOWED_HOSTS=(list, ["localhost", "127.0.0.1"]),
     ADMIN_PATH=(str, "admin/"),
 )
 
@@ -43,14 +43,18 @@ SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env("DEBUG")
+PRODUCTION = env("PRODUCTION")
 
-ALLOWED_HOSTS = env("DJANGO_ALLOWED_HOSTS")
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
 ADMIN_PATH = env("ADMIN_PATH")
 TBA_API_KEY = env("TBA_API_KEY")
 SERVER_IP = env("SERVER_IP")
 SERVER_MESSAGE = env("SERVER_MESSAGE")
 
-CSRF_TRUSTED_ORIGINS = env("CSRF_TRUSTED_ORIGINS")
+CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS")
+CSRF_COOKIE_SECURE = env("CSRF_COOKIE_SECURE", default=False)
+SECURE_SSL_REDIRECT = env("SECURE_SSL_REDIRECT", default=False)
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 POSTGRES_NAME = env("POSTGRES_NAME")
 POSTGRES_USER = env("POSTGRES_USER")
@@ -111,13 +115,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "scouting.wsgi.application"
 
-CSRF_TRUSTED_ORIGINS = [SERVER_IP]
-
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 
-if DEBUG:
+if not PRODUCTION:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",

@@ -34,6 +34,7 @@ def auth(request):
             "TBA_API_KEY": settings.TBA_API_KEY,
             "SERVER_MESSAGE": settings.SERVER_MESSAGE,
             "EMAIL_HOST_USER": settings.EMAIL_HOST_USER,
+            "EMAIL_ENABLED": settings.EMAIL_ENABLED,
         }
 
         return render(request, "authentication.html", context)
@@ -195,6 +196,7 @@ def create_account(request):
         team-number: The team number of the user
         email: The email the user provided
         password: The password the user is setting
+        verify: Weather or not to check if the account has verified
     """
 
     if request.method == "POST":
@@ -207,9 +209,10 @@ def create_account(request):
             user_uuid=body["uuid"], verified=True
         ).first()
 
-        if code_verified:
+        if code_verified or not body["verify"]:
             try:
-                code_verified.delete()
+                if body["verify"]:
+                    code_verified.delete()
 
                 user = User.objects.create_user(
                     body["email"],

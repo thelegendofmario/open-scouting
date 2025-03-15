@@ -6,7 +6,7 @@
 
   **An open source application for easier scouting at First Robotics competitions**
 
-  **[Releases](https://github.com/FRC-Team3484/open-scouting/releases) ● [Issues](https://github.com/FRC-Team3484/open-scouting/issues) ● [Development branch](https://github.com/FRC-Team3484/open-scouting/tree/development)**
+  **[Live Server](https://206.189.255.232/) ● [Releases](https://github.com/FRC-Team3484/open-scouting/releases) ● [Issues](https://github.com/FRC-Team3484/open-scouting/issues) ● [Development branch](https://github.com/FRC-Team3484/open-scouting/tree/development)**
 
 </div>
 
@@ -48,6 +48,9 @@ Follow the steps in [Development Installation](./docs/Development_Installation.m
 ### Production
 First, ensure you have `docker`, `docker-compose`, and `git` installed on your system
 
+> [!NOTE]
+> The included build files assumes that the db data is located at `/mnt/db/postgres` for the db and `/mnt/db/backups` for database backups. Change these values in `docker-compose.yml` to adjust the database location
+
 Next, clone this repository
 ```bash
 git clone https://github.com/FRC-Team3484/open-scouting
@@ -76,7 +79,7 @@ The following variables are for the superuser that is created when the server st
 
 Additionally, you should configure the environment variables for setting up emails
 
-> ![NOTE]
+> [!NOTE]
 > If you're having issues with pip being able to resolve the DNS name, you may need to restart your docker daemon using `sudo systemctl restart docker`
 
 Finally, building and running the server is as simple as running the following
@@ -92,6 +95,18 @@ docker compose up -d
 The server should now be working!
 
 You should navigate to the `/admin` page (or whatever your admin path is) and access your new superuser, and fill in some values for the `Profile` object to prevent any errors when attempting to use this account
+
+#### Backups
+If you'd like to enable backups on your sever, use a cron job to do so
+```bash
+crontab -e # Select the first option
+```
+
+Add these lines into the editor that opens
+```bash
+0 2 * * * docker exec -t postgres pg_dump -U postgres -F c -f /backups/db_backup_$(date +\%F).dump mydatabase
+0 3 * * * find /mnt/db/backups -type f -name "db_backup_*.dump" -mtime +7 -exec rm {} \;
+```
 
 ## Contributing
 Contributions are welcome to this project! Please see the [issues](https://github.com/FRC-Team3484/open-scouting/issues) page or the [roadmap](/docs/ROADMAP.md) for any current bugs or features that need implemented.
