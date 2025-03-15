@@ -1505,10 +1505,6 @@ select {
   padding: 1rem;
 }
 
-.p-6 {
-  padding: 1.5rem;
-}
-
 .\!px-2 {
   padding-left: 0.5rem !important;
   padding-right: 0.5rem !important;
@@ -2424,12 +2420,12 @@ select {
     padding: 0.5rem;
   }
 
-  .md\:p-8 {
-    padding: 2rem;
-  }
-
   .md\:p-6 {
     padding: 1.5rem;
+  }
+
+  .md\:p-8 {
+    padding: 2rem;
   }
 
   .md\:px-3 {
@@ -2447,6 +2443,11 @@ select {
     padding-bottom: 0.5rem;
   }
 
+  .md\:text-2xl {
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+
   .md\:text-3xl {
     font-size: 1.875rem;
     line-height: 2.25rem;
@@ -2460,11 +2461,6 @@ select {
   .md\:text-lg {
     font-size: 1.125rem;
     line-height: 1.75rem;
-  }
-
-  .md\:text-2xl {
-    font-size: 1.5rem;
-    line-height: 2rem;
   }
 }
 
