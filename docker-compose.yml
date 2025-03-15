@@ -31,11 +31,11 @@ services:
     image: postgres
     container_name: postgres
     volumes:
-      - db-data:/var/lib/postgresql/data
+      - /mnt/db/postgres:/var/lib/postgresql/data
+      - /mnt/db/backups:/backups
     env_file:
       - ./scouting/.env.production
     restart: unless-stopped
 
 volumes:
-  db-data:
   staticfiles:
