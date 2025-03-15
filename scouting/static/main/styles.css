@@ -1219,6 +1219,10 @@ select {
   cursor: pointer;
 }
 
+.touch-manipulation {
+  touch-action: manipulation;
+}
+
 .snap-y {
   scroll-snap-type: y var(--tw-scroll-snap-strictness);
 }

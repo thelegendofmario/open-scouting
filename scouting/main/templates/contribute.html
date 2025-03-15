@@ -234,12 +234,12 @@
                             integer_buttons.classList = "flex flex-row";
 
                             let integer_add_button = document.createElement("button");
-                            integer_add_button.classList = "ui_button_icon mx-2";
+                            integer_add_button.classList = "ui_button_icon mx-2 touch-manipulation";
                             integer_add_button.setAttribute("x-on:click", "value < max ? value = value + 1 : null");
                             integer_add_button.innerHTML = `<i class="ph-bold ph-plus"></i>`;
 
                             let integer_subtract_button = document.createElement("button");
-                            integer_subtract_button.classList = "ui_button_icon mx-2";
+                            integer_subtract_button.classList = "ui_button_icon mx-2 touch-manipulation";
                             integer_subtract_button.setAttribute("x-on:click", "value > min ? value = value - 1 : null");
                             integer_subtract_button.innerHTML = `<i class="ph-bold ph-minus"></i>`;
 
