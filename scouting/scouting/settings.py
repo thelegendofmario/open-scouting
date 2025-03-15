@@ -43,6 +43,7 @@ SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env("DEBUG")
+PRODUCTION = env("PRODUCTION")
 
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
 ADMIN_PATH = env("ADMIN_PATH")
@@ -118,7 +119,7 @@ WSGI_APPLICATION = "scouting.wsgi.application"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 
-if DEBUG:
+if not PRODUCTION:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
