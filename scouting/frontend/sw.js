@@ -8,6 +8,8 @@ const addResourcesToCache = async (resources) => {
 };
 
 const putInCache = async (request, response) => {
+	if (request.url.includes("/admin/")) return;
+
 	const cache = await caches.open("v1");
 	await cache.put(request, response);
 	console.log("Cached: ", request.url);
@@ -128,6 +130,7 @@ self.addEventListener("install", (event) => {
 			"/contribute",
 			"/data",
 			"/pits",
+			"/advanced_data",
 			"/static/main/scripts/app.js",
 			"/static/main/styles.css",
 			"/static/main/images/favicon.ico",
