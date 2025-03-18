@@ -1046,7 +1046,7 @@
                 function create_custom_event() {
                     return {
                         shown: false,
-                        YEARS: JSON.parse(`{{ YEARS|safe }}`),
+                        YEARS: JSON.parse(`{{ YEARS|safe }}`).reverse(),
                         selected_year: null,
                         able_to_submit: false,
 
