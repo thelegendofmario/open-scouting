@@ -32,16 +32,32 @@
                        x-text="sign_in_error"></p>
                 </div>
 
-                <input class="ui_input"
-                       placeholder="Email"
-                       type="text"
-                       x-ref="sign_in_email"
-                       @input="check_sign_in_fields()">
-                <input class="ui_input"
-                       placeholder="Password"
-                       type="password"
-                       x-ref="sign_in_password"
-                       @input="check_sign_in_fields()">
+                <div class="flex flex-col w-full items-center">
+                    <input class="ui_input w-full"
+                           placeholder="Email"
+                           type="text"
+                           x-ref="sign_in_email"
+                           @input="check_sign_in_fields()">
+                    <input class="ui_input w-full"
+                           placeholder="Password"
+                           :type="sign_in_show_password ? 'text' : 'password'"
+                           x-ref="sign_in_password"
+                           @input="check_sign_in_fields()">
+
+                    <div class="flex flex-row items-center w-full justify-center mt-2 mb-1">
+                        <input class="ui_checkbox ml-2"
+                               @input="$el.checked ? sign_in_show_password = true : sign_in_show_password = false"
+                               type="checkbox">
+                        <p class="dark:text-white text-black text-sans text-md ml-2"
+                           @click="check_password_visibility()"
+                           x-show="!sign_in_show_password">Show Password</p>
+                        <p class="dark:text-white text-black text-sans text-md ml-2"
+                           @click="check_password_visibility()"
+                           x-show="sign_in_show_password">Hide Password</p>
+                    </div>
+
+                </div>
+
                 <button class="ui_button"
                         x-ref="sign_in_button"
                         @click="sign_in_request()"
@@ -273,6 +289,7 @@
                     create_account_error: "",
                     sending_email: false,
                     sign_in_error: "",
+                    sign_in_show_password: false,
                     EMAIL_ENABLED: "{{ EMAIL_ENABLED }}",
 
                     create_account_start_over() {
