@@ -639,7 +639,7 @@
                 <div x-show="open" x-collapse>
                     <template x-for="team in data.auton" :key="team.team">
                         <div x-show="Object.keys(team.data).length > 0"
-                             x-data="{ open: true }"
+                             x-data="{ open: false }"
                              class="flex flex-col items-left gap-4 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg p-4 my-2">
 
                             <!-- Team Number -->
@@ -708,7 +708,7 @@
                 <div x-show="open" x-collapse>
                     <template x-for="team in data.teleop" :key="team.team">
                         <div x-show="Object.keys(team.data).length > 0"
-                             x-data="{ open: true }"
+                             x-data="{ open: false }"
                              class="flex flex-col items-left gap-4 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg p-4 my-2">
 
                             <!-- Team Number -->
@@ -777,7 +777,7 @@
                     <template x-for="team in data.capabilities" :key="team.team">
                         <div class="flex flex-col items-left gap-4 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg p-4 my-2"
                              x-show="Object.keys(team.data).length > 0"
-                             x-data="{ open: true }">
+                             x-data="{ open: false }">
 
                             <!-- Team Number -->
                             <div class="flex flex-row justify-between"
@@ -842,7 +842,7 @@
 
                 <div x-show="open" x-collapse>
                     <template x-for="team in data.other" :key="team.team">
-                        <template x-if="Object.keys(team.data).length > 0" x-data="{ open: true }">
+                        <template x-if="Object.keys(team.data).length > 0" x-data="{ open: false }">
                             <div class="flex flex-col items-left gap-4 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg p-4 my-2">
 
                                 <!-- Team Number -->
