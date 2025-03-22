@@ -632,7 +632,16 @@
                         }
                     },
 
-                    init() {}
+                    async init() {
+                        // Prevent devices on the page from sleeping
+                        if ("wakeLock" in navigator) {
+                            try {
+                                this.wakeLock = await navigator.wakeLock.request("screen");
+                            } catch (err) {
+                                console.error(`${err.name}, ${err.message}`);
+                            }
+                        }
+                    }
                 }
             }
         </script>
