@@ -213,6 +213,7 @@
                         if (field.type === 'large_integer') {
                             field_element = document.createElement('input');
                             field_element.type = 'number';
+                            field_element.pattern = '[0-9]*';
                             field_element.setAttribute('name', field.simple_name);
                             field_element.setAttribute('x-ref', field.simple_name);
                             field_element.classList = "dark:text-white text-black dark:bg-slate-700 bg-slate-300 rounded px-2 py-1 mb-2";
