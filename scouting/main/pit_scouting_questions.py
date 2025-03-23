@@ -151,13 +151,13 @@ reefscape = [
     },
     {
         "text": "How long does your team strategize for?",
-        "simple_name": "cad",
+        "simple_name": "strategize_time",
         "type": "text",
         "answers": [],
     },
     {
         "text": "How long does it take before you're building and assembling your robot?",
-        "simple_name": "cad",
+        "simple_name": "build_time",
         "type": "text",
         "answers": [],
     },

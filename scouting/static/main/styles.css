@@ -975,6 +975,10 @@ select {
   margin-top: 1.5rem;
 }
 
+.mr-6 {
+  margin-right: 1.5rem;
+}
+
 .block {
   display: block;
 }
@@ -1123,11 +1127,6 @@ select {
   width: auto;
 }
 
-.w-fit {
-  width: -moz-fit-content;
-  width: fit-content;
-}
-
 .w-full {
   width: 100%;
 }
@@ -1217,6 +1216,10 @@ select {
 
 .cursor-pointer {
   cursor: pointer;
+}
+
+.touch-manipulation {
+  touch-action: manipulation;
 }
 
 .snap-y {
@@ -1322,6 +1325,14 @@ select {
 
 .whitespace-nowrap {
   white-space: nowrap;
+}
+
+.break-words {
+  overflow-wrap: break-word;
+}
+
+.break-all {
+  word-break: break-all;
 }
 
 .rounded {

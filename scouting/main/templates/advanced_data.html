@@ -81,7 +81,8 @@
                            placeholder="Search for a team..."
                            x-ref="teams_search"
                            @input="update_team_search()">
-                    <button class="ui_button_small" @click="add_team_open = false">
+                    <button class="ui_button_small"
+                            @click="add_team_open = false; $refs.teams_search.value = ''">
                         <i class="ph-bold ph-x"></i>
                     </button>
                 </div>
@@ -125,7 +126,8 @@
                            placeholder="Search for an event..."
                            x-ref="events_search"
                            @input="update_event_search()">
-                    <button class="ui_button_small" @click="add_event_open = false">
+                    <button class="ui_button_small"
+                            @click="add_event_open = false; this.$refs.events_search.value = ''">
                         <i class="ph-bold ph-x"></i>
                     </button>
                 </div>
@@ -140,7 +142,7 @@
                     </div>
                 </template>
             </div>
-            <p class="dark:text-white text-black font-mono text-sm ml-6 opacity-60"
+            <p class="dark:text-white text-black font-mono text-sm ml-6 opacity-60 break-all mr-6"
                x-text="query"></p>
             <button class="ui_button_small ml-6" @click="clear_filters()">
                 <i class="ph-bold ph-trash"></i> Clear Filters
@@ -240,11 +242,13 @@
 
                     add_team(team) {
                         this.teams.push(team);
+                        this.$refs.teams_search.value = "";
                         this.update_results_and_query();
                     },
 
                     add_event(event) {
                         this.events.push(event);
+                        this.$refs.events_search.value = "";
                         this.update_results_and_query();
                     },
 
@@ -268,6 +272,8 @@
                         data_promise.then(() => {
                             this.get_sortable_fields();
                         });
+
+                        console.log(this.events)
                     },
 
                     update_team_search() {
@@ -639,7 +645,7 @@
                 <div x-show="open" x-collapse>
                     <template x-for="team in data.auton" :key="team.team">
                         <div x-show="Object.keys(team.data).length > 0"
-                             x-data="{ open: true }"
+                             x-data="{ open: false }"
                              class="flex flex-col items-left gap-4 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg p-4 my-2">
 
                             <!-- Team Number -->
@@ -708,7 +714,7 @@
                 <div x-show="open" x-collapse>
                     <template x-for="team in data.teleop" :key="team.team">
                         <div x-show="Object.keys(team.data).length > 0"
-                             x-data="{ open: true }"
+                             x-data="{ open: false }"
                              class="flex flex-col items-left gap-4 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg p-4 my-2">
 
                             <!-- Team Number -->
@@ -777,7 +783,7 @@
                     <template x-for="team in data.capabilities" :key="team.team">
                         <div class="flex flex-col items-left gap-4 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg p-4 my-2"
                              x-show="Object.keys(team.data).length > 0"
-                             x-data="{ open: true }">
+                             x-data="{ open: false }">
 
                             <!-- Team Number -->
                             <div class="flex flex-row justify-between"
@@ -842,7 +848,7 @@
 
                 <div x-show="open" x-collapse>
                     <template x-for="team in data.other" :key="team.team">
-                        <template x-if="Object.keys(team.data).length > 0" x-data="{ open: true }">
+                        <template x-if="Object.keys(team.data).length > 0" x-data="{ open: false }">
                             <div class="flex flex-col items-left gap-4 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg p-4 my-2">
 
                                 <!-- Team Number -->

@@ -213,6 +213,7 @@
                         if (field.type === 'large_integer') {
                             field_element = document.createElement('input');
                             field_element.type = 'number';
+                            field_element.pattern = '[0-9]*';
                             field_element.setAttribute('name', field.simple_name);
                             field_element.setAttribute('x-ref', field.simple_name);
                             field_element.classList = "dark:text-white text-black dark:bg-slate-700 bg-slate-300 rounded px-2 py-1 mb-2";
@@ -234,12 +235,12 @@
                             integer_buttons.classList = "flex flex-row";
 
                             let integer_add_button = document.createElement("button");
-                            integer_add_button.classList = "ui_button_icon mx-2";
+                            integer_add_button.classList = "ui_button_icon mx-2 touch-manipulation";
                             integer_add_button.setAttribute("x-on:click", "value < max ? value = value + 1 : null");
                             integer_add_button.innerHTML = `<i class="ph-bold ph-plus"></i>`;
 
                             let integer_subtract_button = document.createElement("button");
-                            integer_subtract_button.classList = "ui_button_icon mx-2";
+                            integer_subtract_button.classList = "ui_button_icon mx-2 touch-manipulation";
                             integer_subtract_button.setAttribute("x-on:click", "value > min ? value = value - 1 : null");
                             integer_subtract_button.innerHTML = `<i class="ph-bold ph-minus"></i>`;
 
@@ -631,7 +632,16 @@
                         }
                     },
 
-                    init() {}
+                    async init() {
+                        // Prevent devices on the page from sleeping
+                        if ("wakeLock" in navigator) {
+                            try {
+                                this.wakeLock = await navigator.wakeLock.request("screen");
+                            } catch (err) {
+                                console.error(`${err.name}, ${err.message}`);
+                            }
+                        }
+                    }
                 }
             }
         </script>

@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
+from django.db.models import Q
 
 from main.models import Data, Event, PitGroup, Pit
 from . import season_fields
@@ -1072,82 +1073,78 @@ def get_events_with_filters(request):
 
 def get_data_from_query(request):
     """
-    For the advanced data view. For the given query, return a list of all of the matching data. Teams should be grouped together
+    For the advanced data view. Returns a list of all matching data, grouped by teams.
 
     Example query: `?year=2025&teams=1,2,3&events=alhu,arli`
 
     Body Parameters:
-        query: The query to filter by
+        query: The query string to filter by
 
     Returns:
-        A list of all of the data that matches the query
+        A list of all data matching the query, grouped by team number.
     """
-    if request.method == "POST":
-        try:
-            body = json.loads(request.body)
+    if request.method != "POST":
+        return HttpResponse("Request is not a POST request!", status=501)
 
-        except KeyError:
-            return HttpResponse(request, "No body found in request", status=400)
-
-        query = urlparse(body["query"]).query
+    try:
+        body = json.loads(request.body)
+        query = urlparse(body.get("query", "")).query
         query_components = parse_qs(query)
+    except (json.JSONDecodeError, KeyError):
+        return HttpResponse("Invalid JSON body", status=400)
 
-        year = query_components.get("year", None)
-        teams = query_components.get("teams", [None])
-        events = query_components.get("events", [None])
+    year = query_components.get("year", [None])[0]
+    teams = query_components.get("teams", [None])[0]
+    events = query_components.get("events", [None])[0]
 
-        if year is None:
-            return HttpResponse(request, "No year found in query", status=400)
+    if year is None:
+        return HttpResponse("No year found in query", status=400)
 
-        data = Data.objects.filter(year=year[0])
+    # Base query filter by year
+    query_filter = Q(year=year)
 
-        if teams[0] is not None:
-            new_data = []
-            for data in data:
-                try:
-                    for item in data.data:
-                        if item["name"] == "team_number":
-                            if item["value"] in teams:
-                                new_data.append(data)
-                            break
-                except (AttributeError, TypeError, KeyError):
-                    pass
+    # Apply event filter if given
+    if events:
+        event_list = events.split(",")
+        query_filter &= Q(event_model__event_code__in=event_list)
 
-            data = new_data
+    # Get initial queryset (filtered only by year and events)
+    data_queryset = Data.objects.filter(query_filter)
 
-        if events[0] is not None:
-            data = Data.objects.filter(event_model__event_code__in=events)
+    # Manually filter by teams since JSON filtering is not supported in SQLite
+    team_list = teams.split(",") if teams else []
+    filtered_data = []
 
-        final_data = []
+    for item in data_queryset:
+        team_number = None
 
-        team_data_map = {}
+        if isinstance(item.data, list):
+            for field in item.data:
+                field.setdefault("stat_type", "ignore")
+                field.setdefault("game_piece", "")
+                if field["name"] == "team_number":
+                    team_number = str(
+                        field.get("value", "")
+                    )  # Ensure it's a string for comparison
 
-        for item in data:
-            team_number = None
-            if type(item.data) is list:
-                for field in item.data:
-                    if "stat_type" not in field:
-                        field["stat_type"] = "ignore"
-                    if "game_piece" not in field:
-                        field["game_piece"] = ""
-                    if field["name"] == "team_number":
-                        try:
-                            team_number = field["value"]
-                        except KeyError:
-                            pass
+            if not team_list or team_number in team_list:
+                filtered_data.append(item)
 
-                if team_number is not None:
-                    if team_number not in team_data_map:
-                        team_data_map[team_number] = []
-                    team_data_map[team_number].append(item.data)
+    # Organize results by team
+    team_data_map = {}
 
-        final_data = [
-            {"team_number": team_number, "data": [fields for fields in fields_list]}
-            for team_number, fields_list in team_data_map.items()
-        ]
+    for item in filtered_data:
+        team_number = None
+        if isinstance(item.data, list):
+            for field in item.data:
+                if field["name"] == "team_number":
+                    team_number = str(field.get("value", ""))
 
-        # print(json.dumps(final_data, indent=4))
+            if team_number:
+                team_data_map.setdefault(team_number, []).append(item.data)
 
-        return JsonResponse(final_data, safe=False, status=200)
-    else:
-        return HttpResponse(request, "Request is not a POST request!", status=501)
+    final_data = [
+        {"team_number": team, "data": fields} for team, fields in team_data_map.items()
+    ]
+
+    return JsonResponse(final_data, safe=False, status=200)
