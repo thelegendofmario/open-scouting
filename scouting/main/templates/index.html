@@ -684,23 +684,24 @@
                             },
 
                             update_filters() {
-                                if (this.$refs.show_past_events.checked == false) {
-                                    let today = new Date();
+                                let today = new Date();
+                                today.setHours(0, 0, 0, 0); // Normalize today to midnight
 
+                                if (!this.$refs.show_past_events.checked) {
                                     this.filtered_events = this.events.filter(event => {
-                                        let eventDate = new Date(event.end_date);
+                                        let eventDate = new Date(event.end_date + "T23:59:59"); // Ensure full day is considered
                                         return eventDate >= today;
                                     });
 
                                     this.custom_filtered_events = this.custom_events.filter(event => {
-                                        let eventDate = new Date(event.end_date);
+                                        let eventDate = new Date(event.end_date + "T23:59:59");
                                         return eventDate >= today;
                                     });
-
                                 } else {
                                     this.filtered_events = this.events;
                                     this.custom_filtered_events = this.custom_events;
                                 }
+
 
                                 let search = this.$refs.event_search.value.toLowerCase();
 
