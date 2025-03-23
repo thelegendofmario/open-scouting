@@ -81,7 +81,8 @@
                            placeholder="Search for a team..."
                            x-ref="teams_search"
                            @input="update_team_search()">
-                    <button class="ui_button_small" @click="add_team_open = false">
+                    <button class="ui_button_small"
+                            @click="add_team_open = false; $refs.teams_search.value = ''">
                         <i class="ph-bold ph-x"></i>
                     </button>
                 </div>
@@ -125,7 +126,8 @@
                            placeholder="Search for an event..."
                            x-ref="events_search"
                            @input="update_event_search()">
-                    <button class="ui_button_small" @click="add_event_open = false">
+                    <button class="ui_button_small"
+                            @click="add_event_open = false; this.$refs.events_search.value = ''">
                         <i class="ph-bold ph-x"></i>
                     </button>
                 </div>
@@ -240,11 +242,13 @@
 
                     add_team(team) {
                         this.teams.push(team);
+                        this.$refs.teams_search.value = "";
                         this.update_results_and_query();
                     },
 
                     add_event(event) {
                         this.events.push(event);
+                        this.$refs.events_search.value = "";
                         this.update_results_and_query();
                     },
 
