@@ -481,7 +481,7 @@
                                         })
                                     });
 
-                                    response.text().then(async (text) => {
+                                    await response.text().then(async (text) => {
                                         this.pit_data_old = JSON.parse(JSON.stringify(this.pit_data));
 
                                         this.remove_pit_data_locally();
@@ -505,58 +505,67 @@
                     },
 
                     async sync_pit_data() {
-                        // Push and then pull pit data from the server
                         this.state = "syncing";
 
-                        if (globalThis.offline == false) {
-                            var response = await fetch("{{ SERVER_IP }}/update_pits", {
-                                method: "POST",
-                                headers: {
-                                        "Content-Type": "application/json",
-                                        "X-CSRFToken": "{{ csrf_token }}"
-,                                    },
-                                body: JSON.stringify({
-                                    event_name: encodeURIComponent("{{ event_name }}"),
-                                    event_code: "{{ event_code }}",
-                                    custom: "{{ custom }}",
-                                    year: "{{ year }}",
-                                    data: this.pit_data
-                                })
-                            });
-
-                            response.text().then(async (text) => {
-                                var get_response = await fetch("{{ SERVER_IP }}/get_pits", {
+                        if (!globalThis.offline) {
+                            try {
+                                // First, push the data to the server
+                                let response = await fetch("{{ SERVER_IP }}/update_pits", {
                                     method: "POST",
                                     headers: {
-                                            "Content-Type": "application/json",
-                                            "X-CSRFToken": "{{ csrf_token }}"
-                                        },
+                                        "Content-Type": "application/json",
+                                        "X-CSRFToken": "{{ csrf_token }}"
+                                    },
                                     body: JSON.stringify({
-                                            event_name: encodeURIComponent("{{ event_name }}"),
-                                            event_code: "{{ event_code }}",
-                                            custom: "{{ custom }}",
-                                            year: "{{ year }}"
-                                        })
-                                    });
-                                
-                                    get_response.text().then(async (text) => {
-                                    this.pit_data = JSON.parse(text);
-                                    this.pit_data_old = JSON.parse(text);
-
-                                    this.filter_pit_data();
-                                    this.get_pit_status();
-
-                                    this.remove_pit_data_locally();
-
-                                    this.state = "saved";
+                                        event_name: encodeURIComponent("{{ event_name }}"),
+                                        event_code: "{{ event_code }}",
+                                        custom: "{{ custom }}",
+                                        year: "{{ year }}",
+                                        data: this.pit_data
+                                    })
                                 });
-                            });
+
+                                if (!response.ok) throw new Error("Failed to update pits on server");
+
+                                // Then, fetch the updated data from the server
+                                let get_response = await fetch("{{ SERVER_IP }}/get_pits", {
+                                    method: "POST",
+                                    headers: {
+                                        "Content-Type": "application/json",
+                                        "X-CSRFToken": "{{ csrf_token }}"
+                                    },
+                                    body: JSON.stringify({
+                                        event_name: encodeURIComponent("{{ event_name }}"),
+                                        event_code: "{{ event_code }}",
+                                        custom: "{{ custom }}",
+                                        year: "{{ year }}"
+                                    })
+                                });
+
+                                if (!get_response.ok) throw new Error("Failed to fetch updated pits");
+
+                                let data = await get_response.json();
+
+                                // Update local state
+                                this.pit_data = data;
+                                this.pit_data_old = JSON.parse(JSON.stringify(data));
+
+                                this.filter_pit_data();
+                                this.get_pit_status();
+                                this.remove_pit_data_locally();
+
+                                this.state = "saved";
+                            } catch (error) {
+                                console.error("Sync Error:", error);
+                                this.state = "offline"; // Handle failure by marking offline
+                            }
                         } else {
                             this.store_pit_data_locally();
                             this.state = "offline";
                             this.pit_data_old = JSON.parse(JSON.stringify(this.pit_data));
                         }
                     },
+
 
                     store_pit_data_locally() {
                         const openRequest = indexedDB.open("scouting_data", 4);
