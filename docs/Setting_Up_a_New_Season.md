@@ -6,6 +6,7 @@ These steps should be followed as early in the season as possible, preferably on
 
 ## 1. Update `season_fields.py`
 - Add a new year to the `season_fields.py` file. Follow [Formatting Season Fields](./Formatting_Season_Fields.md) for how to do this. Data entries should be kept simple and not complicated, simplify or remove any fields that you can, and the very minimum amount of fields should be kept required, the goal is to make the process as easy and quick as possible for scouts.
+- Add the new year to the mapping dictionary in the `get_season_fields` function
 
 ## 2. Update `pit_scouting_questions.py`
 - Add a new year to the `pit_scouting_questions.py` file. Follow [Formatting Pit Scouting Questions](./Formatting_Pit_Scouting_Questions.md) for how to do this. Simplify the amount of hte questions for scouts to ask to make the pit scouting process as easy as possible.
@@ -14,7 +15,7 @@ These steps should be followed as early in the season as possible, preferably on
 ## 3. Update `views.py` and `models.py`
 - Navigate to `/main/views.py`
   - Add the new year to the `YEARS` array
-  - Add to the `get_season_data_from_year` and `get_demo_data_from_year` functions to return the new year's data
+  - Add to the `get_demo_data_from_year` function to return the new year's data
 - Navigate to `/main/models.py`
   - Add the new year to the `YEARS` array as a tuple, just match with the years that are already in this array
 

@@ -24,22 +24,6 @@ DATE_FORMAT = "%Y-%m-%d"
 
 
 # TODO: Move to respective .py files instead
-def get_season_data_from_year(year):
-    """
-    Returns the season data for a given year.
-
-    Args:
-        year (str): The year that you want the season data for
-    """
-    if year == "2024":
-        return season_fields.crescendo
-    elif year == "2025":
-        return season_fields.reefscape
-    else:
-        return None
-
-
-# TODO: Move to respective .py files instead
 def get_demo_data_from_year(year):
     """
     Returns the demo data for a given year.
@@ -217,7 +201,7 @@ def contribute(request):
         "TBA_API_KEY": settings.TBA_API_KEY,
         "SERVER_MESSAGE": settings.SERVER_MESSAGE,
         "season_fields": json.dumps(
-            get_season_data_from_year(request.GET.get("year", "unknown"))
+            season_fields.get_season_fields(request.GET.get("year", "unknown"))
         ),
         "username": request.GET.get("username", "unknown"),
         "team_number": request.GET.get("team_number", "unknown"),
@@ -440,7 +424,7 @@ def get_data(request):
 
             all_names = season_fields.create_tabulator_headers(
                 season_fields.collect_field_names(
-                    get_season_data_from_year(body["year"])
+                    season_fields.get_season_fields(body["year"])
                 )
             )
 
