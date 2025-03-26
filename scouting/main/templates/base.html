@@ -5,10 +5,12 @@
         {% block head_scripts %}
         {% endblock head_scripts %}
 
+        <!-- Phosphor Icons -->
         <link rel="stylesheet"
               type="text/css"
               href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css" />
 
+        <!-- alpine.js -->
         <script defer
                 src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
         <script defer
@@ -17,8 +19,14 @@
         <script defer
                 src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
+        <!-- chart.js -->
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+        <!-- tippy.js -->
+        <script src="https://unpkg.com/@popperjs/core@2"></script>
+        <script src="https://unpkg.com/tippy.js@6"></script>
+
+        <!-- Open Scouting -->
         <script src="{% static '/main/scripts/app.js' %}"></script>
 
         <script>
@@ -48,5 +56,7 @@
         {% include "server_message.html" %}
 
         {% block scripts %}{% endblock %}
+
+        <script>tippy('[data-tippy-content]', { theme: "open-scouting", arrow: false });</script>
     </body>
 </html>
