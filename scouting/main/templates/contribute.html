@@ -375,6 +375,14 @@
                     
                     init() {
                         this.parse_json(JSON.parse(this.field_data));
+
+                        let urlParams = new URLSearchParams(window.location.search);
+
+                        let match_number = urlParams.get('match_number', '');
+                        let match_type = urlParams.get('match_type', 'N/A');
+
+                        document.querySelector('input[name="match_number"]').value = match_number;
+                        document.querySelector('select[name="match_type"]').value = decodeURIComponent(match_type);
                     }
                 }
             }
@@ -497,6 +505,9 @@
                         } catch {
                             var demo_param = false;
                         }
+                        
+                        let match_number = document.querySelector("input[name='match_number']").value;
+                        let type = document.querySelector("select[name='match_type']").value;
 
                         if (!demo_param) {
                             if (this.check_fields()) {
@@ -565,6 +576,9 @@
                                         url.searchParams.delete("submitted_offline");
                                         url.searchParams.delete("submitted_demo");
 
+                                        url.searchParams.set("match_number", parseInt(match_number, 10) + 1);
+                                        url.searchParams.set("match_type", encodeURIComponent(type));
+
                                         window.location.href = url.toString();
                                     });
                                 } else {
@@ -605,6 +619,9 @@
                                             url.searchParams.delete("submitted");
                                             url.searchParams.delete("submitted_demo");
 
+                                            url.searchParams.set("match_number", parseInt(match_number, 10) + 1);
+                                            url.searchParams.set("match_type", encodeURIComponent(type));
+
                                             window.location.href = url.toString();
                                         };
 
@@ -627,6 +644,9 @@
                             url.searchParams.set("submitted_demo", true);
                             url.searchParams.delete("submitted");
                             url.searchParams.delete("submitted_offline");
+
+                            url.searchParams.set("match_number", parseInt(match_number, 10) + 1);
+                            url.searchParams.set("match_type", encodeURIComponent(type));
 
                             window.location.href = url.toString();
                         }
