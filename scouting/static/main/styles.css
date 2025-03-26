@@ -1742,6 +1742,16 @@ select {
   color: rgb(255 255 255 / var(--tw-text-opacity));
 }
 
+.\!text-blue-500 {
+  --tw-text-opacity: 1 !important;
+  color: rgb(59 130 246 / var(--tw-text-opacity)) !important;
+}
+
+.\!text-red-500 {
+  --tw-text-opacity: 1 !important;
+  color: rgb(239 68 68 / var(--tw-text-opacity)) !important;
+}
+
 .opacity-0 {
   opacity: 0;
 }
