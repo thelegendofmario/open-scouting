@@ -664,7 +664,6 @@
                         for (const field of other_fields) {
                             let value;
                             if (field.value) {
-
                                 if (field.getAttribute("scouting_type") == "integer") {
                                     value = field.value;
                                 }
@@ -673,6 +672,16 @@
                                     "name": field.getAttribute("x-ref"),
                                     "type": field.getAttribute("scouting_type"),
                                     "value": value,
+                                    "stat_type": field.getAttribute("scouting_stat_type"),
+                                    "game_piece": field.getAttribute("scouting_game_piece")
+                                }
+
+                                data.push(data_field);
+                            } else {
+                                let data_field = {
+                                    "name": field.getAttribute("x-ref"),
+                                    "type": field.getAttribute("scouting_type"),
+                                    "value": 0,
                                     "stat_type": field.getAttribute("scouting_stat_type"),
                                     "game_piece": field.getAttribute("scouting_game_piece")
                                 }
