@@ -6,7 +6,7 @@ This document describes the roadmap for Open Scouting, and roughly when each fea
 ## To-Do
 ### `v0.1.2-alpha`
 - [ ] [#62](https://github.com/FRC-Team3484/open-scouting/issues/62) - Issues with saving and syncing pit scouting data
-- [ ] [#63](https://github.com/FRC-Team3484/open-scouting/issues/63) - Offline pit scouting data doesn't seem to be cleared locally properly
+- [x] [#63](https://github.com/FRC-Team3484/open-scouting/issues/63) - Offline pit scouting data doesn't seem to be cleared locally properly
 - [x] [#64](https://github.com/FRC-Team3484/open-scouting/issues/64) - Add a button to return to the top of the screen in pit scouting
 - [ ] [#60](https://github.com/FRC-Team3484/open-scouting/issues/60) - In certain cases, the `/authentication` page cannot be loaded
 - [x] [#26](https://github.com/FRC-Team3484/open-scouting/issues/26) - Autofill match and team numbers when contributing separately
