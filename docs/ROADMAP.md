@@ -11,10 +11,9 @@ This document describes the roadmap for Open Scouting, and roughly when each fea
 - [ ] [#60](https://github.com/FRC-Team3484/open-scouting/issues/60) - In certain cases, the `/authentication` page cannot be loaded
 - [x] [#26](https://github.com/FRC-Team3484/open-scouting/issues/26) - Autofill match and team numbers when contributing separately
 - [x] [#66](https://github.com/FRC-Team3484/open-scouting/issues/66) - Add a field on the contribute page for indicating what kind of match
-
+- [x] [#69](https://github.com/FRC-Team3484/open-scouting/issues/69) - Create team summaries in the advanced data view
 
 ### `v0.1.3-alpha`
-- [ ] [#69](https://github.com/FRC-Team3484/open-scouting/issues/69) - Create team summaries in the advanced data view
 - [ ] [#70](https://github.com/FRC-Team3484/open-scouting/issues/70) - Charts in the advanced data view don't update when the filters do
 - [ ] [#71](https://github.com/FRC-Team3484/open-scouting/issues/71) - Organize client side code
 - [ ] [#54](https://github.com/FRC-Team3484/open-scouting/issues/54) - Update Tailwind.css to v4.0
