@@ -239,7 +239,7 @@
                                                 </template>
 
                                                 <button class="ui_button_icon !w-10 !h-10 ml-2"
-                                                        @click="submit_answer($event, question.simple_name, question.type)">
+                                                        @click="submit_answer($event, question.simple_name, question.type); editing = false;">
                                                     <i class="ph-bold ph-check !text-md"></i>
                                                 </button>
                                             </div>
@@ -415,18 +415,27 @@
                         let team_number = event.target.closest(".pit_top").getAttribute("team_number");
 
                         var today = new Date();
-                        var date = today.getFullYear() + "-" + (today.getMonth()+1) + "-" + today.getDate();
+                        var date = today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate();
 
                         let pit_index = this.pit_data.findIndex(obj => obj.team_number == team_number);
                         let question_index = this.pit_data[pit_index].questions.findIndex(obj => obj.simple_name == simple_name);
 
-                        if (type == "boolean") {
-                            this.pit_data[pit_index].questions[question_index].answers.push({value: input.checked, user: "{{ username }}", contributed: date});
-                        } else {
-                            this.pit_data[pit_index].questions[question_index].answers.push({value: input.value, user: "{{ username }}", contributed: date});
-                        }
+                        let new_value = type == "boolean" ? input.checked : input.value;
 
-                        this.state = "unsaved";
+                        // Check if the answer already exists to prevent duplicates
+                        let existing_answer = this.pit_data[pit_index].questions[question_index].answers.find(
+                            ans => ans.value == new_value && ans.user == "{{ username }}"
+                        );
+
+                        if (!existing_answer) {
+                            this.pit_data[pit_index].questions[question_index].answers.push({
+                                value: new_value,
+                                user: "{{ username }}",
+                                contributed: date
+                            });
+
+                            this.state = "unsaved";
+                        }
                     },
 
                     submit_question(event, name) {

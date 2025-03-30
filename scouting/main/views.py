@@ -852,6 +852,9 @@ def update_pits(request):
 
             if diff:
                 try:
+                    pits_to_update = []
+                    pits_to_create = []
+
                     for change in list(diff["iterable_item_removed"]):
                         if "root" and "questions" and "answers" in change.path():
                             team_number = client_db[
@@ -864,7 +867,7 @@ def update_pits(request):
                             pit.data[change.path(output_format="list")[2]][
                                 "answers"
                             ].append(change.t1)
-                            pit.save()
+                            pits_to_update.append(pit)
 
                         elif "root" and "questions" in change.path():
                             team_number = client_db[
@@ -875,7 +878,7 @@ def update_pits(request):
                             ).first()
 
                             pit.data.append(change.t1)
-                            pit.save()
+                            pits_to_update.append(pit)
 
                         elif "root" in change.path():
                             pit_data = change.t1
@@ -886,7 +889,11 @@ def update_pits(request):
                                 created=timezone.now(),
                                 data=pit_data["questions"],
                             )
-                            pit.save()
+                            pits_to_create.append(pit)
+
+                    # Bulk update and create
+                    Pit.objects.bulk_update(pits_to_update, ["data"])
+                    Pit.objects.bulk_create(pits_to_create)
 
                     return JsonResponse("done", safe=False, status=200)
 
