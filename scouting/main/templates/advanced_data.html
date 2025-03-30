@@ -148,27 +148,31 @@
                 <i class="ph-bold ph-trash"></i> Clear Filters
             </button>
 
-            <p class="dark:text-white text-black text-sans text-2xl ml-4 mt-4">
-                <i class="ph-bold ph-funnel-simple"></i> Sort By
-            </p>
-            <p class="dark:text-white text-black text-sans text-sm ml-6 opacity-80">
-                Sorts the data displayed below by each team by a stat. For example, sort the teams in descending order by the average coral scored during the autonomous period
-            </p>
-            <div class="flex flex-row mx-4 gap-2">
-                <select class="ui_input"
-                        x-ref="sort_field"
-                        @change="update_results_and_query()">
-                    <template x-for="field in sort_fields">
-                        <option :value="field.simple_name" x-text="field.name"></option>
-                    </template>
-                </select>
-                <select class="ui_input"
-                        x-ref="sort_order"
-                        @change="update_results_and_query()">
-                    <option value="descending">Descending (High to low)</option>
-                    <option value="ascending">Ascending (Low to high)</option>
-                </select>
+            <!-- TODO: Fix this later -->
+            <div class="flex flex-col !hidden">
+                <p class="dark:text-white text-black text-sans text-2xl ml-4 mt-4">
+                    <i class="ph-bold ph-funnel-simple"></i> Sort By
+                </p>
+                <p class="dark:text-white text-black text-sans text-sm ml-6 opacity-80">
+                    Sorts the data displayed below by each team by a stat. For example, sort the teams in descending order by the average coral scored during the autonomous period
+                </p>
+                <div class="flex flex-row mx-4 gap-2">
+                    <select class="ui_input"
+                            x-ref="sort_field"
+                            @change="update_results_and_query()">
+                        <template x-for="field in sort_fields">
+                            <option :value="field.simple_name" x-text="field.name"></option>
+                        </template>
+                    </select>
+                    <select class="ui_input"
+                            x-ref="sort_order"
+                            @change="update_results_and_query()">
+                        <option value="descending">Descending (High to low)</option>
+                        <option value="ascending">Ascending (Low to high)</option>
+                    </select>
+                </div>
             </div>
+
         </div>
 
         <script>
@@ -294,19 +298,20 @@
                             return [];
                         }
 
+                        // Default sorting option
                         sort_fields["disabled"] = {
                             simple_name: "disabled",
                             name: "Don't sort"
                         };
 
-                        // Process auton & teleop sections
-                        ["auton", "teleop"].forEach(section => {
-                            if (this.data[section]) {
-                                for (const team_number in this.data[section]) {
-                                    const team_data = this.data[section][team_number];
+                        // Process each team's auton & teleop sections
+                        for (const team_number in this.data) {
+                            const team_data = this.data[team_number];
 
-                                    for (const game_piece in team_data) {
-                                        const game_piece_data = team_data[game_piece];
+                            ["auton", "teleop"].forEach(section => {
+                                if (team_data[section]) {
+                                    for (const game_piece in team_data[section]) {
+                                        const game_piece_data = team_data[section][game_piece];
 
                                         ["score", "miss"].forEach(type => {
                                             if (game_piece_data[type]) {
@@ -320,94 +325,74 @@
                                         });
                                     }
                                 }
-                            }
-                        });
-
-                        // We can't properly sort for all capabilities so they're disabled for now
-                        // if (this.data.capabilities) {
-                        //     for (const team_number in this.data.capabilities) {
-                        //         for (const capability in this.data.capabilities[team_number]) {
-                        //             sort_fields[capability] = {
-                        //                 simple_name: capability,
-                        //                 name: capability.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
-                        //             };
-                        //         }
-                        //     }
-                        // }
+                            });
+                        }
 
                         // Convert to array
                         this.sort_fields = Object.values(sort_fields);
                     },
 
-
                     sort_teams_by_field(data) {
-                        // TODO: There's still a chance that the data will be filtered if for some reason there's a field with name "disabled"
-                        if (!this.data) {
+                        if (!data) {
                             console.warn("No data available");
+                            return [];
                         }
 
                         let field = this.$refs.sort_field.value;
                         let order = this.$refs.sort_order.value;
 
-                        let teams = new Set();
+                        // Collect all team numbers (keys of the data object)
+                        let teamList = Object.keys(data);
 
-                        // Collect all team numbers from all sections
-                        ["auton", "teleop", "capabilities", "other"].forEach(section => {
-                            if (data[section]) {
-                                Object.keys(data[section]).forEach(team => teams.add(team));
-                            }
-                        });
-
-                        // Convert Set to an Array
-                        let teamList = Array.from(teams);
-
-                        // Sort the teams based on the selected field
+                        // Sort teams based on the selected field
                         teamList.sort((teamA, teamB) => {
                             let valueA = this.get_team_field_value(teamA, field);
                             let valueB = this.get_team_field_value(teamB, field);
 
+                            // Handle undefined or null values by defaulting to 0
+                            valueA = valueA || 0;
+                            valueB = valueB || 0;
+
+                            // Determine order of sorting
                             return order === "ascending" ? valueA - valueB : valueB - valueA;
                         });
 
-                        // Create a new sorted data object
-                        let sortedData = {};
-                        ["auton", "teleop", "capabilities", "other"].forEach(section => {
-                            sortedData[section] = [];
+                        // Create a new sorted array of objects
+                        let sortedData = teamList.map(team => ({ teamNumber: team, data: data[team] }));
 
-                            if (data[section]) {
-                                teamList.forEach(team => {
-                                    let teamData = data[section][team] || {}; // Keep empty teams
-                                    sortedData[section].push({ team, data: teamData });
-                                });
-                            }
-                        });
+                        console.log(sortedData)
 
                         return sortedData;
                     },
 
                     // Helper function to get a team's value for a given field
                     get_team_field_value(team, field) {
-                        let value = 0;
+                        let values = [];
 
+                        // Loop through 'auton' and 'teleop' sections
                         ["auton", "teleop"].forEach(section => {
                             if (this.data[section]?.[team]) {
                                 for (const game_piece in this.data[section][team]) {
+                                    // Loop through 'score' and 'miss' types
                                     ["score", "miss"].forEach(type => {
-                                        if (this.data[section][team][game_piece]?.[type]?.[field]?.average !== undefined) {
-                                            value = this.data[section][team][game_piece][type][field].average;
+                                        const fieldData = this.data[section][team][game_piece]?.[type]?.[field];
+                                        if (fieldData?.average !== undefined) {
+                                            values.push(fieldData.average);
                                         }
                                     });
                                 }
                             }
                         });
 
+                        // Handle capabilities section
                         if (this.data.capabilities?.[team]?.[field]) {
-                            // Get any numeric percentage for capabilities
-                            value = Object.values(this.data.capabilities[team][field])[0] || 0;
+                            // If field is in capabilities, grab the first value or default to 0
+                            values.push(Object.values(this.data.capabilities[team][field])[0] || 0);
                         }
 
-                        return value;
+                        return values;
                     },
+
 
                     async get_teams_with_filters() {
                         var response = await fetch("{{ SERVER_IP }}/get_teams_with_filters", {
@@ -451,20 +436,19 @@
                     },
 
                     parse_server_data(data) {
-                        const final_data = {
-                            auton: {},
-                            teleop: {},
-                            capabilities: {},
-                            other: {}
-                        };
+                        const final_data = {};
 
                         for (const team of data) {
                             const team_number = team.team_number;
 
-                            if (!final_data.auton[team_number]) final_data.auton[team_number] = {};
-                            if (!final_data.teleop[team_number]) final_data.teleop[team_number] = {};
-                            if (!final_data.capabilities[team_number]) final_data.capabilities[team_number] = {};
-                            if (!final_data.other[team_number]) final_data.other[team_number] = [];
+                            if (!final_data[team_number]) {
+                                final_data[team_number] = {
+                                    auton: {},
+                                    teleop: {},
+                                    capabilities: {},
+                                    other: []
+                                };
+                            }
 
                             team.data.forEach(match => {
                                 match.forEach(field => {
@@ -473,106 +457,87 @@
                                     switch (stat_type) {
                                         case "auton_score":
                                         case "auton_miss":
-                                            if (!game_piece) break; // skip if no game_piece
-                                            if (!final_data.auton[team_number][game_piece]) {
-                                                final_data.auton[team_number][game_piece] = {
-                                                    score: {},
-                                                    miss: {}
-                                                };
+                                            if (!game_piece) break;
+                                            if (!final_data[team_number].auton[game_piece]) {
+                                                final_data[team_number].auton[game_piece] = { score: {}, miss: {} };
                                             }
                                             const autonType = stat_type === "auton_score" ? "score" : "miss";
-                                            if (!final_data.auton[team_number][game_piece][autonType][name]) {
-                                                final_data.auton[team_number][game_piece][autonType][name] = {
-                                                    values: [],
-                                                    average: 0
-                                                };
+                                            if (!final_data[team_number].auton[game_piece][autonType][name]) {
+                                                final_data[team_number].auton[game_piece][autonType][name] = { values: [], average: 0, stat_type };
                                             }
-                                            final_data.auton[team_number][game_piece][autonType][name].values.push(value);
+                                            final_data[team_number].auton[game_piece][autonType][name].values.push(value);
                                             break;
 
                                         case "score":
                                         case "miss":
-                                            if (!game_piece) break; // skip if no game_piece
-                                            if (!final_data.teleop[team_number][game_piece]) {
-                                                final_data.teleop[team_number][game_piece] = {
-                                                    score: {},
-                                                    miss: {}
-                                                };
+                                            if (!game_piece) break;
+                                            if (!final_data[team_number].teleop[game_piece]) {
+                                                final_data[team_number].teleop[game_piece] = { score: {}, miss: {} };
                                             }
                                             const teleopType = stat_type === "score" ? "score" : "miss";
-                                            if (!final_data.teleop[team_number][game_piece][teleopType][name]) {
-                                                final_data.teleop[team_number][game_piece][teleopType][name] = {
-                                                    values: [],
-                                                    average: 0
-                                                };
+                                            if (!final_data[team_number].teleop[game_piece][teleopType][name]) {
+                                                final_data[team_number].teleop[game_piece][teleopType][name] = { values: [], average: 0, stat_type };
                                             }
-                                            final_data.teleop[team_number][game_piece][teleopType][name].values.push(value);
+                                            final_data[team_number].teleop[game_piece][teleopType][name].values.push(value);
                                             break;
 
                                         case "capability":
-                                            if (!final_data.capabilities[team_number][name]) {
-                                                final_data.capabilities[team_number][name] = {};
+                                            if (!final_data[team_number].capabilities[name]) {
+                                                final_data[team_number].capabilities[name] = {};
                                             }
-                                            if (!final_data.capabilities[team_number][name][value]) {
-                                                final_data.capabilities[team_number][name][value] = 0;
+                                            if (!final_data[team_number].capabilities[name][value]) {
+                                                final_data[team_number].capabilities[name][value] = 0;
                                             }
-                                            final_data.capabilities[team_number][name][value]++;
+                                            final_data[team_number].capabilities[name][value]++;
                                             break;
 
                                         case "other":
-                                            final_data.other[team_number].push(value);
-                                            break;
-
-                                        default:
+                                            final_data[team_number].other.push(value);
                                             break;
                                     }
                                 });
                             });
 
                             // Calculate averages per field for auton
-                            for (const game_piece in final_data.auton[team_number]) {
-                                const piece_data = final_data.auton[team_number][game_piece];
+                            for (const game_piece in final_data[team_number].auton) {
+                                const piece_data = final_data[team_number].auton[game_piece];
                                 ["score", "miss"].forEach(type => {
                                     for (const field_name in piece_data[type]) {
                                         const field_data = piece_data[type][field_name];
                                         const count = field_data.values.length;
-                                        field_data.average = count > 0
-                                            ? field_data.values.reduce((a, b) => a + b, 0) / count
-                                            : 0;
+                                        field_data.average = count > 0 ? field_data.values.reduce((a, b) => a + b, 0) / count : 0;
                                     }
                                 });
                             }
 
                             // Calculate averages per field for teleop
-                            for (const game_piece in final_data.teleop[team_number]) {
-                                const piece_data = final_data.teleop[team_number][game_piece];
+                            for (const game_piece in final_data[team_number].teleop) {
+                                const piece_data = final_data[team_number].teleop[game_piece];
                                 ["score", "miss"].forEach(type => {
                                     for (const field_name in piece_data[type]) {
                                         const field_data = piece_data[type][field_name];
                                         const count = field_data.values.length;
-                                        field_data.average = count > 0
-                                            ? field_data.values.reduce((a, b) => a + b, 0) / count
-                                            : 0;
+                                        field_data.average = count > 0 ? field_data.values.reduce((a, b) => a + b, 0) / count : 0;
                                     }
                                 });
                             }
-                        }
 
-                        // Convert capability counts to percentages per team
-                        for (const team_number in final_data.capabilities) {
-                            const team_caps = final_data.capabilities[team_number];
+                            // Convert capability counts to percentages per team
+                            const team_caps = final_data[team_number].capabilities;
                             for (const cap_name in team_caps) {
                                 const cap_values = team_caps[cap_name];
                                 const total_entries = Object.values(cap_values).reduce((a, b) => a + b, 0);
-
                                 for (const value in cap_values) {
                                     cap_values[value] = (cap_values[value] / total_entries) * 100;
                                 }
                             }
                         }
 
+                        // console.log(final_data);
+
                         return final_data;
                     },
+
 
                     async get_data() {
                         var response = await fetch("{{ SERVER_IP }}/get_data_from_query", {
@@ -587,7 +552,8 @@
 
                         if (response.ok) {
                             this.data = this.parse_server_data(await response.json());
-                            this.data_sorted = this.sort_teams_by_field(this.data);
+                            // this.data_sorted = this.sort_teams_by_field(this.data);
+                            this.data_sorted = this.data;
                             window.dispatchEvent(new CustomEvent('data', {
                                 detail: { data: this.data_sorted }
                             }));
@@ -626,272 +592,115 @@
         <div class="flex flex-col w-full md:w-1/2 lg:w-2/3"
              x-data="advanced_data()"
              x-init="init()">
-            <div class="flex flex-col px-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 mt-4 items-left"
-                 x-show="!offline"
-                 x-data="{ open: true }">
-                <div x-data="{ stuck: false }"
-                     x-init=" let el = $el; window.addEventListener('scroll', () => { stuck = el.getBoundingClientRect().top <= 0; }); "
-                     :class="{ 'dark:bg-slate-800 bg-slate-200 border-2 dark:border-slate-700 border-slate-300 shadow-lg mt-2 px-4': stuck }"
-                     class="sticky top-0 flex flex-row py-4 rounded-lg transition-[padding] justify-between align-middle items-center"
-                     @click="open = !open">
-                    <p class="dark:text-white text-black text-sans text-2xl">
-                        <i class="ph-bold ph-robot"></i> Autonomous
-                    </p>
-                    <i class="ph-bold ph-caret-down dark:text-white text-black"
-                       x-show="open"></i>
-                    <i class="ph-bold ph-caret-up dark:text-white text-black" x-show="!open"></i>
-                </div>
-
-                <div x-show="open" x-collapse>
-                    <template x-for="team in data.auton" :key="team.team">
-                        <div x-show="Object.keys(team.data).length > 0"
-                             x-data="{ open: false }"
-                             class="flex flex-col items-left gap-4 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg p-4 my-2">
-
-                            <!-- Team Number -->
-                            <div class="flex flex-row justify-between"
-                                 :class="{ 'border-b-2 dark:border-slate-700 border-slate-300': open }"
-                                 @click="open = !open">
-                                <p class="dark:text-white text-black text-sans text-lg"
-                                   x-text="team.team"></p>
-                                <i class="ph-bold ph-caret-down dark:text-white text-black"
-                                   x-show="open"></i>
-                                <i class="ph-bold ph-caret-up dark:text-white text-black" x-show="!open"></i>
-                            </div>
-
-                            <!-- Game Pieces -->
-                            <template x-for="(piece_value, piece_key) in team.data" :key="piece_key">
-                                <div class="flex flex-col gap-2 mt-2" x-show="open" x-collapse>
-                                    <!-- Game Piece Name -->
-                                    <p class="dark:text-white text-black text-sans text-lg"
-                                       x-text="piece_key.charAt(0).toUpperCase() + piece_key.slice(1)"></p>
-
-                                    <!-- Score and Miss Types -->
-                                    <template x-for="type in ['score', 'miss']" :key="type">
-                                        <div x-show="Object.keys(piece_value[type] || {}).length > 0"
-                                             class="flex flex-col gap-2 ml-4 mt-1">
-                                            <p class="dark:text-white text-black text-sans text-md font-semibold capitalize"
-                                               x-text="type"></p>
-
-                                            <!-- Fields under Score/Miss -->
-                                            <template x-for="(field_value, field_name) in piece_value[type]"
-                                                      :key="field_name">
-                                                <div class="flex flex-col gap-1 ml-4 mb-2 p-2 border dark:border-slate-700 border-slate-300 rounded-lg">
-                                                    <p class="dark:text-white text-black text-sans text-md font-medium"
-                                                       x-text="field_name.replace(/_/g, ' ').replace(/\b\w+\b/g, l => l.charAt(0).toUpperCase() + l.slice(1))"></p>
-                                                    <p class="dark:text-white text-black text-sans text-sm"
-                                                       x-text="`Average: ${field_value.average.toFixed(2)}`"></p>
-                                                    <canvas x-init="create_line_chart($el, field_value.values, field_name, type)"></canvas>
-                                                </div>
-                                            </template>
-                                        </div>
-                                    </template>
-                                </div>
-                            </template>
-
+            <template x-for="(teamData, teamNumber) in data" :key="teamNumber">
+                <template x-if="Object.keys(teamData).length > 0">
+                    <div class="flex flex-col px-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 items-left"
+                         x-data="{ open: false }">
+                        <!-- Team Number -->
+                        <div class="flex flex-row justify-between items-center cursor-pointer"
+                             @click="open = !open">
+                            <p class="dark:text-white text-black text-sans text-2xl"
+                               x-text="teamNumber"></p>
+                            <i class="ph-bold ph-caret-down dark:text-white text-black"
+                               x-show="open"></i>
+                            <i class="ph-bold ph-caret-up dark:text-white text-black" x-show="!open"></i>
                         </div>
-                    </template>
 
-                </div>
-            </div>
-
-            <div class="flex flex-col px-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 items-left"
-                 x-show="!offline"
-                 x-data="{ open: true }">
-                <div x-data="{ stuck: false }"
-                     x-init=" let el = $el; window.addEventListener('scroll', () => { stuck = el.getBoundingClientRect().top <= 0; }); "
-                     :class="{ 'dark:bg-slate-800 bg-slate-200 border-2 dark:border-slate-700 border-slate-300 shadow-lg mt-2 px-4': stuck }"
-                     class="sticky top-0 flex flex-row py-4 rounded-lg transition-[padding] justify-between align-middle items-center"
-                     @click="open = !open">
-                    <p class="dark:text-white text-black text-sans text-2xl">
-                        <i class="ph-bold ph-game-controller"></i> Teleoperated
-                    </p>
-                    <i class="ph-bold ph-caret-down dark:text-white text-black"
-                       x-show="open"></i>
-                    <i class="ph-bold ph-caret-up dark:text-white text-black" x-show="!open"></i>
-                </div>
-
-                <div x-show="open" x-collapse>
-                    <template x-for="team in data.teleop" :key="team.team">
-                        <div x-show="Object.keys(team.data).length > 0"
-                             x-data="{ open: false }"
-                             class="flex flex-col items-left gap-4 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg p-4 my-2">
-
-                            <!-- Team Number -->
-                            <div class="flex flex-row justify-between"
-                                 :class="{ 'border-b-2 dark:border-slate-700 border-slate-300': open }"
-                                 @click="open = !open">
-                                <p class="dark:text-white text-black text-sans text-lg"
-                                   x-text="team.team"></p>
-                                <i class="ph-bold ph-caret-down dark:text-white text-black"
-                                   x-show="open"></i>
-                                <i class="ph-bold ph-caret-up dark:text-white text-black" x-show="!open"></i>
-                            </div>
-
-                            <!-- Game Pieces -->
-                            <template x-for="(piece_value, piece_key) in team.data" :key="piece_key">
-                                <div class="flex flex-col gap-2 mt-2" x-show="open" x-collapse>
-                                    <!-- Game Piece Name -->
-                                    <p class="dark:text-white text-black text-sans text-lg"
-                                       x-text="piece_key.charAt(0).toUpperCase() + piece_key.slice(1)"></p>
-
-                                    <!-- Score and Miss Types -->
-                                    <template x-for="type in ['score', 'miss']" :key="type">
-                                        <div x-show="Object.keys(piece_value[type]).length > 0"
-                                             class="flex flex-col gap-2 ml-4 mt-1">
-                                            <p class="dark:text-white text-black text-sans text-md font-semibold capitalize"
-                                               x-text="type"></p>
-
-                                            <!-- Fields under Score/Miss -->
-                                            <template x-for="(field_value, field_name) in piece_value[type]"
-                                                      :key="field_name">
-                                                <div class="flex flex-col gap-1 ml-4 mb-2 p-2 border dark:border-slate-700 border-slate-300 rounded-lg">
-                                                    <p class="dark:text-white text-black text-sans text-md font-medium"
-                                                       x-text="field_name.replace(/_/g, ' ').replace(/\b\w+\b/g, l => l.charAt(0).toUpperCase() + l.slice(1))"></p>
-                                                    <p class="dark:text-white text-black text-sans text-sm"
-                                                       x-text="`Average: ${field_value.average.toFixed(2)}`"></p>
-                                                    <canvas x-init="create_line_chart($el, field_value.values, `${field_name}`, type)"></canvas>
-                                                </div>
-                                            </template>
-                                        </div>
-                                    </template>
-                                </div>
-                            </template>
-
-                        </div>
-                    </template>
-                </div>
-            </div>
-
-            <div class="flex flex-col px-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 items-left"
-                 x-show="!offline"
-                 x-data="{ open: true }">
-                <div x-data="{ stuck: false }"
-                     x-init=" let el = $el; window.addEventListener('scroll', () => { stuck = el.getBoundingClientRect().top <= 0; }); "
-                     :class="{ 'dark:bg-slate-800 bg-slate-200 border-2 dark:border-slate-700 border-slate-300 shadow-lg mt-2 px-4': stuck }"
-                     class="sticky top-0 flex flex-row py-4 rounded-lg transition-[padding] justify-between align-middle items-center"
-                     @click="open = !open">
-                    <p class="dark:text-white text-black text-sans text-2xl">
-                        <i class="ph-bold ph-list-checks"></i> Capabilities
-                    </p>
-                    <i class="ph-bold ph-caret-down dark:text-white text-black"
-                       x-show="open"></i>
-                    <i class="ph-bold ph-caret-up dark:text-white text-black" x-show="!open"></i>
-                </div>
-
-                <div x-show="open" x-collapse>
-                    <template x-for="team in data.capabilities" :key="team.team">
-                        <div class="flex flex-col items-left gap-4 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg p-4 my-2"
-                             x-show="Object.keys(team.data).length > 0"
-                             x-data="{ open: false }">
-
-                            <!-- Team Number -->
-                            <div class="flex flex-row justify-between"
-                                 :class="{ 'border-b-2 dark:border-slate-700 border-slate-300': open }"
-                                 @click="open = !open">
-                                <p class="dark:text-white text-black text-sans text-lg"
-                                   x-text="team.team"></p>
-                                <i class="ph-bold ph-caret-down dark:text-white text-black"
-                                   x-show="open"></i>
-                                <i class="ph-bold ph-caret-up dark:text-white text-black" x-show="!open"></i>
-                            </div>
-
-                            <!-- Capabilities -->
-                            <template x-for="(capability_value, capability_name) in team.data"
-                                      :key="capability_name">
-                                <div class="flex flex-col gap-2 mt-2 border dark:border-slate-700 border-slate-300 rounded-lg p-2"
-                                     x-show="open"
-                                     x-collapse>
-                                    <!-- Capability Name -->
-                                    <p class="dark:text-white text-black text-sans text-lg font-semibold"
-                                       x-text="capability_name.replace(/_/g, ' ').replace(/\b\w+\b/g, l => l.charAt(0).toUpperCase() + l.slice(1))"></p>
-
-                                    <div class="flex flex-row items-center">
-                                        <!-- Display percentages as text -->
-                                        <div class="w-1/2 flex flex-col justify-center">
-                                            <template x-for="(percentage, value_name) in capability_value"
-                                                      :key="value_name">
-                                                <p class="dark:text-white text-black text-sans text-sm mx-2"
-                                                   x-text="`${value_name}: ${percentage.toFixed(1)}%`"></p>
-                                            </template>
-                                        </div>
-
-                                        <div class="w-1/2 flex justify-center">
-                                            <!-- Donut Chart for this capability -->
-                                            <canvas x-init="create_donut_chart($el, Object.values(capability_value), Object.keys(capability_value), capability_name)"></canvas>
-                                        </div>
+                        <div x-show="open" x-collapse>
+                            <!-- Sections: Auton, Teleop, Capabilities, Other -->
+                            <template x-for="(section, sectionName) in teamData" :key="sectionName">
+                                <div class="mt-4 px-4 py-2 border-l-2 dark:border-slate-600 border-slate-200"
+                                     x-data="{ open: true }">
+                                    <div class="flex flex-row justify-between items-center cursor-pointer"
+                                         @click="open = !open">
+                                        <p class="dark:text-white text-black text-xl font-semibold"
+                                           x-text="sectionName.charAt(0).toUpperCase() + sectionName.slice(1)"></p>
+                                        <i class="ph-bold ph-caret-down dark:text-white text-black"
+                                           x-show="open"></i>
+                                        <i class="ph-bold ph-caret-up dark:text-white text-black" x-show="!open"></i>
                                     </div>
 
-                                </div>
-                            </template>
+                                    <div x-show="open" x-collapse>
 
+                                        <!-- Game Pieces (for Auton & Teleop) -->
+                                        <template x-if="sectionName === 'auton' || sectionName === 'teleop'">
+                                            <template x-for="(pieceData, pieceName) in section" :key="pieceName">
+                                                <div class="ml-4 mt-2 pl-2 border-l-2 dark:border-slate-600 border-slate-200">
+                                                    <p class="dark:text-white text-black text-lg font-medium"
+                                                       x-text="pieceName.charAt(0).toUpperCase() + pieceName.slice(1)"></p>
+
+                                                    <div class="ml-4">
+                                                        <!-- Iterate over 'score' and 'miss' -->
+                                                        <template x-for="(categoryData, categoryName) in pieceData" :key="categoryName">
+                                                            <div class="mt-2">
+                                                                <p class="dark:text-white text-black text-md font-semibold"
+                                                                   x-text="categoryName.charAt(0).toUpperCase() + categoryName.slice(1)"></p>
+
+                                                                <div class="ml-4">
+                                                                    <template x-for="(fieldData, fieldName) in categoryData" :key="fieldName">
+                                                                        <div class="p-2 border dark:border-slate-700 border-slate-300 rounded-lg mb-2">
+                                                                            <p class="dark:text-white text-black text-md font-medium"
+                                                                               x-text="fieldName.replace(/_/g, ' ').charAt(0).toUpperCase() + fieldName.replace(/_/g, ' ').slice(1)">
+                                                                            </p>
+                                                                            <p class="dark:text-white text-black text-sm"
+                                                                               x-text="`Average: ${fieldData.average?.toFixed(2) ?? 'N/A'}`"></p>
+                                                                            <canvas x-init="create_line_chart($el, fieldData.values, fieldName, fieldData.stat_type)"></canvas>
+                                                                        </div>
+                                                                    </template>
+                                                                </div>
+                                                            </div>
+                                                        </template>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </template>
+
+                                        <!-- Capabilities (Pie Chart Representation) -->
+                                        <template x-if="sectionName === 'capabilities'">
+                                            <div class="ml-4 mt-2">
+                                                <template x-for="(capabilityValue, capabilityName) in section"
+                                                          :key="capabilityName">
+                                                    <div class="p-2 border dark:border-slate-700 border-slate-300 rounded-lg mb-2">
+                                                        <p class="dark:text-white text-black text-lg font-semibold"
+                                                           x-text="capabilityName.replace(/_/g, ' ').charAt(0).toUpperCase() + capabilityName.replace(/_/g, ' ').slice(1)"></p>
+                                                        <div class="flex flex-row h-full items-center">
+                                                            <div class="flex flex-col justify-center w-1/2">
+                                                                <ul class="ml-4 list-disc list-inside">
+                                                                    <template x-for="(percentage, key) in capabilityValue" :key="key">
+                                                                        <li class="dark:text-white text-black text-sm"
+                                                                            x-text="`${key.charAt(0).toUpperCase() + key.slice(1)}: ${Math.round(percentage * 100) / 100}%`"></li>
+                                                                    </template>
+                                                                </ul>
+                                                            </div>
+                                                            <div class="flex justify-center w-1/2">
+                                                                <canvas x-init="create_donut_chart($el, Object.values(capabilityValue), Object.keys(capabilityValue), capabilityName)"></canvas>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </template>
+
+                                        <!-- Other (List Representation) -->
+                                        <template x-if="sectionName === 'other'">
+                                            <div class="ml-4 mt-2">
+                                                <ul class="ml-4 list-disc list-inside">
+                                                    <template x-for="(option, index) in section" :key="index">
+                                                        <li class="dark:text-white text-black text-md" x-text="option"></li>
+                                                    </template>
+                                                </ul>
+                                            </div>
+                                        </template>
+
+                                    </div>
+                                </template>
+                            </div>
                         </div>
                     </template>
-                </div>
+                </template>
             </div>
 
-            <div class="flex flex-col px-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 items-left"
-                 x-show="!offline"
-                 x-data="{ open: true }">
-                <div x-data="{ stuck: false }"
-                     x-init=" let el = $el; window.addEventListener('scroll', () => { stuck = el.getBoundingClientRect().top <= 0; }); "
-                     :class="{ 'dark:bg-slate-800 bg-slate-200 border-2 dark:border-slate-700 border-slate-300 shadow-lg mt-2 px-4': stuck }"
-                     class="sticky top-0 flex flex-row py-4 rounded-lg transition-[padding] justify-between align-middle items-center"
-                     @click="open = !open">
-                    <p class="dark:text-white text-black text-sans text-2xl">
-                        <i class="ph-bold ph-list"></i> Other
-                    </p>
-                    <i class="ph-bold ph-caret-down dark:text-white text-black"
-                       x-show="open"></i>
-                    <i class="ph-bold ph-caret-up dark:text-white text-black" x-show="!open"></i>
-                </div>
-
-                <div x-show="open" x-collapse>
-                    <template x-for="team in data.other" :key="team.team">
-                        <template x-if="Object.keys(team.data).length > 0" x-data="{ open: false }">
-                            <div class="flex flex-col items-left gap-4 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg p-4 my-2">
-
-                                <!-- Team Number -->
-                                <div class="flex flex-row justify-between"
-                                     :class="{ 'border-b-2 dark:border-slate-700 border-slate-300': open }"
-                                     @click="open = !open">
-                                    <p class="dark:text-white text-black text-sans text-lg"
-                                       x-text="team.team"></p>
-                                    <i class="ph-bold ph-caret-down dark:text-white text-black"
-                                       x-show="open"></i>
-                                    <i class="ph-bold ph-caret-up dark:text-white text-black" x-show="!open"></i>
-                                </div>
-
-                                <!-- Other Entries -->
-                                <div x-show="open" x-collapse>
-                                    <ul class="list-disc list-inside ml-4">
-                                        <template x-for="(entry, index) in team.data" :key="index">
-                                            <li class="dark:text-white text-black text-sans text-md" x-text="entry"></li>
-                                        </template>
-                                    </ul>
-                                </div>
-                            </div>
-                        </template>
-                    </template>
-                </div>
-            </div>
-
-            <div class="flex flex-col px-4 py-6 bg-orange-200/50 dark:bg-orange-800/50 backdrop-blur-md dark:border-orange-700 border-orange-300 border-2 rounded-lg items-center"
-                 x-show="offline">
-
-                <div class="flex flex-row dark:text-white text-black text-2xl items-center gap-1">
-                    <i class="ph-bold ph-wifi-slash"></i>
-                    <p class="text-sans mt-1">You're offline</p>
-                </div>
-
-                <p class="dark:text-white text-black text-sans text-lg">You'll need to go back online to get and filter data from the server</p>
-                <button class="ui_button" @click="window.location.href = '{{ SERVER_IP }}'">
-                    <i class="ph-bold ph-house"></i> Go Home
-                </button>
-            </div>
-        </div>
-
-        <script>
+            <script>
             function advanced_data() {
                 return {
                     data: {},
@@ -902,7 +711,7 @@
                         
                         const average = data.reduce((acc, val) => acc + val, 0) / data.length;
                         
-                        const color = type === "score" ? "#51ff4e" : "#ff4e51";
+                        const color = (type === "auton_score" || type === "score") ? "#51ff4e" : "#ff4e51";
                         
                         new Chart(canvas, {
                             type: "line",
@@ -994,10 +803,10 @@
                     }
                 }
             }
-        </script>
-    </div>
+            </script>
+        </div>
 
-{% endblock %}
+    {% endblock %}
 
-{% block scripts %}
-{% endblock %}
+    {% block scripts %}
+    {% endblock %}

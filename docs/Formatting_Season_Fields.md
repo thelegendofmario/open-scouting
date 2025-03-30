@@ -9,14 +9,11 @@ You can view the current `season_fields.py` file [here](https://github.com/FRC-T
 ## Types of fields
 This section demonstrates what each of the available fields are and their parameters
 
-Every field needs at least seven parameters, `name`, `simple_name`, `type`, `required`, `order`, `stat_type` and `game_piece`
+Every field needs at least seven parameters, `name`, `simple_name`, `type`, `required`, `stat_type` and `game_piece`
 - `name` indicates the display name of the field, this is the title over the field that appears in the `/submit` UI
 - `simple_name` is the simple name of the field, that will be used as the key in the key value pair when the data is stored in the database
 - `type` should be one of the following types listed below. This indicates the type of field that is being created, and what data it will return
 - `required` indicates if the field is required to have contents to allow the form to be submitted. Setting this parameter to `True` should be kept to a minimum, to prevent frustration during scouting, and allowing for data to be kept empty if it's not needed
-- `order` indicates the order in which each field is shown in the `/data` table
-  - The data should be organized such that the way that the fields are visible on `/submit` (top-to-bottom which matches how they're ordered in `season_fields.py`) matches the `order` parameter. The first one in the list should be the lowest and the last one should be the highest
-  - Sections are not given an order as they are not shown in the table at `/data`
 - `stat_type` indicates which type of stat it is when displaying data in the advanced data view
     - Possible values are `score` (A score in teleop), `miss` (A miss/drop in teleop), `auton_score` (A score in auton), `auton_miss` (A miss/drop in auton), `capability` (A capability the robot is able to do, for example, if the robot climbed or not), `other` (Some other kind of stat), `ignore` (Don't show these stats in the data view)
 - `game_piece` indicates which game piece is used if `stat_type` is `score`, `miss`, `auton_score` or `auton_miss`
@@ -34,7 +31,6 @@ This field should be used for fields like the team number or match number
     "simple_name": "team_number",
     "type": "large_integer",
     "required": True,
-    "order": 1,
     "stat_type": "ignore",
     "game_piece": "",
 },
@@ -56,7 +52,6 @@ This field should be used for any smaller integer values, like the number of sco
     "minimum": 0,
     "maximum": 30,
     "required": False,
-    "order": 1,
     "stat_type": "score",
     "game_piece": "note",
 },
@@ -77,7 +72,6 @@ This field should be used for any value that should be true or false, like if a 
     "simple_name": "left_starting_zone",
     "type": "boolean",
     "required": False,
-    "order": 1,
     "stat_type": "capability",
     "game_piece": "",
 },
@@ -97,7 +91,6 @@ This field allows the user to select multiple choices, for example if scouts wan
     "type": "multiple_choice",
     "choices": ["N/A", "Close", "Mid Field", "Far"],
     "required": False,
-    "order": 1,
     "stat_type": "capability",
     "game_piece": "",
 },
@@ -117,7 +110,6 @@ This field allows the user to select a single choice from a list, in case scouts
     "type": "choice",
     "choices": ["N/A", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
     "required": False,
-    "order": 1,
     "stat_type": "score",
     "game_piece": "note",
 },
@@ -155,7 +147,6 @@ An example section is below:
             "simple_name": "team_number",
             "type": "large_integer",
             "required": True,
-            "order": 1,
             "stat_type": "ignore",
             "game_piece": "",
         },
@@ -164,7 +155,6 @@ An example section is below:
             "simple_name": "match_number",
             "type": "large_integer",
             "required": True,
-            "order": 2,
             "stat_type": "ignore",
             "game_piece": "",
         },

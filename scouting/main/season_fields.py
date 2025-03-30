@@ -51,10 +51,34 @@ def create_tabulator_headers(data):
     return processed
 
 
+def get_season_fields(year):
+    season_mapping = {"2024": crescendo, "2025": reefscape}
+
+    season_fields = season_mapping.get(
+        year, []
+    ).copy()  # Copy to avoid modifying original lists
+
+    if isinstance(main, list):
+        season_fields = main + season_fields  # Ensure `main` is properly included
+    else:
+        season_fields.insert(0, main)
+
+    # Assign a universal order across all fields
+    order_index = 0
+    for section in season_fields:
+        if isinstance(section, dict) and "fields" in section:
+            for field in section["fields"]:
+                if isinstance(field, dict):  # Ensure field is a dictionary
+                    field.setdefault("order", order_index)
+                    order_index += 1  # Increment order globally
+
+    return season_fields
+
+
 # ----------
-# 2024
+# Main Fields
 # ----------
-crescendo = [
+main = [
     {
         "section": "Main",
         "simple_name": "main",
@@ -64,7 +88,6 @@ crescendo = [
                 "simple_name": "team_number",
                 "type": "large_integer",
                 "required": True,
-                "order": 1,
                 "stat_type": "ignore",
                 "game_piece": "",
             },
@@ -73,12 +96,33 @@ crescendo = [
                 "simple_name": "match_number",
                 "type": "large_integer",
                 "required": True,
-                "order": 2,
+                "stat_type": "ignore",
+                "game_piece": "",
+            },
+            {
+                "name": "Match Type",
+                "simple_name": "match_type",
+                "type": "choice",
+                "choices": [
+                    "N/A",
+                    "Qualification Match",
+                    "Playoff Match",
+                    "Practice Match",
+                    "Other Match",
+                ],
+                "required": False,
                 "stat_type": "ignore",
                 "game_piece": "",
             },
         ],
     },
+]
+
+
+# ----------
+# 2024
+# ----------
+crescendo = [
     {
         "section": "Auton",
         "simple_name": "auton",
@@ -91,7 +135,6 @@ crescendo = [
                 "minimum": 0,
                 "maximum": 30,
                 "required": False,
-                "order": 3,
                 "stat_type": "auton_score",
                 "game_piece": "note",
             },
@@ -103,7 +146,6 @@ crescendo = [
                 "minimum": 0,
                 "maximum": 30,
                 "required": False,
-                "order": 4,
                 "stat_type": "auton_score",
                 "game_piece": "note",
             },
@@ -125,7 +167,6 @@ crescendo = [
                         "minimum": 0,
                         "maximum": 30,
                         "required": False,
-                        "order": 5,
                         "stat_type": "score",
                         "game_piece": "note",
                     },
@@ -137,7 +178,6 @@ crescendo = [
                         "minimum": 0,
                         "maximum": 30,
                         "required": False,
-                        "order": 6,
                         "stat_type": "miss",
                         "game_piece": "note",
                     },
@@ -155,7 +195,6 @@ crescendo = [
                         "minimum": 0,
                         "maximum": 30,
                         "required": False,
-                        "order": 7,
                         "stat_type": "score",
                         "game_piece": "note",
                     },
@@ -167,7 +206,6 @@ crescendo = [
                         "minimum": 0,
                         "maximum": 30,
                         "required": False,
-                        "order": 8,
                         "stat_type": "miss",
                         "game_piece": "note",
                     },
@@ -184,7 +222,6 @@ crescendo = [
                 "simple_name": "left_starting_zone",
                 "type": "boolean",
                 "required": False,
-                "order": 9,
                 "stat_type": "capability",
                 "game_piece": "",
             },
@@ -194,7 +231,6 @@ crescendo = [
                 "type": "multiple_choice",
                 "choices": ["N/A", "Close", "Mid Field", "Far"],
                 "required": False,
-                "order": 10,
                 "stat_type": "capability",
                 "game_piece": "",
             },
@@ -203,7 +239,6 @@ crescendo = [
                 "simple_name": "floor_pickup",
                 "type": "boolean",
                 "required": False,
-                "order": 11,
                 "stat_type": "capability",
                 "game_piece": "",
             },
@@ -212,7 +247,6 @@ crescendo = [
                 "simple_name": "climb",
                 "type": "boolean",
                 "required": False,
-                "order": 12,
                 "stat_type": "capability",
                 "game_piece": "",
             },
@@ -221,7 +255,6 @@ crescendo = [
                 "simple_name": "scored_trap",
                 "type": "boolean",
                 "required": False,
-                "order": 13,
                 "stat_type": "capability",
                 "game_piece": "",
             },
@@ -230,7 +263,6 @@ crescendo = [
                 "simple_name": "feeder_station_pickup",
                 "type": "boolean",
                 "required": False,
-                "order": 14,
                 "stat_type": "capability",
                 "game_piece": "",
             },
@@ -239,7 +271,6 @@ crescendo = [
                 "simple_name": "moved_during_auto",
                 "type": "boolean",
                 "required": False,
-                "order": 15,
                 "stat_type": "capability",
                 "game_piece": "",
             },
@@ -254,7 +285,6 @@ crescendo = [
                 "simple_name": "notes",
                 "type": "text",
                 "required": False,
-                "order": 16,
                 "stat_type": "other",
                 "game_piece": "",
             },
@@ -267,30 +297,6 @@ crescendo = [
 # ----------
 reefscape = [
     {
-        "section": "Main",
-        "simple_name": "main",
-        "fields": [
-            {
-                "name": "Team Number",
-                "simple_name": "team_number",
-                "type": "large_integer",
-                "required": True,
-                "order": 1,
-                "stat_type": "ignore",
-                "game_piece": "",
-            },
-            {
-                "name": "Match Number",
-                "simple_name": "match_number",
-                "type": "large_integer",
-                "required": True,
-                "order": 2,
-                "stat_type": "ignore",
-                "game_piece": "",
-            },
-        ],
-    },
-    {
         "section": "Auton",
         "simple_name": "auton",
         "fields": [
@@ -299,7 +305,6 @@ reefscape = [
                 "simple_name": "auton_moved",
                 "type": "boolean",
                 "required": False,
-                "order": 3,
                 "stat_type": "capability",
                 "game_piece": "",
             },
@@ -311,7 +316,6 @@ reefscape = [
                 "minimum": 0,
                 "maximum": 20,
                 "required": False,
-                "order": 4,
                 "stat_type": "auton_score",
                 "game_piece": "coral",
             },
@@ -323,7 +327,6 @@ reefscape = [
                 "minimum": 0,
                 "maximum": 20,
                 "required": False,
-                "order": 5,
                 "stat_type": "auton_miss",
                 "game_piece": "coral",
             },
@@ -335,7 +338,6 @@ reefscape = [
                 "minimum": 0,
                 "maximum": 20,
                 "required": False,
-                "order": 6,
                 "stat_type": "auton_score",
                 "game_piece": "algae",
             },
@@ -347,7 +349,6 @@ reefscape = [
                 "minimum": 0,
                 "maximum": 20,
                 "required": False,
-                "order": 7,
                 "stat_type": "auton_score",
                 "game_piece": "algae",
             },
@@ -359,19 +360,17 @@ reefscape = [
                 "minimum": 0,
                 "maximum": 20,
                 "required": False,
-                "order": 8,
                 "stat_type": "auton_score",
                 "game_piece": "algae",
             },
             {
-                "name": "Algae Dropped",
-                "simple_name": "auton_algae_dropped",
+                "name": "Algae Score Failed",
+                "simple_name": "algae_score_failed",
                 "type": "integer",
                 "default": 0,
                 "minimum": 0,
                 "maximum": 20,
                 "required": False,
-                "order": 5,
                 "stat_type": "auton_miss",
                 "game_piece": "algae",
             },
@@ -389,7 +388,6 @@ reefscape = [
                 "minimum": 0,
                 "maximum": 20,
                 "required": False,
-                "order": 9,
                 "stat_type": "score",
                 "game_piece": "coral",
             },
@@ -401,7 +399,6 @@ reefscape = [
                 "minimum": 0,
                 "maximum": 20,
                 "required": False,
-                "order": 10,
                 "stat_type": "miss",
                 "game_piece": "coral",
             },
@@ -413,7 +410,6 @@ reefscape = [
                 "minimum": 0,
                 "maximum": 20,
                 "required": False,
-                "order": 11,
                 "stat_type": "score",
                 "game_piece": "algae",
             },
@@ -425,7 +421,6 @@ reefscape = [
                 "minimum": 0,
                 "maximum": 20,
                 "required": False,
-                "order": 12,
                 "stat_type": "score",
                 "game_piece": "algae",
             },
@@ -437,19 +432,17 @@ reefscape = [
                 "minimum": 0,
                 "maximum": 20,
                 "required": False,
-                "order": 13,
                 "stat_type": "score",
                 "game_piece": "algae",
             },
             {
-                "name": "Algae Dropped",
-                "simple_name": "algae_dropped",
+                "name": "Algae Score Failed",
+                "simple_name": "algae_score_failed",
                 "type": "integer",
                 "default": 0,
                 "minimum": 0,
                 "maximum": 20,
                 "required": False,
-                "order": 5,
                 "stat_type": "miss",
                 "game_piece": "algae",
             },
@@ -463,9 +456,8 @@ reefscape = [
                 "name": "Coral Levels",
                 "simple_name": "coral_levels",
                 "type": "multiple_choice",
-                "choices": ["N/A", "Level 1", "Level 2", "Level 3", "Level 4"],
+                "choices": ["Level 1", "Level 2", "Level 3", "Level 4"],
                 "required": False,
-                "order": 14,
                 "stat_type": "capability",
                 "game_piece": "",
             },
@@ -474,7 +466,6 @@ reefscape = [
                 "simple_name": "feeder_pickup",
                 "type": "boolean",
                 "required": False,
-                "order": 15,
                 "stat_type": "capability",
                 "game_piece": "",
             },
@@ -484,7 +475,6 @@ reefscape = [
                 "type": "choice",
                 "choices": ["N/A", "Barge Zone", "Shallow Cage", "Deep Cage"],
                 "required": False,
-                "order": 16,
                 "stat_type": "capability",
                 "game_piece": "",
             },
@@ -501,7 +491,6 @@ reefscape = [
                     "5 - Great",
                 ],
                 "required": False,
-                "order": 17,
                 "stat_type": "capability",
                 "game_piece": "",
             },
@@ -518,7 +507,6 @@ reefscape = [
                     "5 - Great",
                 ],
                 "required": False,
-                "order": 18,
                 "stat_type": "capability",
                 "game_piece": "",
             },
@@ -534,7 +522,14 @@ reefscape = [
                     "Red Card",
                 ],
                 "required": False,
-                "order": 19,
+                "stat_type": "capability",
+                "game_piece": "",
+            },
+            {
+                "name": "Robot was damaged and/or disabled during the match",
+                "simple_name": "disabled",
+                "type": "boolean",
+                "required": False,
                 "stat_type": "capability",
                 "game_piece": "",
             },
@@ -549,7 +544,6 @@ reefscape = [
                 "simple_name": "notes",
                 "type": "text",
                 "required": False,
-                "order": 20,
                 "stat_type": "other",
                 "game_piece": "",
             },

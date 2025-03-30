@@ -239,7 +239,7 @@
                                                 </template>
 
                                                 <button class="ui_button_icon !w-10 !h-10 ml-2"
-                                                        @click="submit_answer($event, question.simple_name, question.type)">
+                                                        @click="submit_answer($event, question.simple_name, question.type); editing = false;">
                                                     <i class="ph-bold ph-check !text-md"></i>
                                                 </button>
                                             </div>
@@ -360,6 +360,14 @@
 
                 <div class="fixed bottom-1 left-1 md:bottom-2 md:left-2 z-5 drop-shadow-xl bg-slate-200/80 dark:bg-slate-700/80 border-2 dark:border-slate-600 border-slate-300 rounded-full backdrop-blur-md p-2 flex flex-row align-middle items-center">
                     <button class="ui_button_icon mr-2 !w-8 !h-8 md:!w-12 md:!h-12"
+                            @click="go_to_top"
+                            x-show="scrollTop > 0"
+                            x-transition
+                            x-data="{ scrollTop: 0 }"
+                            @scroll.window="scrollTop = window.scrollY">
+                        <i class="ph-bold ph-arrow-line-up"></i>
+                    </button>
+                    <button class="ui_button_icon mr-2 !w-8 !h-8 md:!w-12 md:!h-12"
                             @click="sync_pit_data">
                         <i class="ph-bold ph-arrows-clockwise"></i>
                     </button>
@@ -407,18 +415,27 @@
                         let team_number = event.target.closest(".pit_top").getAttribute("team_number");
 
                         var today = new Date();
-                        var date = today.getFullYear() + "-" + (today.getMonth()+1) + "-" + today.getDate();
+                        var date = today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate();
 
                         let pit_index = this.pit_data.findIndex(obj => obj.team_number == team_number);
                         let question_index = this.pit_data[pit_index].questions.findIndex(obj => obj.simple_name == simple_name);
 
-                        if (type == "boolean") {
-                            this.pit_data[pit_index].questions[question_index].answers.push({value: input.checked, user: "{{ username }}", contributed: date});
-                        } else {
-                            this.pit_data[pit_index].questions[question_index].answers.push({value: input.value, user: "{{ username }}", contributed: date});
-                        }
+                        let new_value = type == "boolean" ? input.checked : input.value;
 
-                        this.state = "unsaved";
+                        // Check if the answer already exists to prevent duplicates
+                        let existing_answer = this.pit_data[pit_index].questions[question_index].answers.find(
+                            ans => ans.value == new_value && ans.user == "{{ username }}"
+                        );
+
+                        if (!existing_answer) {
+                            this.pit_data[pit_index].questions[question_index].answers.push({
+                                value: new_value,
+                                user: "{{ username }}",
+                                contributed: date
+                            });
+
+                            this.state = "unsaved";
+                        }
                     },
 
                     submit_question(event, name) {
@@ -481,7 +498,7 @@
                                         })
                                     });
 
-                                    response.text().then(async (text) => {
+                                    await response.text().then(async (text) => {
                                         this.pit_data_old = JSON.parse(JSON.stringify(this.pit_data));
 
                                         this.remove_pit_data_locally();
@@ -505,58 +522,67 @@
                     },
 
                     async sync_pit_data() {
-                        // Push and then pull pit data from the server
                         this.state = "syncing";
 
-                        if (globalThis.offline == false) {
-                            var response = await fetch("{{ SERVER_IP }}/update_pits", {
-                                method: "POST",
-                                headers: {
-                                        "Content-Type": "application/json",
-                                        "X-CSRFToken": "{{ csrf_token }}"
-,                                    },
-                                body: JSON.stringify({
-                                    event_name: encodeURIComponent("{{ event_name }}"),
-                                    event_code: "{{ event_code }}",
-                                    custom: "{{ custom }}",
-                                    year: "{{ year }}",
-                                    data: this.pit_data
-                                })
-                            });
-
-                            response.text().then(async (text) => {
-                                var get_response = await fetch("{{ SERVER_IP }}/get_pits", {
+                        if (!globalThis.offline) {
+                            try {
+                                // First, push the data to the server
+                                let response = await fetch("{{ SERVER_IP }}/update_pits", {
                                     method: "POST",
                                     headers: {
-                                            "Content-Type": "application/json",
-                                            "X-CSRFToken": "{{ csrf_token }}"
-                                        },
+                                        "Content-Type": "application/json",
+                                        "X-CSRFToken": "{{ csrf_token }}"
+                                    },
                                     body: JSON.stringify({
-                                            event_name: encodeURIComponent("{{ event_name }}"),
-                                            event_code: "{{ event_code }}",
-                                            custom: "{{ custom }}",
-                                            year: "{{ year }}"
-                                        })
-                                    });
-                                
-                                    get_response.text().then(async (text) => {
-                                    this.pit_data = JSON.parse(text);
-                                    this.pit_data_old = JSON.parse(text);
-
-                                    this.filter_pit_data();
-                                    this.get_pit_status();
-
-                                    this.remove_pit_data_locally();
-
-                                    this.state = "saved";
+                                        event_name: encodeURIComponent("{{ event_name }}"),
+                                        event_code: "{{ event_code }}",
+                                        custom: "{{ custom }}",
+                                        year: "{{ year }}",
+                                        data: this.pit_data
+                                    })
                                 });
-                            });
+
+                                if (!response.ok) throw new Error("Failed to update pits on server");
+
+                                // Then, fetch the updated data from the server
+                                let get_response = await fetch("{{ SERVER_IP }}/get_pits", {
+                                    method: "POST",
+                                    headers: {
+                                        "Content-Type": "application/json",
+                                        "X-CSRFToken": "{{ csrf_token }}"
+                                    },
+                                    body: JSON.stringify({
+                                        event_name: encodeURIComponent("{{ event_name }}"),
+                                        event_code: "{{ event_code }}",
+                                        custom: "{{ custom }}",
+                                        year: "{{ year }}"
+                                    })
+                                });
+
+                                if (!get_response.ok) throw new Error("Failed to fetch updated pits");
+
+                                let data = await get_response.json();
+
+                                // Update local state
+                                this.pit_data = data;
+                                this.pit_data_old = JSON.parse(JSON.stringify(data));
+
+                                this.filter_pit_data();
+                                this.get_pit_status();
+                                this.remove_pit_data_locally();
+
+                                this.state = "saved";
+                            } catch (error) {
+                                console.error("Sync Error:", error);
+                                this.state = "offline"; // Handle failure by marking offline
+                            }
                         } else {
                             this.store_pit_data_locally();
                             this.state = "offline";
                             this.pit_data_old = JSON.parse(JSON.stringify(this.pit_data));
                         }
                     },
+
 
                     store_pit_data_locally() {
                         const openRequest = indexedDB.open("scouting_data", 4);
@@ -748,6 +774,10 @@
                     scroll_to_pit(pit) {
                         const pit_div = document.querySelector(`div[team_number='${pit}']`);
                         pit_div.scrollIntoView({behavior: "smooth"});
+                    },
+
+                    go_to_top() {
+                        window.scrollTo({top: 0, behavior: "smooth"});
                     },
 
                      init() {

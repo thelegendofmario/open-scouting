@@ -78,3 +78,8 @@
 .tabulator-cell svg {
     @apply mx-auto;
 }
+
+/* tippy.js styles */
+.tippy-box[data-theme~='open-scouting'] {
+    @apply bg-white dark:bg-slate-800 text-black dark:text-white dark:border-slate-600 border-slate-300 rounded-lg shadow-lg border-solid border-1;
+}

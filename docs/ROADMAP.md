@@ -4,27 +4,27 @@ This document describes the roadmap for Open Scouting, and roughly when each fea
 ---
 
 ## To-Do
-### `v0.1.2-alpha`
-- [ ] [#62](https://github.com/FRC-Team3484/open-scouting/issues/62) - Issues with saving and syncing pit scouting data
-- [ ] [#63](https://github.com/FRC-Team3484/open-scouting/issues/63) - Offline pit scouting data doesn't seem to be cleared locally properly
-- [ ] [#64](https://github.com/FRC-Team3484/open-scouting/issues/64) - Add a button to return to the top of the screen in pit scouting
-- [ ] [#60](https://github.com/FRC-Team3484/open-scouting/issues/60) - In certain cases, the `/authentication` page cannot be loaded
-- [ ] [#26](https://github.com/FRC-Team3484/open-scouting/issues/26) - Autofill match and team numbers when contributing separately
-- [ ] [#66](https://github.com/FRC-Team3484/open-scouting/issues/66) - Add a field on the contribute page for indicating what kind of match
-
-
 ### `v0.1.3-alpha`
-- [ ] [#69](https://github.com/FRC-Team3484/open-scouting/issues/69) - Create team summaries in the advanced data view
 - [ ] [#70](https://github.com/FRC-Team3484/open-scouting/issues/70) - Charts in the advanced data view don't update when the filters do
 - [ ] [#71](https://github.com/FRC-Team3484/open-scouting/issues/71) - Organize client side code
 - [ ] [#54](https://github.com/FRC-Team3484/open-scouting/issues/54) - Update Tailwind.css to v4.0
+- [ ] [#60](https://github.com/FRC-Team3484/open-scouting/issues/60) - In certain cases, the `/authentication` page cannot be loaded
 
 ### `v0.1.4-alpha`
+- [ ] [#73](https://github.com/FRC-Team3484/open-scouting/issues/73) - Reimplement the ability to sort data in the advanced data view
 - [ ] [#18](https://github.com/FRC-Team3484/open-scouting/issues/18) - Export data
 - [ ] [#22](https://github.com/FRC-Team3484/open-scouting/issues/22) - Add the ability to import data
 
 ---
 ## Completed
+### `v0.1.2-alpha`
+- [x] [#62](https://github.com/FRC-Team3484/open-scouting/issues/62) - Issues with saving and syncing pit scouting data
+- [x] [#63](https://github.com/FRC-Team3484/open-scouting/issues/63) - Offline pit scouting data doesn't seem to be cleared locally properly
+- [x] [#64](https://github.com/FRC-Team3484/open-scouting/issues/64) - Add a button to return to the top of the screen in pit scouting
+- [x] [#26](https://github.com/FRC-Team3484/open-scouting/issues/26) - Autofill match and team numbers when contributing separately
+- [x] [#66](https://github.com/FRC-Team3484/open-scouting/issues/66) - Add a field on the contribute page for indicating what kind of match
+- [x] [#69](https://github.com/FRC-Team3484/open-scouting/issues/69) - Create team summaries in the advanced data view
+
 ### `v0.1.1-alpha`
 - [x] Fix bugs found at competition
 
