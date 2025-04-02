@@ -864,9 +864,15 @@ def update_pits(request):
                                 team_number=team_number, pit_group=pit_group
                             ).first()
 
-                            pit.data[change.path(output_format="list")[2]][
-                                "answers"
-                            ].append(change.t1)
+                            if (
+                                change.t1
+                                not in pit.data[change.path(output_format="list")[2]][
+                                    "answers"
+                                ]
+                            ):
+                                pit.data[change.path(output_format="list")[2]][
+                                    "answers"
+                                ].append(change.t1)
                             pits_to_update.append(pit)
 
                         elif "root" and "questions" in change.path():
