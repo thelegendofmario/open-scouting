@@ -28,15 +28,15 @@
                          x-show="page_dropdown"
                          x-anchor.offset.10="$refs.page_button"
                          x-transition>
-                        <button class="ui_button_small !my-1 !py-1 !px-2 !w-full !text-left"
+                        <button class="ui_button_small my-1! py-1! px-2! w-full! text-left!"
                                 @click="go_to_contribute">
                             <i class="ph-bold ph-pencil"></i> Add Scouting Reports
                         </button>
-                        <button class="ui_button_small !my-1 !py-1 !px-2 !w-full !text-left"
+                        <button class="ui_button_small my-1! py-1! px-2! w-full! text-left!"
                                 @click="go_to_data">
                             <i class="ph-bold ph-database"></i> View Scouting Data
                         </button>
-                        <button class="ui_button_small !my-1 !py-1 !px-2 !w-full !text-left"
+                        <button class="ui_button_small my-1! py-1! px-2! w-full! text-left!"
                                 @click="go_to_pits">
                             <i class="ph-bold ph-garage"></i> Pit Scouting
                         </button>
@@ -100,22 +100,22 @@
         <div x-data="pits()" class="w-full md:w-3/4 lg:w-2/3 mx-8">
             <div class="flex flex-col bg-slate-200/80 dark:bg-slate-700/80 border-2 dark:border-slate-600 border-slate-300 rounded-xl backdrop-blur-md p-4 my-2">
                 <div class="flex flex-row flex-wrap">
-                    <button class="ui_button_small !m-1"
+                    <button class="ui_button_small m-1!"
                             :disabled="filter == 'all'"
                             @click="filter = 'all'; filter_pit_data(); get_pit_status()">
                         <i class="ph-bold ph-selection-all"></i> View All Pits
                     </button>
-                    <button class="ui_button_small !m-1"
+                    <button class="ui_button_small m-1!"
                             :disabled="filter == 'incomplete'"
                             @click="filter = 'incomplete'; filter_pit_data(); get_pit_status()">
                         <i class="ph-bold ph-arrows-clockwise"></i> View Incomplete Pits
                     </button>
-                    <button class="ui_button_small !m-1"
+                    <button class="ui_button_small m-1!"
                             :disabled="filter == 'no_data'"
                             @click="filter = 'no_data'; filter_pit_data(); get_pit_status()">
                         <i class="ph-bold ph-x"></i> View Pits With No Data
                     </button>
-                    <button class="ui_button_small !m-1"
+                    <button class="ui_button_small m-1!"
                             :disabled="filter == 'completed'"
                             @click="filter = 'completed'; filter_pit_data(); get_pit_status()">
                         <i class="ph-bold ph-check"></i> View Completed Pits
@@ -194,17 +194,17 @@
                                              @click.outside="editing = false; open = false">
                                             <div class="ml-4 flex flex-row items-center my-1">
                                                 <i class="ph-bold ph-check text-md text-green-600 mr-1"></i>
-                                                <button class="ui_button_icon ml-2 mr-1 !w-10 !h-10"
+                                                <button class="ui_button_icon ml-2 mr-1 w-10! h-10!"
                                                         @click="editing = !editing">
-                                                    <i class="ph-bold ph-plus-circle !text-md" x-show="!editing"></i>
-                                                    <i class="ph-bold ph-x-circle !text-md" x-show="editing"></i>
+                                                    <i class="ph-bold ph-plus-circle text-md!" x-show="!editing"></i>
+                                                    <i class="ph-bold ph-x-circle text-md!" x-show="editing"></i>
                                                 </button>
-                                                <button class="ui_button_icon mr-2 ml-1 !w-10 !h-10"
+                                                <button class="ui_button_icon mr-2 ml-1 w-10! h-10!"
                                                         @click="open = !open"
                                                         x-show="!editing"
                                                         x-transition>
-                                                    <i class="ph-bold ph-eye !text-md" x-show="!open"></i>
-                                                    <i class="ph-bold ph-eye-closed !text-md" x-show="open"></i>
+                                                    <i class="ph-bold ph-eye text-md!" x-show="!open"></i>
+                                                    <i class="ph-bold ph-eye-closed text-md!" x-show="open"></i>
                                                 </button>
                                                 <p class="dark:text-white text-black" x-text="question.text"></p>
                                                 <p class="dark:text-white text-black opacity-80 ml-2 mr-2"
@@ -222,25 +222,25 @@
                                                  x-ref="inputs"
                                                  x-collapse>
                                                 <template x-if="question.type == 'choice'">
-                                                    <select class="ui_input !max-h-8">
+                                                    <select class="ui_input max-h-8!">
                                                         <template x-for="choice in question.choices">
                                                             <option x-text="choice"></option>
                                                         </template>
                                                     </select>
                                                 </template>
                                                 <template x-if="question.type == 'boolean'">
-                                                    <input class="ui_checkbox !max-h-8" type="checkbox">
+                                                    <input class="ui_checkbox max-h-8!" type="checkbox">
                                                 </template>
                                                 <template x-if="question.type == 'number'">
-                                                    <input class="ui_input !max-h-8" type="number">
+                                                    <input class="ui_input max-h-8!" type="number">
                                                 </template>
                                                 <template x-if="question.type == 'text'">
-                                                    <input class="ui_input !max-h-8" type="text">
+                                                    <input class="ui_input max-h-8!" type="text">
                                                 </template>
 
-                                                <button class="ui_button_icon !w-10 !h-10 ml-2"
+                                                <button class="ui_button_icon w-10! h-10! ml-2"
                                                         @click="submit_answer($event, question.simple_name, question.type); editing = false;">
-                                                    <i class="ph-bold ph-check !text-md"></i>
+                                                    <i class="ph-bold ph-check text-md!"></i>
                                                 </button>
                                             </div>
                                             <div class="flex flex-row ml-8 flex-wrap"
@@ -266,10 +266,10 @@
                                              @click.outside="editing = false">
                                             <div class="ml-4 flex flex-row items-center my-1">
                                                 <i class="ph-bold ph-x text-md text-red-500 mr-1"></i>
-                                                <button class="ui_button_icon ml-2 mr-1 !w-10 !h-10"
+                                                <button class="ui_button_icon ml-2 mr-1 w-10! h-10!"
                                                         @click="editing = !editing">
-                                                    <i class="ph-bold ph-plus-circle !text-md" x-show="!editing"></i>
-                                                    <i class="ph-bold ph-x-circle !text-md" x-show="editing"></i>
+                                                    <i class="ph-bold ph-plus-circle text-md!" x-show="!editing"></i>
+                                                    <i class="ph-bold ph-x-circle text-md!" x-show="editing"></i>
                                                 </button>
                                                 <p class="dark:text-white text-black" x-text="question.text"></p>
                                             </div>
@@ -277,25 +277,25 @@
                                                  x-show="editing"
                                                  x-collapse>
                                                 <template x-if="question.type == 'choice'">
-                                                    <select class="ui_input !max-h-8">
+                                                    <select class="ui_input max-h-8!">
                                                         <template x-for="choice in question.choices">
                                                             <option x-text="choice"></option>
                                                         </template>
                                                     </select>
                                                 </template>
                                                 <template x-if="question.type == 'boolean'">
-                                                    <input class="ui_checkbox !max-h-8" type="checkbox">
+                                                    <input class="ui_checkbox max-h-8!" type="checkbox">
                                                 </template>
                                                 <template x-if="question.type == 'number'">
-                                                    <input class="ui_input !max-h-8" type="number">
+                                                    <input class="ui_input max-h-8!" type="number">
                                                 </template>
                                                 <template x-if="question.type == 'text'">
-                                                    <input class="ui_input !max-h-8" type="text">
+                                                    <input class="ui_input max-h-8!" type="text">
                                                 </template>
 
-                                                <button class="ui_button_icon !w-10 !h-10 ml-2"
+                                                <button class="ui_button_icon w-10! h-10! ml-2"
                                                         @click="submit_answer($event, question.simple_name, question.type)">
-                                                    <i class="ph-bold ph-check !text-md"></i>
+                                                    <i class="ph-bold ph-check text-md!"></i>
                                                 </button>
                                             </div>
                                         </div>
@@ -343,7 +343,7 @@
                              x-data="{ team_number_input: '' }"
                              x-collapse>
                             <p class="dark:text-white text-black text-md text-center">Add a new pit</p>
-                            <input class="ui_input mt-1 !w-full"
+                            <input class="ui_input mt-1 w-full!"
                                    type="number"
                                    placeholder="Team Number"
                                    x-ref="team_number_input"
@@ -359,7 +359,7 @@
                 </div>
 
                 <div class="fixed bottom-1 left-1 md:bottom-2 md:left-2 z-5 drop-shadow-xl bg-slate-200/80 dark:bg-slate-700/80 border-2 dark:border-slate-600 border-slate-300 rounded-full backdrop-blur-md p-2 flex flex-row align-middle items-center">
-                    <button class="ui_button_icon mr-2 !w-8 !h-8 md:!w-12 md:!h-12"
+                    <button class="ui_button_icon mr-2 w-8! h-8! md:w-12! md:h-12!"
                             @click="go_to_top"
                             x-show="scrollTop > 0"
                             x-transition
@@ -367,7 +367,7 @@
                             @scroll.window="scrollTop = window.scrollY">
                         <i class="ph-bold ph-arrow-line-up"></i>
                     </button>
-                    <button class="ui_button_icon mr-2 !w-8 !h-8 md:!w-12 md:!h-12"
+                    <button class="ui_button_icon mr-2 w-8! h-8! md:w-12! md:h-12!"
                             @click="sync_pit_data">
                         <i class="ph-bold ph-arrows-clockwise"></i>
                     </button>

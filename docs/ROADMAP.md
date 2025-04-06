@@ -7,7 +7,7 @@ This document describes the roadmap for Open Scouting, and roughly when each fea
 ### `v0.1.3-alpha`
 - [ ] [#70](https://github.com/FRC-Team3484/open-scouting/issues/70) - Charts in the advanced data view don't update when the filters do
 - [ ] [#71](https://github.com/FRC-Team3484/open-scouting/issues/71) - Organize client side code
-- [ ] [#54](https://github.com/FRC-Team3484/open-scouting/issues/54) - Update Tailwind.css to v4.0
+- [x] [#54](https://github.com/FRC-Team3484/open-scouting/issues/54) - Update Tailwind.css to v4.0
 - [ ] [#60](https://github.com/FRC-Team3484/open-scouting/issues/60) - In certain cases, the `/authentication` page cannot be loaded
 - [ ] [#78](https://github.com/FRC-Team3484/open-scouting/issues/78) - Show any client errors in the developer menu
 
