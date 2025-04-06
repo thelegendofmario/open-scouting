@@ -15,7 +15,6 @@
 	// 	],
 	// 	"description": "Log output to console"
 	// }
-
 	"Emit custom event": {
 		"scope": "javascript,html",
 		"prefix": "emit",
@@ -26,7 +25,6 @@
 		],
 		"description": "Dispatch a custom event"
 	},
-
 	"Recieve custom event": {
 		"scope": "javascript,html",
 		"prefix": "recieve",
@@ -39,5 +37,17 @@
 			"});"
 		],
 		"description": "Recieve custom event"
+	},
+	"Alpine.js Data": {
+		"scope": "javascript",
+		"prefix": "alpine",
+		"body": [
+			"document.addEventListener('alpine:init', () => {",
+			"    Alpine.data('$1', () => ({",
+			"        $2",
+			"    }));",
+			"});"
+		],
+		"description": "Create alpine.js data that is extended in JavaScript"
 	}
 }
