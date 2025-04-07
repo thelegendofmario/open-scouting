@@ -1,3 +1,11 @@
+/**
+ * Handles the client side code for the authentication box on the index page
+ *
+ * This checks with the server if the user is authenticated or not,
+ * displays the current authentication status,
+ * and handles the process of signing in without an account
+ */
+
 document.addEventListener("alpine:init", () => {
 	Alpine.data("authentication_box", () => ({
 		YEARS: YEARS,
@@ -7,6 +15,9 @@ document.addEventListener("alpine:init", () => {
 		display_name: "",
 		team_number: "",
 
+		/**
+		 * Checks if the username and team number are filled in
+		 */
 		check() {
 			if (this.$refs.username.value && this.$refs.team_number.value) {
 				this.$refs.next.disabled = false;
@@ -15,6 +26,10 @@ document.addEventListener("alpine:init", () => {
 			}
 		},
 
+		/**
+		 * Submits the username and team number to the server to start scouting,
+		 * when continuing without an account
+		 */
 		submit() {
 			username = this.$refs.username.value;
 			team_number = this.$refs.team_number.value;
@@ -59,6 +74,9 @@ document.addEventListener("alpine:init", () => {
 			}
 		},
 
+		/**
+		 * Starts scouting in demo mode
+		 */
 		start_demo() {
 			window.dispatchEvent(
 				new CustomEvent("header_demo", {
@@ -69,14 +87,23 @@ document.addEventListener("alpine:init", () => {
 			this.page = 4;
 		},
 
+		/**
+		 * Opens the advanced data view
+		 */
 		advanced_data_view() {
 			window.location.href = `${SERVER_IP}/advanced_data`;
 		},
 
+		/**
+		 * Opens the authentication page
+		 */
 		sign_in() {
 			window.location.href = `${SERVER_IP}/authentication`;
 		},
 
+		/**
+		 * Continues scouting with an account, using the current authentication status
+		 */
 		continue_with_account() {
 			username = this.username;
 			team_number = this.team_number;
@@ -121,6 +148,9 @@ document.addEventListener("alpine:init", () => {
 			}
 		},
 
+		/**
+		 * Asks the server to sign the user out
+		 */
 		async sign_out() {
 			const response = await fetch(`${SERVER_IP}/authentication/sign_out`, {
 				method: "POST",
@@ -146,6 +176,9 @@ document.addEventListener("alpine:init", () => {
 			}
 		},
 
+		/**
+		 * Gets the current authentication status from the server
+		 */
 		async check_authentication_status() {
 			if (globalThis.offline === false) {
 				// Ask server for status

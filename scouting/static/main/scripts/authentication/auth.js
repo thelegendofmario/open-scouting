@@ -1,3 +1,11 @@
+/**
+ * Handles the client side code for the authentication page
+ *
+ * Goes through the steps of creating an account and signing in,
+ * sends and checks verification codes,
+ * and tells the server to authenticate and create accounts
+ */
+
 document.addEventListener("alpine:init", () => {
 	Alpine.data("auth", () => ({
 		sign_in: true,
