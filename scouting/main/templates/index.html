@@ -9,14 +9,15 @@
 {% block stylesheets %}{% endblock %}
 
 {% block body %}
+    <script>
+        const YEARS = JSON.parse(`{{ YEARS|safe }}`);
+        const SERVER_IP = `{{ SERVER_IP }}`;
+        const CSRF_TOKEN = `{{ csrf_token }}`;
+        const TBA_API_KEY = `{{ TBA_API_KEY }}`;
+    </script>
+
     <div class="snap-y snap-mandatory h-screen overflow-y-scroll" id="index">
         <div class="flex h-screen justify-center items-center flex-col w-screen snap-center px-4">
-            <script>
-                const YEARS = JSON.parse(`{{ YEARS|safe }}`);
-                const SERVER_IP = `{{ SERVER_IP }}`;
-                const CSRF_TOKEN = `{{ csrf_token }}`;
-                const TBA_API_KEY = `{{ TBA_API_KEY }}`;
-            </script>
 
             <script src="{% static '/main/scripts/index/header.js' %}"></script>
 
