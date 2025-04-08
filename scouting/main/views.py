@@ -413,7 +413,10 @@ def get_data(request):
             for item in data:
                 item_data = {}
                 for key in item.data:
-                    item_data[key["name"]] = key["value"]
+                    try:
+                        item_data[key["name"]] = key["value"]
+                    except KeyError:
+                        break
 
                 item_data["created"] = item.created
                 item_data["username_created"] = item.username_created
