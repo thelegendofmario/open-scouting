@@ -4,15 +4,26 @@
     Open Scouting
 {% endblock head_title %}
 
-{% block head_scripts %}{% endblock %}
+{% block head_scripts %}
+{% endblock head_scripts %}
 
-{% block stylesheets %}{% endblock %}
+{% block stylesheets %}
+{% endblock stylesheets %}
 
 {% block body %}
+    <script>
+        const YEARS = JSON.parse(`{{ YEARS|safe }}`);
+        const SERVER_IP = `{{ SERVER_IP }}`;
+        const CSRF_TOKEN = `{{ csrf_token }}`;
+        const TBA_API_KEY = `{{ TBA_API_KEY }}`;
+    </script>
+
     <div class="snap-y snap-mandatory h-screen overflow-y-scroll" id="index">
         <div class="flex h-screen justify-center items-center flex-col w-screen snap-center px-4">
 
-            <div x-data="header()">
+            <script src="{% static '/main/scripts/index/header.js' %}"></script>
+
+            <div x-data="header">
                 <div class="flex flex-col justify-center items-center"
                      x-show="basic"
                      x-transition>
@@ -71,117 +82,13 @@
 
             </div>
 
-            <script>
-                function header() {
-                    return {
-                        basic: true,
-                        username: "",
-                        team_number: "",
-                        event_name: "",
-                        event_code: "",
-                        custom_event: false,
-                        year: "",
-                        demo: false,
+            <script src="{% static '/main/scripts/index/index.js' %}"></script>
 
-                        start_over() {
-                            window.dispatchEvent(new CustomEvent('start_over'));
-                            this.basic = true;
-                            this.username = "";
-                            this.team_number = "";
-                            this.event_name = "";
-                            this.event_code = "";
-                            this.year = "";
-                            this.demo = false;
-                        },
+            <div x-data="index">
+                <script src="{% static '/main/scripts/index/authentication_box.js' %}"></script>
 
-                        init() {
-                            window.addEventListener('header_username', (event) => {
-                                event.stopImmediatePropagation();
-                                const { username, team_number } = event.detail;
-                                this.username = username;
-                                this.team_number = team_number;
-
-                                this.basic = false;
-                            });
-
-                            window.addEventListener('header_event', (event) => {
-                                event.stopImmediatePropagation();
-                                const { event_name, event_code } = event.detail;
-
-                                this.event_name = event_name;
-                                this.event_code = event_code;
-                            });
-
-                            window.addEventListener('header_year', (event) => {
-                                const { year } = event.detail;
-                                this.year = year;
-                            });
-
-                            window.addEventListener('header_custom_event', (event) => {
-                                event.stopImmediatePropagation();
-                                const { event_name, event_code } = event.detail;
-
-                                this.event_name = event_name;
-                                this.event_code = event_code;
-                                this.custom_event = true;
-                            });
-
-                            window.addEventListener('header_demo', (event) => {
-                                event.stopImmediatePropagation();
-                                const { year } = event.detail;
-
-                                this.basic = false;
-
-                                this.year = year;
-                                this.demo = true;
-                                this.username = "demo";
-                                this.team_number = "0000";
-                                this.event_name = "";
-                                this.event_code = "";
-                                this.custom_event = false;
-                            })
-
-                            window.addEventListener('get_header_data', (event) => {
-                                event.stopImmediatePropagation();
-                                const { load_page } = event.detail;
-
-                                let username = this.username;
-                                let team_number = this.team_number;
-                                let event_name = this.event_name;
-                                let event_code = this.event_code;
-                                let load_page_var = load_page;
-                                let custom = this.custom_event;
-                                let year = this.year;
-                                let demo = this.demo;
-
-                                window.dispatchEvent(new CustomEvent('header_data', {
-                                    detail: { username, team_number, event_name, event_code, load_page, custom, year, demo }
-                                }));
-                            });
-
-                            window.addEventListener('get_link_data', (event) => {
-                                event.stopImmediatePropagation();
-
-                                let username = this.username;
-                                let team_number = this.team_number;
-                                let event_name = this.event_name;
-                                let event_code = this.event_code;
-                                let custom = this.custom_event;
-                                let year = this.year;
-                                let demo = this.demo;
-
-                                window.dispatchEvent(new CustomEvent('link_data', {
-                                    detail: { username, team_number, event_name, event_code, custom, year, demo }
-                                }));
-                            });
-                        }
-                    }
-                }
-            </script>
-
-            <div x-data="index()">
                 <div class="flex flex-col"
-                     x-data="authentication_box()"
+                     x-data="authentication_box"
                      x-show="page == 1"
                      x-transition>
 
@@ -238,206 +145,10 @@
                     </button>
                 </div>
 
-                <script>
-                    function authentication_box() {
-                        return {
-                            open: false,
-                            YEARS: JSON.parse(`{{ YEARS|safe }}`),
-                            authenticated: false,
-                            username: "",
-                            display_name: "",
-                            team_number: "",
-
-                            check() {
-                                if (this.$refs.username.value && this.$refs.team_number.value) {
-                                    this.$refs.next.disabled = false;
-                                } else {
-                                    this.$refs.next.disabled = true;
-                                }
-                            },
-
-                            submit() {
-                                username = this.$refs.username.value;
-                                team_number = this.$refs.team_number.value;
-
-                                window.dispatchEvent(new CustomEvent('header_username', {
-                                    detail: { username, team_number }
-                                }));
-                                
-                                const urlParams = new URLSearchParams(window.location.search);
-                                const year = urlParams.get('year');
-                                const event_name = urlParams.get('event_name');
-                                const event_code = urlParams.get('event_code');
-
-                                if (year && event_name && event_code) {
-                                    window.dispatchEvent(new CustomEvent('header_year', {
-                                        detail: { year }
-                                    }));
-
-                                    window.dispatchEvent(new CustomEvent('header_event', {
-                                        detail: { event_name, event_code }
-                                    }));
-
-                                    window.dispatchEvent(new CustomEvent('scouting_notification', {
-                                        detail: { title:"Event autofilled", body:"Autofilled the event and year from the provided link data", icon:"lightning" }
-                                    }));
-
-                                    this.page = 4;
-                                } else {
-                                    this.page = 2;
-                                }
-                            },
-
-                            start_demo() {
-                                window.dispatchEvent(new CustomEvent('header_demo', {
-                                    detail: { year: this.YEARS.at(-1) }
-                                }));
-
-                                this.page = 4;
-                            },
-
-                            advanced_data_view() {
-                                window.location.href = "{{ SERVER_IP }}/advanced_data";
-                            },
-
-                            sign_in() {
-                                window.location.href = "{{ SERVER_IP }}/authentication";
-                            },
-
-                            continue_with_account() {
-                                username = this.username;
-                                team_number = this.team_number;
-
-                                window.dispatchEvent(new CustomEvent('header_username', {
-                                    detail: { username, team_number }
-                                }));
-
-                                const urlParams = new URLSearchParams(window.location.search);
-                                const year = urlParams.get('year');
-                                const event_name = urlParams.get('event_name');
-                                const event_code = urlParams.get('event_code');
-
-                                if (year && event_name && event_code) {
-                                    window.dispatchEvent(new CustomEvent('header_year', {
-                                        detail: { year }
-                                    }));
-
-                                    window.dispatchEvent(new CustomEvent('header_event', {
-                                        detail: { event_name, event_code }
-                                    }));
-
-                                    window.dispatchEvent(new CustomEvent('scouting_notification', {
-                                        detail: { title:"Event autofilled", body:"Autofilled the event and year from the provided link data", icon:"lightning" }
-                                    }));
-
-                                    this.page = 4;
-                                } else {
-                                    this.page = 2;
-                                }
-                            },
-
-                            async sign_out() {
-                                var response = await fetch("{{ SERVER_IP }}/authentication/sign_out", {
-                                method: "POST",
-                                headers: {
-                                        "X-CSRFToken": "{{ csrf_token }}",
-                                    }
-                                });
-
-                                if (response.ok) {
-                                    response.text().then(async (text) => {
-                                        let auth_json = {
-                                            authenticated: false,
-                                            username: "",
-                                            display_name: "",
-                                            team_number: ""
-                                        }
-
-                                        localStorage.setItem("authenticated", JSON.stringify(auth_json));
-                                        window.location.reload();
-                                    });
-                                } else {
-                                    console.log("Error signing out");
-                                }
-                            },
-
-                            async check_authentication_status() {
-                                if (globalThis.offline == false) {
-                                    // Ask server for status
-                                    var response = await fetch("{{ SERVER_IP }}/authentication/get_authentication_status", {
-                                    method: "POST",
-                                    headers: {
-                                            "X-CSRFToken": "{{ csrf_token }}",
-                                        }
-                                    });
-
-                                    if (response.ok) {
-                                        response.json().then(async (json) => {
-                                            if (json.authenticated == true) {
-                                                this.authenticated = true;
-                                                let auth_json = {
-                                                    authenticated: json.authenticated,
-                                                    username: json.username,
-                                                    display_name: json.display_name,
-                                                    team_number: json.team_number
-                                                }
-
-                                                this.username = json.username;
-                                                this.display_name = json.display_name;
-                                                this.team_number = json.team_number;
-                                                localStorage.setItem("authenticated", JSON.stringify(auth_json));
-                                                
-                                            } else {
-                                                this.authenticated = false;
-                                                let auth_json = {
-                                                    authenticated: json.authenticated,
-                                                    username: json.username,
-                                                    display_name: json.display_name,
-                                                    team_number: json.team_number
-                                                }
-
-                                                this.username = json.username;
-                                                this.display_name = json.display_name;
-                                                this.team_number = json.team_number;
-                                                localStorage.setItem("authenticated", JSON.stringify(auth_json));
-                                            }
-                                        });
-                                    } else {
-                                        console.log("Error getting authentication status");
-                                        this.authenticated = false;
-                                        let auth_json = {
-                                            authenticated: false,
-                                            username: "",
-                                            display_name: "",
-                                            team_number: ""
-                                        }
-                                        localStorage.setItem("authenticated", JSON.stringify(auth_json));
-                                    }
-                                    
-                                } else {
-                                    // Check local storage for status
-                                    if (JSON.parse(localStorage.getItem("authenticated")).authenticated) {
-                                        this.authenticated = true;
-                                        this.username = JSON.parse(localStorage.getItem("authenticated")).username;
-                                        this.display_name = JSON.parse(localStorage.getItem("authenticated")).display_name;
-                                        this.team_number = JSON.parse(localStorage.getItem("authenticated")).team_number;
-                                    } else {
-                                        this.authenticated = false;
-                                    }
-                                }
-                            },
-
-                            init() {
-                                setTimeout(() => {
-                                    this.check_authentication_status();
-                                }, 100);
-                            }
-                        };
-                    }
-                </script>
+                <script src="{% static '/main/scripts/index/year_select.js' %}"></script>
 
                 <div class="flex flex-col justify-center items-center"
-                     x-data="year_select()"
+                     x-data="year_select"
                      x-show="page == 2"
                      x-transition>
                     <p class="text-center dark:text-white text-black font-sans text-2xl mt-6 mb-4">
@@ -466,57 +177,10 @@
                     </button>
                 </div>
 
-                <script>
-                    function year_select() {
-                        return {
-                            YEARS: JSON.parse(`{{ YEARS|safe }}`).reverse(),
-                            selected_year: new Date().getFullYear(),
-                            number_of_events: 0,
-
-                            update_selected_year() {
-                                this.selected_year = this.$refs.year.value;
-                                this.get_year_data();
-                            },
-
-                            async get_year_data() {
-                                var response = await fetch("{{ SERVER_IP }}/get_year_data", {
-                                        method: "POST",
-                                        headers: {
-                                            "Content-Type": "application/json",
-                                            "X-CSRFToken": "{{ csrf_token }}"
-                                        },
-                                        body: JSON.stringify({
-                                            year: this.selected_year
-                                        })
-                                    });
-                            
-                                let year_data = JSON.parse(await response.json());
-                                this.number_of_events = year_data["events"];
-                            },
-
-                            next() {
-                                this.selected_year = this.$refs.year.value;
-
-                                window.dispatchEvent(new CustomEvent('header_year', {
-                                    detail: { year: this.selected_year }
-                                }));
-                                this.page = 3;
-                            },
-
-                            init() {
-                                setTimeout(() => {
-                                    this.selected_year = this.$refs.year.value;
-
-                                    this.get_year_data();
-                                }, 100)
-                                
-                            }
-                        };
-                    }
-                </script>
+                <script src="{% static '/main/scripts/index/events.js' %}"></script>
 
                 <div class="flex flex-col justify-center items-center"
-                     x-data="events()"
+                     x-data="events"
                      x-show="page == 3"
                      x-transition>
                     <p class="text-center dark:text-white text-black font-sans text-2xl mt-4">
@@ -642,145 +306,6 @@
 
                 </div>
 
-                <script>
-                    function events() {
-                        return {
-                            events: [],
-                            custom_events: [],
-                            filtered_events: [],
-                            custom_filtered_events: [],
-                            no_events: true,
-                            no_custom_events: true,
-                            show_custom_events: false,
-                            year: new Date().getFullYear(),
-
-                            async get_events() {
-                                var response = await fetch(`https://www.thebluealliance.com/api/v3/events/${this.year}`, {
-                                method: "GET",
-                                headers: {
-                                        "X-TBA-Auth-Key": "{{ TBA_API_KEY }}"
-                                    }
-                                });
-                        
-                                let data = await response.json();
-                                this.events = data;
-                                this.update_filters();
-
-                                var response = await fetch("{{ SERVER_IP }}/get_custom_events", {
-                                    method: "POST",
-                                    headers: {
-                                        "Content-Type": "application/json",
-                                        "X-CSRFToken": "{{ csrf_token }}"
-                                    },
-                                    body: JSON.stringify({
-                                        year: this.year
-                                    })
-                                });
-                        
-                                let custom_data = JSON.parse(await response.json());
-                                this.custom_events = custom_data;
-
-                                this.update_filters();
-                            },
-
-                            update_filters() {
-                                let today = new Date();
-                                today.setHours(0, 0, 0, 0); // Normalize today to midnight
-
-                                if (!this.$refs.show_past_events.checked) {
-                                    this.filtered_events = this.events.filter(event => {
-                                        let eventDate = new Date(event.end_date + "T23:59:59"); // Ensure full day is considered
-                                        return eventDate >= today;
-                                    });
-
-                                    this.custom_filtered_events = this.custom_events.filter(event => {
-                                        let eventDate = new Date(event.end_date + "T23:59:59");
-                                        return eventDate >= today;
-                                    });
-                                } else {
-                                    this.filtered_events = this.events;
-                                    this.custom_filtered_events = this.custom_events;
-                                }
-
-
-                                let search = this.$refs.event_search.value.toLowerCase();
-
-                                if (search != "") {
-                                    this.filtered_events = this.filtered_events.filter(event => {
-                                        let name = event.name ? event.name.toLowerCase() : '';
-                                        let city = event.city ? event.city.toLowerCase() : '';
-                                        let country = event.country ? event.country.toLowerCase() : '';
-                                        let location_name = event.location_name ? event.location_name.toLowerCase() : '';
-
-                                        return (
-                                            name.includes(search) ||
-                                            city.includes(search) ||
-                                            country.includes(search) ||
-                                            location_name.includes(search)
-                                        );
-                                    });
-
-                                    this.custom_filtered_events = this.custom_filtered_events.filter(event => {
-                                        let name = event.name ? event.name.toLowerCase() : '';
-                                        let location = event.location ? event.location.toLowerCase() : '';
-
-                                        return (
-                                            name.includes(search) ||
-                                            location.includes(search)
-                                        );
-                                    });
-                                }
-
-                                if (this.filtered_events.length == 0) {
-                                    this.no_events = true;
-                                } else {
-                                    this.no_events = false;
-                                }
-
-                                if (this.custom_filtered_events.length == 0) {
-                                    this.no_custom_events = true;
-                                } else {
-                                    this.no_custom_events = false;
-                                }
-                            },
-
-                            select_event(event_name, event_code) {
-                                window.dispatchEvent(new CustomEvent('header_event', {
-                                    detail: { event_name, event_code }
-                                }));
-                                this.page = 4;
-                            },
-
-                            select_custom_event(event_name, event_code ) {
-                                window.dispatchEvent(new CustomEvent('header_custom_event', {
-                                    detail: { event_name, event_code }
-                                }));
-                                this.page = 4;
-                            },
-
-                            create_custom_event() {
-                                window.dispatchEvent(new CustomEvent('open_create_custom_event'));
-                            },
-
-                            init() {
-                                this.get_events();
-
-                                window.addEventListener('refresh_event_list', (event) => {
-                                    event.stopImmediatePropagation();
-                                    this.get_events();
-                                });
-
-                                window.addEventListener('header_year', (event) => {
-                                    const { year } = event.detail;
-                                    this.year = year;
-
-                                    this.get_events();
-                                });
-                            }
-                        }
-                    }
-                </script>
-
                 <div class="flex flex-col w-full mt-2"
                      x-show="page == 4"
                      x-data="{ contribute_open: false }"
@@ -833,114 +358,6 @@
                 </div>
             </div>
 
-            <script>
-                function index() {
-                    return {
-                        page: 1,
-                        link: "",
-
-                        get_header_data(load_page) {
-                            window.dispatchEvent(new CustomEvent('get_header_data', {
-                                detail: { load_page }
-                            }));
-                        },
-
-                        get_link_data() {
-                            window.dispatchEvent(new CustomEvent('get_link_data'));
-                        },
-
-                        load_page(page) {
-                            if (!this.demo) {
-                                if (page == "session") {
-                                    console.log("This feature is coming soon");
-                                } else if (page == "contribute_separately") {
-                                    
-                                    if (!this.custom) {
-                                        window.location.href = `{{ SERVER_IP }}/contribute?username=${encodeURIComponent(this.username)}&team_number=${encodeURIComponent(this.team_number)}&event_name=${encodeURIComponent(this.event_name)}&event_code=${this.event_code}&year=${this.year}&`;
-                                    } else {
-                                        window.location.href = `{{ SERVER_IP }}/contribute?username=${encodeURIComponent(this.username)}&team_number=${encodeURIComponent(this.team_number)}&event_name=${encodeURIComponent(this.event_name)}&event_code=${this.event_code}&year=${this.year}&custom=true&`;
-                                    }
-                                } else if (page == "view_data") {
-                                    if (!this.custom) {
-                                        window.location.href = `{{ SERVER_IP }}/data?username=${encodeURIComponent(this.username)}&team_number=${encodeURIComponent(this.team_number)}&event_name=${encodeURIComponent(this.event_name)}&event_code=${this.event_code}&year=${this.year}&`;
-                                    } else {
-                                        window.location.href = `{{ SERVER_IP }}/data?username=${encodeURIComponent(this.username)}&team_number=${encodeURIComponent(this.team_number)}&event_name=${encodeURIComponent(this.event_name)}&event_code=${this.event_code}&year=${this.year}&custom=true&`;
-                                    }
-                                } else if (page == "pit_scouting") {
-                                    if (!this.custom) {
-                                        window.location.href = `{{ SERVER_IP }}/pits?username=${encodeURIComponent(this.username)}&team_number=${encodeURIComponent(this.team_number)}&event_name=${encodeURIComponent(this.event_name)}&event_code=${this.event_code}&year=${this.year}&`;
-                                    } else {
-                                        window.location.href = `{{ SERVER_IP }}/pits?username=${encodeURIComponent(this.username)}&team_number=${encodeURIComponent(this.team_number)}&event_name=${encodeURIComponent(this.event_name)}&event_code=${this.event_code}&year=${this.year}&custom=true&`;
-                                    }
-                                }
-                            } else {
-                                if (page == "session") {
-                                    console.log("This feature is coming soon");
-                                    
-                                } else if (page == "contribute_separately") {
-                                    window.location.href = `{{ SERVER_IP }}/contribute?year=${this.year}&demo=true&`;
-
-                                } else if (page == "view_data") {
-                                    window.location.href = `{{ SERVER_IP }}/data?year=${this.year}&demo=true&`;
-
-                                } else if (page == "pit_scouting") {
-                                    window.location.href = `{{ SERVER_IP }}/pits?year=${this.year}&demo=true&`;
-                                }
-                            }
-                        },
-
-                        async copy_event_link() {
-                            let link_to_event = `{{ SERVER_IP }}/?year=${this.year}&event_name=${encodeURIComponent(this.event_name)}&event_code=${this.event_code}`;
-
-                            try {
-                                await navigator.clipboard.writeText(link_to_event);
-                                this.link = link_to_event;
-                                window.dispatchEvent(new CustomEvent('scouting_notification', {
-                                    detail: { title:"Link copied", body:"The link to this event and year has been copied to your clipboard", icon:"check-circle" }
-                                }));
-
-                            } catch (err) {
-                                console.error('Failed to copy: ', err);
-                            }
-                        },
-
-                        init() {
-                            window.addEventListener('start_over', (event) => {
-                                this.page = 1
-                            });
-
-                            window.addEventListener('header_data', (event) => {
-                                event.stopImmediatePropagation();
-                                const { username, team_number, event_name, event_code, load_page, custom, year, demo } = event.detail;
-
-                                this.username = username;
-                                this.team_number = team_number;
-                                this.event_name = event_name;
-                                this.event_code = event_code;
-                                this.custom = custom;
-                                this.year = year;
-                                this.demo = demo;
-                                this.load_page(load_page);
-                            });
-
-                            window.addEventListener('link_data', (event) => {
-                                event.stopImmediatePropagation();
-                                const { username, team_number, event_name, event_code, custom, year, demo } = event.detail;
-
-                                this.username = username;
-                                this.team_number = team_number;
-                                this.event_name = event_name;
-                                this.event_code = event_code;
-                                this.custom = custom;
-                                this.year = year;
-                                this.demo = demo;
-                                this.copy_event_link();
-                            });
-                        }
-                    }
-                }
-            </script>
-
             <div class="absolute bottom-1 md:bottom-4 animate-bounce"
                  x-data="scroll_indicator()"
                  x-show="scroll_value == 0"
@@ -964,8 +381,10 @@
                 }
             </script>
 
+            <script src="{% static '/main/scripts/index/create_custom_event.js' %}"></script>
+
             <div class="fixed z-50 h-[80%] bottom-0 md:bottom-auto w-screen md:h-[80%] md:w-[80%] md:mx-4 md:my-8 dark:bg-slate-800/60 dark:border-slate-700 border-slate-300 border-2 md:rounded-2xl rounded-t-xl bg-slate-200/60 backdrop-blur-md p-4 md:p-8 overflow-y-auto"
-                 x-data="create_custom_event()"
+                 x-data="create_custom_event"
                  x-init="init()"
                  x-show="shown"
                  @click.outside="close_dialog()"
@@ -1042,106 +461,6 @@
                     </button>
                 </div>
             </div>
-
-            <script>
-                function create_custom_event() {
-                    return {
-                        shown: false,
-                        YEARS: JSON.parse(`{{ YEARS|safe }}`).reverse(),
-                        selected_year: null,
-                        able_to_submit: false,
-
-                        update_date_fields(e) {
-                            this.selected_year = e.target.value;
-
-                            this.$refs.date_begins.min = `${this.selected_year}-01-01`;
-                            this.$refs.date_begins.max = `${this.selected_year}-12-31`;
-                            this.$refs.date_ends.min = `${this.selected_year}-01-01`;
-                            this.$refs.date_ends.max = `${this.selected_year}-12-31`;
-                        },
-
-                        check_date_fields() {
-                            let date_begins_value = new Date(Date.parse(this.$refs.date_begins.value));
-                            let date_ends_value = new Date(Date.parse(this.$refs.date_ends.value));
-                            let valid = false;
-
-                            if (!this.$refs.date_begins.checkValidity()) {
-                                this.$refs.date_begins.value = `${this.selected_year}-${date_begins_value.getMonth()}-${date_begins_value.getDate()}`;
-                            }
-
-                            if (!this.$refs.date_ends.checkValidity()) {
-                                this.$refs.date_ends.value = `${this.selected_year}-${date_begins_value.getMonth()}-${date_begins_value.getDate()}`;
-                            }
-
-                            this.check_fields();
-                        },
-
-                        check_fields() {
-                            if (this.$refs.date_begins.value == "" || this.$refs.date_ends.value == "" || this.$refs.name.value == "" || this.$refs.location.value == "" || this.$refs.type.value == "N/A") {
-                                valid = false;
-                            } else {
-                                valid = true;
-                            }
-
-                            if (valid) {
-                                this.able_to_submit = true;
-                            } else {
-                                this.able_to_submit = false;
-                            }
-                        },
-
-                        async create_event() {
-                            var response = await fetch("{{ SERVER_IP }}/create_custom_event", {
-                                method: "POST",
-                                headers: {
-                                        "Content-Type": "application/json",
-                                        "X-CSRFToken": "{{ csrf_token }}"
-                                    },
-                                body: JSON.stringify({
-                                        name: this.$refs.name.value,
-                                        year: this.$refs.year.value,
-                                        date_begins: this.$refs.date_begins.value,
-                                        date_ends: this.$refs.date_ends.value,
-                                        location: this.$refs.location.value,
-                                        type: this.$refs.type.value,
-                                    })
-                                });
-
-                                response.text().then(async (text) => {
-                                    if (response.ok) {
-                                        this.close_dialog();
-                                        window.dispatchEvent(new CustomEvent('refresh_event_list'));
-                                    }
-                                });
-                        },
-
-                        close_dialog() {
-                            this.shown = false;
-
-                            this.$refs.name.value = "";
-                            this.$refs.date_begins.value = "";
-                            this.$refs.date_ends.value = "";
-                            this.$refs.location.value = "";
-                            this.$refs.type.value = "N/A";
-                        },
-
-                        init() {
-                            window.addEventListener('open_create_custom_event', (event) => {
-                                event.stopImmediatePropagation();
-                                
-                                this.shown = true;
-                            });
-
-                            this.selected_year = this.YEARS[0]
-                            this.$refs.date_begins.min = `${this.selected_year}-01-01`;
-                            this.$refs.date_begins.max = `${this.selected_year}-12-31`;
-                            this.$refs.date_ends.min = `${this.selected_year}-01-01`;
-                            this.$refs.date_ends.max = `${this.selected_year}-12-31`;
-                        },
-                    }
-                }
-            </script>
-
         </div>
 
         <div class="h-screen w-screen max-w-screen snap-center flex flex-col lg:flex-row justify-center items-center px-6 lg:px-24 overflow-hidden">
@@ -1199,6 +518,8 @@
                    href="https://github.com/FRC-Team3484/open-scouting/tree/development"><i class="ph-bold ph-hammer"></i> Development Branch</a>
             </div>
         </div>
-    {% endblock %}
+    </div>
+{% endblock body %}
 
-    {% block scripts %}{% endblock %}
+{% block scripts %}
+{% endblock scripts %}

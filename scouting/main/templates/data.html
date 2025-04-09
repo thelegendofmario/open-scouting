@@ -1,21 +1,38 @@
 {% extends "base.html" %}
 {% load static %}
-{% block head_title %}Open Scouting{% endblock %}
+{% block head_title %}
+    Open Scouting
+{% endblock head_title %}
 
 {% block head_scripts %}
     <link href="https://unpkg.com/tabulator-tables@6.3.0/dist/css/tabulator.min.css"
           rel="stylesheet">
     <script type="text/javascript"
             src="https://unpkg.com/tabulator-tables@6.3.0/dist/js/tabulator.min.js"></script>
-{% endblock %}
+{% endblock head_scripts %}
 
-{% block stylesheets %}{% endblock %}
+{% block stylesheets %}
+{% endblock stylesheets %}
 
 {% block body %}
+    <script>
+        const SERVER_IP = `{{ SERVER_IP }}`;
+        const CSRF_TOKEN = `{{ csrf_token }}`;
+        const TBA_API_KEY = `{{ TBA_API_KEY }}`;
+        const DEMO = `{{ demo }}`;
+
+        const EVENT_NAME = `{{ event_name }}`;
+        const EVENT_CODE = `{{ event_code }}`;
+        const CUSTOM = `{{ custom }}`;
+        const YEAR = `{{ year }}`;
+    </script>
+
     <div class="flex flex-col h-full min-h-screen w-screen overflow-hidden items-center justify-center">
 
+        <script src="{% static '/main/scripts/data/header.js' %}"></script>
+
         <div class="flex flex-row w-full md:w-3/4 lg:w-2/3 mx-8 my-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 items-center justify-center"
-             x-data="data_header()">
+             x-data="header">
             <img class="w-16 h-16 aspect-square m-2 hover:scale-110 transition-all ease-in-out active:scale-95"
                  src="{% static '/main/images/icon_rounded.png' %}"
                  @click="window.location.href = '{{ SERVER_IP }}'">
@@ -65,44 +82,10 @@
 
         </div>
 
-        <script>
-        function data_header() {
-            return {
-                demo: false, 
-                page_dropdown: false,
-                page_path: "/data",
-
-                go_to_contribute() {
-                    let url = new URL(window.location.href);
-                    url.pathname = url.pathname.replace(this.page_path, "/contribute");
-                    window.location.href = url.toString();
-                },
-
-                go_to_data() {
-                    let url = new URL(window.location.href);
-                    url.pathname = url.pathname.replace(this.page_path, "/data");
-                    window.location.href = url.toString();
-                },
-
-                go_to_pits() {
-                    let url = new URL(window.location.href);
-                    url.pathname = url.pathname.replace(this.page_path, "/pits");
-                    window.location.href = url.toString();
-                },
-
-                init() {
-                    try {
-                        this.demo = JSON.parse("{{ demo }}");
-                    } catch {
-                        this.demo = false;
-                    }
-                }
-            }
-        }
-        </script>
+        <script src="{% static '/main/scripts/data/data_table.js' %}"></script>
 
         <div class="w-full overflow-x-auto mx-16"
-             x-data="dataTable()"
+             x-data="data_table"
              x-init="init()"
              x-transition>
             <div x-show="!offline && !no_data"
@@ -134,128 +117,8 @@
             </div>
 
         </div>
-
-        <script>
-        function dataTable() {
-            return {
-                headers: [],
-                entries: {},
-                SERVER_IP: "{{ SERVER_IP }}",
-                no_data: false,
-                offline: false,
-
-                generate_header_text(header_text) {
-                    return header_text.replaceAll("_", " ").split(' ')
-                        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                        .join(' ');
-                },
-
-                convert_entries_to_tabulator(entries) {
-                    let new_entries = [];
-
-                    for (entry in entries) {
-                        new_entries.push(entries[entry].data);
-                    }
-
-                    return new_entries;
-                },
-
-                init() {
-                    console.log("table started")
-                    
-                    fetch(
-                        `${this.SERVER_IP}/get_data`, {
-                        method: 'POST',
-                        headers: {
-                            "Content-Type": "application/json",
-                            "X-CSRFToken": "{{ csrf_token }}"
-                        },
-                        body: JSON.stringify({
-                            event_name: encodeURIComponent("{{ event_name }}"),
-                            event_code: "{{ event_code }}",
-                            custom: "{{ custom }}",
-                            year: "{{ year }}",
-                            demo: "{{ demo }}"
-                        })
-                    })
-                    .then(response => response.json().then(json => {
-                        this.headers = json.data_headers;
-                        this.entries = json.data;
-
-                        if (this.headers.length == 0) {
-                            if (!this.offline) {
-                                this.no_data = true;
-                            }
-                        }
-                        
-                        var menu_icon = function(cell, formatterParams, onRendered) {
-                            return "<i class='ph-bold ph-info'></i>";
-                        };
-
-                        var menu_click = function(e, component, onRendered) {
-                            //e - the mouse/touch event that triggered the popup
-                            //component - column/row/cell component that triggered this popup
-                            //onRendered - function to call when the formatter has been rendered
-
-                            let div = document.createElement("div");
-                            div.classList = "flex flex-col dark:bg-slate-700 bg-slate-200 border-2 dark:border-slate-600 border-slate-300 rounded-2xl p-4 transition-all shadow-lg";
-
-                            let div_header = document.createElement("p");
-                            div_header.innerText = "Info";
-                            div_header.classList = "dark:text-white text-black text-lg text-bold text-sans";
-
-                            let div_verified = document.createElement("p");
-                            div_verified.classList = "dark:text-white text-black text-sm text-bold text-sans opacity-80";
-
-                            if (component.getData().account) {
-                                div_verified.innerHTML = '<i class="ph-bold ph-check-circle"></i> Verified Account';
-                            } else {
-                                div_verified.innerHTML = '<i class="ph-bold ph-x-circle"></i> Temporary Account';
-                            }
-
-                            let div_info = document.createElement("p");
-                            div_info.classList = "dark:text-white text-black text-md text-sans";
-
-                            let date = new Date(component.getData().created);
-
-                            if (component.getData().username_created && component.getData().team_number_created) {
-                                div_info.innerText = `Created by ${component.getData().username_created} on team ${component.getData().team_number_created} on ${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`;
-                            } else {
-                                div_info.innerText = `Created on ${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`;
-                            }
-
-                            div.appendChild(div_header);
-                            div.appendChild(div_info);
-                            div.appendChild(div_verified);
-
-                            return div;
-                        };
-
-                        this.headers.unshift({title:"Info", hozAlign:"center", formatter:menu_icon, width:20, clickPopup:menu_click, headerSort:false});
-
-                        var table = new Tabulator(this.$refs.table, {
-                            height: "100%",
-                            data: this.entries,
-                            layout: "fitColumns",
-                            columns: this.headers
-                        });
-                    }))
-                    .then(data => console.log(data))
-                    .catch(error => console.error(error));
-
-                    if (navigator.onLine) {
-                        this.offline = false;
-                    } else {
-                        this.offline = true;
-                    }
-                    
-                    
-                }
-            }
-        }
-        </script>
     </div>
-{% endblock %}
+{% endblock body %}
 
 {% block scripts %}
-{% endblock %}
+{% endblock scripts %}

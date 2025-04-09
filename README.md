@@ -26,9 +26,6 @@
 ## Features
 - Save data offline in case of poor connection in the stands
 - Work with The Blue Alliance's API to grab match data allowing to autofill team numbers
-- Tie multiple clients together into a "session" so all the devices can be sent to the next match simultaneously
-  - This will iterate the match number and help autofill some additional information
-- Auto jump to the next section that needs filled out
 - View all data from an event in a table
 - Have a system for quickly setting up all the required data entries for a new season
   - Have fields to quickly set up and provide to the user when scouting, e.g. "text", "boolean", "data" ect.
@@ -39,13 +36,19 @@
 - Manually go offline in case of bad connection
 - Scout team's pits at competition
 - View and filter data for multiple teams at multiple events and filter that data by a specific recorded stat
+- Scouts can select what field position they're watching (Red 1, Blue 2, ect.) and the team number for them to watch will be autofilled
+- Match numbers are automatically incremented, meaning scouts only need to enter the match they're scouting and the match type and everything else will be filled in for subsequent matches
+<!-- - Tie multiple clients together into a "session" so all the devices can be sent to the next match simultaneously -->
+  <!-- - This will iterate the match number and help autofill some additional information -->
+<!-- - Auto jump to the next section that needs filled out -->
 
 ## Installation
-The installation and deployment process uses docker for simplicity.
 ### Development
 Follow the steps in [Development Installation](./docs/Development_Installation.md) for how to get Open Scouting up and running locally for development or contributing
 
 ### Production
+The installation and deployment process uses docker for simplicity.
+
 First, ensure you have `docker`, `docker-compose`, and `git` installed on your system
 
 > [!NOTE]
@@ -109,13 +112,13 @@ Add these lines into the editor that opens
 ```
 
 ## Contributing
-Contributions are welcome to this project! Please see the [issues](https://github.com/FRC-Team3484/open-scouting/issues) page or the [roadmap](/docs/ROADMAP.md) for any current bugs or features that need implemented.
+Contributions are welcome to this project! Please see the [issues](https://github.com/FRC-Team3484/open-scouting/issues) page or the [roadmap](/docs/ROADMAP.md) for any current bugs or features that need implemented. Features in the roadmap should be prioritized over features as an issue, although any help is always appreciated.
 
 You can view the guide on how `season_fields.py` is formatted [here](/docs/Formatting_Season_Fields.md) if your contribution involves this file
 
 When contributing, please fork this repository (ensure you uncheck the "Copy the `main` branch only" check box, this gives you access to the `development` branch with the latest changes)
 
-Next, create a new branch and implement your changes. You can install this project locally for testing by following the steps in [Development Installation](#development-installation). Once you've made your changes, please open a pull request into the `development` branch, and your changes will be reviewed.
+Next, create a new branch and implement your changes. You can install this project locally for testing by following the steps in [Development Installation](#development-installation). Once you've made your changes, please open a pull request into the `development` branch, and your changes will be reviewed and merged
 
 Eventually, `development` will be merged into `main` and your changes will be released into production with a new release. Thanks for your contribution!
 

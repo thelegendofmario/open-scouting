@@ -1,12 +1,24 @@
 {% extends "base.html" %}
 {% load static %}
-{% block head_title %}Open Scouting | Contribute{% endblock %}
 
-{% block head_scripts %}{% endblock %}
+{% block head_title %}
+    Open Scouting | Contribute
+{% endblock head_title %}
 
-{% block stylesheets %}{% endblock %}
+{% block head_scripts %}
+{% endblock head_scripts %}
+
+{% block stylesheets %}
+{% endblock stylesheets %}
 
 {% block body %}
+    <script>
+        const SERVER_IP = `{{ SERVER_IP }}`;
+        const CSRF_TOKEN = `{{ csrf_token }}`;
+        const TBA_API_KEY = `{{ TBA_API_KEY }}`;
+        const EMAIL_ENABLED = `{{ EMAIL_ENABLED }}`;
+    </script>
+
     <div class="flex h-screen justify-center items-center flex-col w-screen"
          x-data>
         <img class="w-full md:w-1/2 xl:w-2/6 px-10 hidden dark:block hover:scale-[1.03] active:scale-95 transition-all"
@@ -17,7 +29,9 @@
              @click="window.location.href = '{{ SERVER_IP }}'">
         <p class="dark:text-white text-black text-sans text-center text-lg">Sign in or create an account</p>
 
-        <div class="mt-4" x-data="auth()">
+        <script src="{% static '/main/scripts/authentication/auth.js' %}"></script>
+
+        <div class="mt-4" x-data="auth">
             <div class="flex flex-col items-center dark:bg-slate-800 dark:border-slate-700 bg-slate-200 border-slate-300 border-2 rounded-2xl py-6 px-4 mx-2"
                  x-show="sign_in"
                  x-transition:enter.delay.300ms>
@@ -264,324 +278,5 @@
                 </button>
             </div>
         </div>
-
-        <script>
-            function auth() {
-                return {
-                    sign_in: true,
-                    create_account_page: 1,
-                    user: {
-                        uuid: "",
-                        display_name: "",
-                        team_number: "",
-                        email: "",
-                        password: "",
-                    },
-                    team_number: {
-                        show: false,
-                        show_image: false,
-                        nickname: "",
-                        avatar: "",
-                    },
-                    password_strength: "",
-                    verification_code_error: "",
-                    verification_code_success: "",
-                    create_account_error: "",
-                    sending_email: false,
-                    sign_in_error: "",
-                    sign_in_show_password: false,
-                    EMAIL_ENABLED: "{{ EMAIL_ENABLED }}",
-
-                    create_account_start_over() {
-                        this.$refs.create_display_name.value = '';
-                        this.$refs.create_team_number.value = '';
-                        this.$refs.create_email.value = '';
-                        this.$refs.create_verification_code.value = '';
-                        this.$refs.create_password.value = '';
-                        this.create_account_page = 1;
-
-                        this.team_number.show = false;
-
-                        this.user.uuid = "";
-                        this.user.email = "";
-
-                        this.password_strength = "";
-                        this.verification_code_error = "";
-                        this.verification_code_success = "";
-                        this.sending_email = false;
-
-                        this.check_display_name_and_team_number()
-                        this.check_email()
-                    },
-
-                    async display_team_number(e) {
-                        var current_season = await fetch(`https://www.thebluealliance.com/api/v3/status`, {
-                            method: "GET",
-                            headers: {
-                                "X-TBA-Auth-Key": "{{ TBA_API_KEY }}"
-                            }
-                            });
-                            
-                            if (current_season.ok) {
-                                let current_season_data = await current_season.json()
-
-                                try {
-                                    var response = await fetch(`https://www.thebluealliance.com/api/v3/team/frc${e.target.value}`, {
-                                        method: "GET",
-                                        headers: {
-                                            "X-TBA-Auth-Key": "{{ TBA_API_KEY }}"
-                                        }
-                                    });
-                                        
-                                    if (response.ok) {
-                                        let data = await response.json();
-                                        this.team_number.nickname = data.nickname;
-                                        this.team_number.avatar = `https://www.thebluealliance.com/avatar/${current_season_data.current_season}/frc${e.target.value}.png`;
-                                        this.team_number.show = true;
-                                        this.team_number.show_image = true;
-
-                                    } else if (response.status == 404) {
-                                        this.team_number.show = false;
-                                    }
-                                } catch {}
-                            }
-                    },
-
-                    check_display_name_and_team_number() {
-                        if (this.$refs.create_display_name.value && this.$refs.create_team_number.value) {
-                            this.$refs.create_display_name_team_number_next.disabled = false;
-                        } else {
-                            this.$refs.create_display_name_team_number_next.disabled = true;
-                        }
-                    },
-
-                    check_email() {
-                        if (this.$refs.create_email.value && this.$refs.create_email.value.includes("@") && this.$refs.create_email.value.includes(".")) {
-                            this.$refs.create_email_next.disabled = false;
-                        } else {
-                            this.$refs.create_email_next.disabled = true;
-                        }
-                    },
-
-                    check_verification_code_fields() {
-                        if (this.$refs.create_verification_code.value) {
-                            this.$refs.create_verify_next.disabled = false;
-                        } else {
-                            this.$refs.create_verify_next.disabled = true;
-                        }
-                    },
-
-                    async send_verification_code() {
-                        this.user.email = this.$refs.create_email.value;
-                        this.user.uuid = crypto.randomUUID();
-
-                        this.$refs.create_email_next.disabled = true;
-
-                        if (this.EMAIL_ENABLED) {
-                            var response = await fetch("{{ SERVER_IP }}/authentication/send_verification_code", {
-                            method: "POST",
-                            headers: {
-                                    "X-CSRFToken": "{{ csrf_token }}",
-                                    "Content-Type": "application/json"
-                                },
-                            body: JSON.stringify({
-                                    uuid: this.user.uuid,
-                                    email: this.$refs.create_email.value,
-                                    display_name: this.$refs.create_display_name.value,
-                                })
-                            });
-
-                            if (response.ok) {
-                                response.json().then(async (json) => {
-                                    this.create_account_page = 3;
-                                });
-                            } else {
-                                response.text().then(async (text) => {
-                                    console.log("Unable to send verification code")
-                                });
-                            }
-                        } else {
-                            this.create_account_page = 4;
-                        }
-                    },
-
-                    async check_verification_code() {
-                        var response = await fetch("{{ SERVER_IP }}/authentication/check_verification_code", {
-                        method: "POST",
-                        headers: {
-                                "X-CSRFToken": "{{ csrf_token }}",
-                                "Content-Type": "application/json"
-                            },
-                        body: JSON.stringify({
-                                code: this.$refs.create_verification_code.value,
-                                user_uuid: this.user.uuid
-                            })
-                        });
-
-                        if (response.ok) {
-                            response.json().then(async (json) => {
-                                console.log("Verification code is valid");
-                                this.verification_code_success = "Your email has been verified!";
-                                this.create_account_page = 4;
-                            });
-                        } else {
-                            response.json().then(async (json) => {
-                                if (json.reason == "expired") {
-                                    this.verification_code_error = "The verification code has expired. Use the 'Resend Code' to send a new one.";
-
-                                } else if (json.reason == "does_not_exist") {
-                                    this.verification_code_error = "The verification code is incorrect!"
-                                    
-                                }
-                            });
-                        }
-                    },
-
-                    check_password_field_and_strength() {
-                        if (this.$refs.create_password.value) {
-                            this.$refs.create_create_account.disabled = false;
-                        } else {
-                            this.$refs.create_create_account.disabled = true;
-                        }
-
-                        let password_strength = 0;
-
-                        if (this.$refs.create_password.value.length >= 8) {
-                            password_strength += 1;
-                        }
-
-                        if (this.$refs.create_password.value.match(/[A-Z]/)) {
-                            password_strength += 1;
-                        }
-
-                        if (this.$refs.create_password.value.match(/[0-9]/)) {
-                            password_strength += 1;
-                        }
-
-                        if (this.$refs.create_password.value.match(/[!@#$%^&*(),.?":{}|<>\-_=+]/)) {
-                            password_strength += 1;
-                        }
-
-                        if (this.$refs.create_password.value == "") {
-                            this.password_strength = "";
-                        }
-
-                        if (password_strength == 0) {
-                            this.password_strength = "Poor Password";
-                        } else if (password_strength == 1) {
-                            this.password_strength = "Weak Password";
-                        } else if (password_strength == 2) {
-                            this.password_strength = "Okay Password";
-                        } else if (password_strength == 3) {
-                            this.password_strength = "Strong Password";
-                        } else if (password_strength == 4) {
-                            this.password_strength = "Very Strong Password";
-                        } else {
-                            this.password_strength = "";
-                        }
-
-                    },
-
-                    check_password_visibility() {
-                        if (this.$refs.create_password.type == "password") {
-                            this.$refs.create_password.type = "text";
-                            this.$refs.create_password_visibility_label.innerText = "Hide";
-                        } else {
-                            this.$refs.create_password.type = "password";
-                            this.$refs.create_password_visibility_label.innerText = "Show";
-                        }
-                    },
-
-                    async create_account() {
-                        var response = await fetch("{{ SERVER_IP }}/authentication/create_account", {
-                        method: "POST",
-                        headers: {
-                                "X-CSRFToken": "{{ csrf_token }}",
-                                "Content-Type": "application/json"
-                            },
-                        body: JSON.stringify({
-                                uuid: this.user.uuid,
-                                display_name: this.$refs.create_display_name.value,
-                                team_number: this.$refs.create_team_number.value,
-                                email: this.$refs.create_email.value,
-                                password: this.$refs.create_password.value,
-                                verify: this.EMAIL_ENABLED
-                            })
-                        });
-
-                        if (response.ok) {
-                            response.text().then(async (text) => {
-                                console.log("Account has been created!");
-                                
-                                this.create_account_page = 5;
-                                setTimeout(() => this.go_to_index(), 10000);
-                            });
-                        } else {
-                            response.text().then(async (text) => {
-                                this.verification_code_success = "";
-
-                                if (text == "username_exists") {
-                                    this.create_account_error = "A user with that username already exists. Reload this page or press 'Start Over' to create an account with a different username";
-                                } else if (text == "error") {
-                                    this.create_account_error = "There was an issue creating your account"
-                                } else {
-                                    this.create_account_error = "There was an unknown issue creating your account"
-                                    console.log(text);
-                                }
-                            });
-                        }
-                    },
-
-                    check_sign_in_fields() {
-                        if (this.$refs.sign_in_email.value && this.$refs.sign_in_password.value) {
-                            this.$refs.sign_in_button.disabled = false;
-                        } else {
-                            this.$refs.sign_in_button.disabled = true;
-                        }
-                    },
-
-                    async sign_in_request() {
-                        var response = await fetch("{{ SERVER_IP }}/authentication/sign_in", {
-                        method: "POST",
-                        headers: {
-                                "X-CSRFToken": "{{ csrf_token }}",
-                                "Content-Type": "application/json"
-                            },
-                        body: JSON.stringify({
-                                email: this.$refs.sign_in_email.value,
-                                password: this.$refs.sign_in_password.value
-                            })
-                        });
-
-                        if (response.ok) {
-                            response.text().then(async (text) => {
-                                this.go_to_index();
-                            });
-                        } else {
-                            response.text().then(async (text) => {
-                                if (text == "incorrect_credentials") {
-                                    this.sign_in_error = "Your username or password is incorrect";
-
-                                } else if (text == "error") {
-                                    this.sign_in_error = "There was an issue signing you in";
-
-                                } else {
-                                    this.sign_in_error = "There was an unknown issue signing you in";
-
-                                }
-                            });
-                        }
-                    },
-
-                    go_to_index() {
-                        window.location.href = "{{ SERVER_IP }}/";
-                    },
-
-                    init() {
-                        this.EMAIL_ENABLED = (this.EMAIL_ENABLED == "True")
-                    }
-                }
-            }
-        </script>
     </div>
 {% endblock body %}

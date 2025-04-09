@@ -1,4 +1,8 @@
-<div x-data="menu()">
+{% load static %}
+
+<script src="{% static '/main/scripts/menu/menu.js' %}"></script>
+
+<div x-data="menu">
     <div class="flex flex-row fixed bottom-2 right-2 justify-end w-auto items-center">
         <div x-show="notification_shown && !open"
              class="mx-4 w-full md:bottom-4 md:right-4 text-white text-md md:text-3xl p-1 md:p-2 dark:bg-slate-700/80 border-2 dark:border-slate-600 bg-slate-200/80 border-slate-300 rounded-full backdrop-blur-md"
@@ -220,7 +224,9 @@
          x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0"></div>
 
-    <div x-data="menu_report_backup_check()"
+    <script src="{% static '/main/scripts/menu/menu_report_backup_check.js' %}"></script>
+
+    <div x-data="menu_report_backup_check"
          x-show="mrbc_open"
          @click.outside="mrbc_open = false"
          x-transition
@@ -288,8 +294,4 @@
             </button>
         </div>
     </div>
-
-    {% include "menu/report_backups.html" %}
 </div>
-
-{% include "menu/main.html" %}
