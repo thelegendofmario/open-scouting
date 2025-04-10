@@ -149,6 +149,29 @@ document.addEventListener("alpine:init", () => {
 		},
 
 		/**
+		 * Checks if the user is online before signing them out
+		 */
+		sign_out_check() {
+			if (globalThis.offline === false) {
+				this.sign_out();
+			} else {
+				window.dispatchEvent(
+					new CustomEvent("dialog_show", {
+						detail: {
+							event_name: "sign_out",
+							title: "Signing out will clear page cache",
+							body: "You're currently offline. Signing out will reset any cached pages to make sure your user is actually signed in. Those pages will not be able to be cached again until you're online, so the site may not work properly if you proceed. Are you sure you want to sign out?",
+							buttons: [
+								{ type: "confirm", icon: "ph-bold ph-check", text: "Sign out" },
+								{ type: "cancel", icon: "ph-bold ph-x", text: "Not now" },
+							],
+						},
+					}),
+				);
+			}
+		},
+
+		/**
 		 * Asks the server to sign the user out
 		 */
 		async sign_out() {
@@ -169,6 +192,10 @@ document.addEventListener("alpine:init", () => {
 					};
 
 					localStorage.setItem("authenticated", JSON.stringify(auth_json));
+
+					// Clear service worker cache
+					await caches.delete("v1");
+
 					window.location.reload();
 				});
 			} else {
@@ -256,6 +283,19 @@ document.addEventListener("alpine:init", () => {
 			setTimeout(() => {
 				this.check_authentication_status();
 			}, 100);
+
+			window.addEventListener("dialog_confirm", (event) => {
+				const { event_name } = event.detail;
+
+				if (event_name === "sign_out") {
+					event.stopImmediatePropagation();
+
+					localStorage.setItem("offline_manual", false);
+					window.dispatchEvent(new CustomEvent("sw_update_offline_manual"));
+
+					this.sign_out();
+				}
+			});
 		},
 	}));
 });

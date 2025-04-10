@@ -34,19 +34,17 @@ document.addEventListener("alpine:init", () => {
 		 * Resets the dialog to its initial state.
 		 */
 		reset() {
-			this.show = false;
 			this.event_name = null;
 			this.title = "";
 			this.body = "";
 			this.buttons = [];
+			this.show = false;
 		},
 
 		/**
 		 * Called when a confirm button is clicked. Dispatches a "dialog_confirm" event and resets the dialog
 		 */
 		confirm() {
-			this.show = false;
-
 			window.dispatchEvent(
 				new CustomEvent("dialog_confirm", {
 					detail: { event_name: this.event_name },
@@ -59,8 +57,6 @@ document.addEventListener("alpine:init", () => {
 		 * Called when a cancel button is clicked. Dispatches a "dialog_cancel" event and resets the dialog
 		 */
 		cancel() {
-			this.show = false;
-
 			window.dispatchEvent(
 				new CustomEvent("dialog_cancel", {
 					detail: { event_name: this.event_name },
@@ -73,8 +69,6 @@ document.addEventListener("alpine:init", () => {
 		 * Called when a close button is clicked. Dispatches a "dialog_close" event and resets the dialog
 		 */
 		close() {
-			this.show = false;
-
 			window.dispatchEvent(
 				new CustomEvent("dialog_close", {
 					detail: { event_name: this.event_name },

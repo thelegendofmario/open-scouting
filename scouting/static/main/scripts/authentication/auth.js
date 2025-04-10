@@ -341,6 +341,29 @@ document.addEventListener("alpine:init", () => {
 		},
 
 		/**
+		 * Check if the user is offline to present a confirmation to sign in
+		 */
+		check_sign_in() {
+			if (globalThis.offline === false) {
+				this.sign_in_request();
+			} else {
+				window.dispatchEvent(
+					new CustomEvent("dialog_show", {
+						detail: {
+							event_name: "sign_in",
+							title: "Signing in will clear page cache",
+							body: "You're currently offline. Signing in will reset any cached pages to make sure your user is actually signed in. Those pages will not be able to be cached again until you're online, so the site may not work properly if you proceed. Are you sure you want to sign in?",
+							buttons: [
+								{ type: "confirm", icon: "ph-bold ph-check", text: "Sign in" },
+								{ type: "cancel", icon: "ph-bold ph-x", text: "Not now" },
+							],
+						},
+					}),
+				);
+			}
+		},
+
+		/**
 		 * Send the sign in request to the server
 		 *
 		 * If the request is successful, go to the index page
@@ -360,6 +383,9 @@ document.addEventListener("alpine:init", () => {
 
 			if (response.ok) {
 				response.text().then(async (text) => {
+					// Clear service worker cache
+					await caches.delete("v1");
+
 					this.go_to_index();
 				});
 			} else {
@@ -384,6 +410,19 @@ document.addEventListener("alpine:init", () => {
 
 		init() {
 			this.EMAIL_ENABLED = this.EMAIL_ENABLED === "True";
+
+			window.addEventListener("dialog_confirm", (event) => {
+				const { event_name } = event.detail;
+
+				if (event_name === "sign_in") {
+					event.stopImmediatePropagation();
+
+					localStorage.setItem("offline_manual", false);
+					window.dispatchEvent(new CustomEvent("sw_update_offline_manual"));
+
+					this.sign_in_request();
+				}
+			});
 		},
 	}));
 });

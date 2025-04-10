@@ -8,10 +8,12 @@ This document describes the roadmap for Open Scouting, and roughly when each fea
 - [ ] [#70](https://github.com/FRC-Team3484/open-scouting/issues/70) - Charts in the advanced data view don't update when the filters do
 - [x] [#71](https://github.com/FRC-Team3484/open-scouting/issues/71) - Organize client side code
 - [x] [#54](https://github.com/FRC-Team3484/open-scouting/issues/54) - Update Tailwind.css to v4.0
-- [ ] [#60](https://github.com/FRC-Team3484/open-scouting/issues/60) - In certain cases, the `/authentication` page cannot be loaded
+- [x] [#60](https://github.com/FRC-Team3484/open-scouting/issues/60) - In certain cases, the `/authentication` page cannot be loaded
 - [ ] [#78](https://github.com/FRC-Team3484/open-scouting/issues/78) - Show any client errors in the developer menu
+- [ ] [#62](https://github.com/FRC-Team3484/open-scouting/issues/62) - Issues with saving and syncing pit scouting data (Issue reopened)
 
 ### `v0.1.4-alpha`
+- [ ] [#82](https://github.com/FRC-Team3484/open-scouting/issues/82) - Move common tailwind styles into style.css
 - [ ] [#73](https://github.com/FRC-Team3484/open-scouting/issues/73) - Reimplement the ability to sort data in the advanced data view
 - [ ] [#18](https://github.com/FRC-Team3484/open-scouting/issues/18) - Export data
 - [ ] [#22](https://github.com/FRC-Team3484/open-scouting/issues/22) - Add the ability to import data
