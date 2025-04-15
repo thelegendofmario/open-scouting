@@ -171,7 +171,7 @@ document.addEventListener("alpine:init", () => {
 				clearReports.onsuccess = () => {
 					clearBackups.onsuccess = () => {
 						clearPitScouting.onsuccess = () => {
-							console.log("Deleted the contents of the object stores");
+							log("INFO", "Deleted the contents of the object stores");
 						};
 					};
 				};
@@ -225,14 +225,15 @@ document.addEventListener("alpine:init", () => {
 					};
 
 					request.onerror = (event) => {
-						console.log(
+						log(
+							"WARNING",
 							`Error adding data to the database: ${event.target.errorCode}`,
 						);
 					};
 				};
 
 				openRequest.onerror = (event) => {
-					console.log(`Error opening database: ${event.target.errorCode}`);
+					log("WARNING", `Error opening database: ${event.target.errorCode}`);
 				};
 			} else {
 				this.offline_reports = false;
@@ -308,10 +309,10 @@ document.addEventListener("alpine:init", () => {
 							};
 
 							clear_request.onerror = (event) => {
-								console.log("Error clearing the object store");
+								log("WARNING", "Error clearing the object store");
 							};
 						} else {
-							console.log("There was an issue uploading scouting reports");
+							log("WARNING", "There was an issue uploading scouting reports");
 							this.show_notification(
 								"There was an issue uploading scouting reports",
 								"Your reports may have not been uploaded",
@@ -322,7 +323,8 @@ document.addEventListener("alpine:init", () => {
 				};
 
 				request.onerror = (event) => {
-					console.log(
+					log(
+						"WARNING",
 						`Error adding data to the database: ${event.target.errorCode}`,
 					);
 				};
@@ -375,14 +377,15 @@ document.addEventListener("alpine:init", () => {
 					};
 
 					request.onerror = (event) => {
-						console.log(
+						log(
+							"WARNING",
 							`Error adding data to the database: ${event.target.errorCode}`,
 						);
 					};
 				};
 
 				openRequest.onerror = (event) => {
-					console.log(`Error opening database: ${event.target.errorCode}`);
+					log("WARNING", `Error opening database: ${event.target.errorCode}`);
 				};
 			} else {
 				this.offline_pit_scouting = false;
@@ -453,11 +456,14 @@ document.addEventListener("alpine:init", () => {
 									};
 
 									delete_request.onerror = (event) => {
-										console.log("Error clearing the object store");
+										log("WARNING", "Error clearing the object store");
 										upload_failed = true;
 									};
 								} else {
-									console.log("There was an issue uploading scouting reports");
+									log(
+										"WARNING",
+										"There was an issue uploading scouting reports",
+									);
 									upload_failed = true;
 								}
 							});
@@ -480,7 +486,8 @@ document.addEventListener("alpine:init", () => {
 				};
 
 				request.onerror = (event) => {
-					console.log(
+					log(
+						"WARNING",
 						`Error adding data to the database: ${event.target.errorCode}`,
 					);
 				};

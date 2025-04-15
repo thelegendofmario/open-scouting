@@ -32,14 +32,15 @@ document.addEventListener("alpine:init", () => {
 				};
 
 				request.onerror = (event) => {
-					console.log(
+					log(
+						"WARNING",
 						`Error adding data to the database: ${event.target.errorCode}`,
 					);
 				};
 			};
 
 			openRequest.onerror = (event) => {
-				console.log(`Error opening database: ${event.target.errorCode}`);
+				log("WARNING", `Error opening database: ${event.target.errorCode}`);
 			};
 		},
 
@@ -107,14 +108,15 @@ document.addEventListener("alpine:init", () => {
 				};
 
 				request.onerror = (event) => {
-					console.log(
+					log(
+						"WARNING",
 						`Error adding data to the database: ${event.target.errorCode}`,
 					);
 				};
 			};
 
 			openRequest.onerror = (event) => {
-				console.log(`Error opening database: ${event.target.errorCode}`);
+				log("WARNING", `Error opening database: ${event.target.errorCode}`);
 			};
 		},
 
@@ -145,14 +147,15 @@ document.addEventListener("alpine:init", () => {
 				};
 
 				request.onerror = (event) => {
-					console.log(
+					log(
+						"WARNING",
 						`Error adding data to the database: ${event.target.errorCode}`,
 					);
 				};
 			};
 
 			openRequest.onerror = (event) => {
-				console.log(`Error opening database: ${event.target.errorCode}`);
+				log("WARNING", `Error opening database: ${event.target.errorCode}`);
 			};
 		},
 

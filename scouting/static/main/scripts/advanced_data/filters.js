@@ -132,8 +132,6 @@ document.addEventListener("alpine:init", () => {
 			data_promise.then(() => {
 				this.get_sortable_fields();
 			});
-
-			console.log(this.events);
 		},
 
 		/**
@@ -239,7 +237,7 @@ document.addEventListener("alpine:init", () => {
 				data: data[team],
 			}));
 
-			console.log(sortedData);
+			// console.log(sortedData);
 
 			return sortedData;
 		},

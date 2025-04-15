@@ -41,8 +41,6 @@ document.addEventListener("alpine:init", () => {
 		 * Gets the data from the server and displays the table to the client
 		 */
 		init() {
-			console.log("table started");
-
 			fetch(`${SERVER_IP}/get_data`, {
 				method: "POST",
 				headers: {
@@ -136,7 +134,6 @@ document.addEventListener("alpine:init", () => {
 						});
 					}),
 				)
-				.then((data) => console.log(data))
 				.catch((error) => console.error(error));
 
 			if (navigator.onLine) {

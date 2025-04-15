@@ -296,11 +296,12 @@ document.addEventListener("alpine:init", () => {
 				const request = objectStore.put(pit_scouting_backup);
 
 				request.onsuccess = (event) => {
-					console.log("Data added to the database");
+					log("WARNING", "Data added to the database");
 				};
 
 				request.onerror = (event) => {
-					console.log(
+					log(
+						"WARNING",
 						`Error adding data to the database: ${event.target.errorCode}`,
 					);
 				};
@@ -341,11 +342,12 @@ document.addEventListener("alpine:init", () => {
 				const request = objectStore.put(pit_scouting_backup);
 
 				request.onsuccess = (event) => {
-					console.log("Data added to the database");
+					log("WARNING", "Data added to the database");
 				};
 
 				request.onerror = (event) => {
-					console.log(
+					log(
+						"WARNING",
 						`Error adding data to the database: ${event.target.errorCode}`,
 					);
 				};
@@ -382,16 +384,18 @@ document.addEventListener("alpine:init", () => {
 				const request = objectStore.delete(`${event_code}_${year}`);
 
 				request.onsuccess = (event) => {
-					console.log("Data removed from the database");
+					log("WARNING", "Data removed from the database");
 				};
 
 				request.onerror = (event) => {
 					if (event.target.error.name === "DataError") {
-						console.log(
+						log(
+							"WARNING",
 							`Key not found in the database: ${event.target.errorCode}`,
 						);
 					} else {
-						console.log(
+						log(
+							"WARNING",
 							`Error removing data from the database: ${event.target.errorCode}`,
 						);
 					}
@@ -632,7 +636,8 @@ document.addEventListener("alpine:init", () => {
 						};
 
 						request.onerror = (event) => {
-							console.log(
+							log(
+								"WARNING",
 								`Error getting data from the database: ${event.target.errorCode}`,
 							);
 						};
@@ -651,14 +656,15 @@ document.addEventListener("alpine:init", () => {
 						};
 
 						master_questions_request.onerror = (event) => {
-							console.log(
+							log(
+								"WARNING",
 								`Error getting data from the database: ${event.target.errorCode}`,
 							);
 						};
 					};
 
 					openRequest.onerror = (event) => {
-						console.log(`Error opening database: ${event.target.errorCode}`);
+						log("WARNING", `Error opening database: ${event.target.errorCode}`);
 					};
 				}
 			}, 100);

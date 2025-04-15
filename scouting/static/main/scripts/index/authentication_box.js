@@ -199,7 +199,7 @@ document.addEventListener("alpine:init", () => {
 					window.location.reload();
 				});
 			} else {
-				console.log("Error signing out");
+				log("ERROR", "Error signing out");
 			}
 		},
 
@@ -250,7 +250,7 @@ document.addEventListener("alpine:init", () => {
 						}
 					});
 				} else {
-					console.log("Error getting authentication status");
+					log("WARNING", "Error getting authentication status");
 					this.authenticated = false;
 					const auth_json = {
 						authenticated: false,

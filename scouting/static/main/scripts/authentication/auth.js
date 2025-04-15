@@ -172,7 +172,7 @@ document.addEventListener("alpine:init", () => {
 					});
 				} else {
 					response.text().then(async (text) => {
-						console.log("Unable to send verification code");
+						log("WARNING", "Unable to send verification code");
 					});
 				}
 			} else {
@@ -201,7 +201,7 @@ document.addEventListener("alpine:init", () => {
 
 			if (response.ok) {
 				response.json().then(async (json) => {
-					console.log("Verification code is valid");
+					log("INFO", "Verification code is valid");
 					this.verification_code_success = "Your email has been verified!";
 					this.create_account_page = 4;
 				});
@@ -305,7 +305,7 @@ document.addEventListener("alpine:init", () => {
 
 			if (response.ok) {
 				response.text().then(async (text) => {
-					console.log("Account has been created!");
+					log("INFO", "Account has been created!");
 
 					this.create_account_page = 5;
 					setTimeout(() => this.go_to_index(), 10000);
@@ -323,7 +323,7 @@ document.addEventListener("alpine:init", () => {
 					} else {
 						this.create_account_error =
 							"There was an unknown issue creating your account";
-						console.log(text);
+						log("ERROR", text);
 					}
 				});
 			}

@@ -182,18 +182,19 @@ document.addEventListener("alpine:init", () => {
 						const request = objectStore.add(report_backup);
 
 						request.onsuccess = (event) => {
-							console.log("Data added to the database");
+							log("INFO", "Data added to the database");
 						};
 
 						request.onerror = (event) => {
-							console.log(
+							log(
+								"WARNING",
 								`Error adding data to the database: ${event.target.errorCode}`,
 							);
 						};
 					};
 
 					openRequest.onerror = (event) => {
-						console.log(`Error opening database: ${event.target.errorCode}`);
+						log("WARNING", `Error opening database: ${event.target.errorCode}`);
 					};
 
 					if (globalThis.offline === false) {
@@ -229,7 +230,7 @@ document.addEventListener("alpine:init", () => {
 							window.location.href = url.toString();
 						});
 					} else {
-						console.log("You're offline, report will be saved offline.");
+						log("INFO", "You're offline, report will be saved offline.");
 
 						const openRequest = indexedDB.open("scouting_data", 4);
 
@@ -261,7 +262,7 @@ document.addEventListener("alpine:init", () => {
 							const request = objectStore.add(offline_report);
 
 							request.onsuccess = (event) => {
-								console.log("Data added to the database");
+								log("INFO", "Data added to the database");
 
 								const url = new URL(window.location.href);
 
@@ -279,19 +280,23 @@ document.addEventListener("alpine:init", () => {
 							};
 
 							request.onerror = (event) => {
-								console.log(
+								log(
+									"WARNING",
 									`Error adding data to the database: ${event.target.errorCode}`,
 								);
 							};
 						};
 
 						openRequest.onerror = (event) => {
-							console.log(`Error opening database: ${event.target.errorCode}`);
+							log(
+								"WARNING",
+								`Error opening database: ${event.target.errorCode}`,
+							);
 						};
 					}
 				}
 			} else {
-				console.log("Submitted in demo mode");
+				log("INFO", "Submitted in demo mode");
 
 				const url = new URL(window.location.href);
 
@@ -318,12 +323,12 @@ document.addEventListener("alpine:init", () => {
 			if ("wakeLock" in navigator) {
 				try {
 					this.wakeLock = await navigator.wakeLock.request("screen");
-					console.log("Wake lock acquired");
+					log("DEBUG", "Wake lock acquired");
 				} catch (err) {
 					console.error(`${err.name}, ${err.message}`);
 				}
 			} else {
-				console.log("Wake lock not supported");
+				log("WARNING", "Wake lock not supported");
 			}
 		},
 	}));
