@@ -18,6 +18,7 @@ document.addEventListener("alpine:init", () => {
 		mrbc_open: false,
 		offline_reports: false,
 		offline_pit_scouting: false,
+		logs_open: false,
 
 		/**
 		 * Check if the user is offline or not, and store it in a global variable

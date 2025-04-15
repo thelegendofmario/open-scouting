@@ -6,11 +6,9 @@
 
 // biome-ignore lint/style/noVar: <explanation>
 var logs = JSON.parse(localStorage.getItem("logs") || "[]");
-if (logs.length > 100) {
-	logs = logs.slice(logs.length - 100);
-}
 
 window.addEventListener("beforeunload", () => {
+	logs = logs.slice(Math.max(logs.length - 100, 0));
 	localStorage.setItem("logs", JSON.stringify(logs));
 });
 
@@ -65,15 +63,21 @@ function log(level = "INFO", ...messages) {
 			"color: gray; font-style: italic;",
 		);
 
-		logs.push({ level: level, message: baseMessage + location });
+		logs.push({
+			level: level,
+			message: `${baseMessage}${location}`,
+			date: `${new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} ${new Date().toISOString().split("T")[0]}`,
+		});
 	} else {
 		const dimLocation = `\x1b[2m${location}\x1b[0m`;
 		console[consoleMethod](...messages, dimLocation);
 
-		logs.push({ level: level, message: [...messages, dimLocation].join(" ") });
+		logs.push({
+			level: level,
+			message: [...messages, dimLocation].join(" "),
+			date: `${new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} ${new Date().toISOString().split("T")[0]}`,
+		});
 	}
-
-	console.log(logs);
 }
 
 window.onerror = (message, source, lineno, colno, error) => {
