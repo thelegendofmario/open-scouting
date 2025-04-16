@@ -10,6 +10,7 @@ class Data(models.Model):
     year = models.IntegerField(choices=YEARS)
     event = models.CharField(max_length=999)
     event_code = models.CharField(max_length=99)
+    team_number = models.IntegerField(null=True, blank=True)
     data = models.JSONField(default=dict, blank=True)
     created = models.DateTimeField(null=True, blank=True)
     event_model = models.ForeignKey(
@@ -23,7 +24,10 @@ class Data(models.Model):
     account = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"Data from {self.event} in {str(self.year)}"
+        if self.team_number:
+            return f"{self.team_number}'s data from {self.event} in {str(self.year)}"
+        else:
+            return f"Data from {self.event} in {str(self.year)}"
 
     class Meta:
         verbose_name_plural = "Data"
