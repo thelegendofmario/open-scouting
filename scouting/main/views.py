@@ -978,11 +978,8 @@ def get_teams_with_filters(request):
 
             for data in datas:
                 try:
-                    for item in data.data:
-                        if item["name"] == "team_number":
-                            if item["value"] not in data_list:
-                                data_list.append(item["value"])
-                            break
+                    if data.team_number not in data_list:
+                        data_list.append(data.team_number)
                 except (AttributeError, TypeError, KeyError):
                     pass
         else:
@@ -991,11 +988,8 @@ def get_teams_with_filters(request):
 
             for data in datas:
                 try:
-                    for item in data.data:
-                        if item["name"] == "team_number":
-                            if item["value"] not in data_list:
-                                data_list.append(item["value"])
-                            break
+                    if data.team_number not in data_list:
+                        data_list.append(data.team_number)
                 except (AttributeError, TypeError, KeyError):
                     pass
 
@@ -1038,8 +1032,8 @@ def get_events_with_filters(request):
             for data in events_with_data:
                 try:
                     for item in data.data:
-                        if item["name"] == "team_number":
-                            if str(item["value"]) in teams:
+                        if data.team_number is not None:
+                            if str(data.team_number) in teams:
                                 if data.event_model.event_code not in event_list:
                                     event_list.append(
                                         {
@@ -1118,30 +1112,20 @@ def get_data_from_query(request):
     for item in data_queryset:
         team_number = None
 
-        if isinstance(item.data, list):
-            for field in item.data:
-                field.setdefault("stat_type", "ignore")
-                field.setdefault("game_piece", "")
-                if field["name"] == "team_number":
-                    team_number = str(
-                        field.get("value", "")
-                    )  # Ensure it's a string for comparison
-
-            if not team_list or team_number in team_list:
-                filtered_data.append(item)
+        if not team_list or str(item.team_number) in team_list:
+            if isinstance(item.data, list):
+                for field in item.data:
+                    field.setdefault("stat_type", "ignore")
+                    field.setdefault("game_piece", "")
+            filtered_data.append(item)
 
     # Organize results by team
     team_data_map = {}
 
     for item in filtered_data:
-        team_number = None
-        if isinstance(item.data, list):
-            for field in item.data:
-                if field["name"] == "team_number":
-                    team_number = str(field.get("value", ""))
-
-            if team_number:
-                team_data_map.setdefault(team_number, []).append(item.data)
+        team_number = str(item.team_number)
+        if team_number:
+            team_data_map.setdefault(team_number, []).append(item.data)
 
     final_data = [
         {"team_number": team, "data": fields} for team, fields in team_data_map.items()
