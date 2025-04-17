@@ -154,7 +154,7 @@ document.addEventListener("alpine:init", () => {
 			const db = new Dexie("scouting_data");
 
 			db.version(DATABASE_VERSION).stores({
-				offline_reports: "++uuid",
+				offline_reports: "++uuid, data, event_name, event_code, custom, year",
 				backups: "++uuid",
 				offline_pit_scouting: "++uuid",
 			});
@@ -183,7 +183,9 @@ document.addEventListener("alpine:init", () => {
 				const db = new Dexie("scouting_data");
 
 				db.version(DATABASE_VERSION).stores({
-					offline_reports: "++uuid",
+					offline_reports: "++uuid, data, event_name, event_code, custom, year",
+					backups: "++uuid",
+					offline_pit_scouting: "++uuid",
 				});
 
 				db.offline_reports
@@ -215,7 +217,9 @@ document.addEventListener("alpine:init", () => {
 			const db = new Dexie("scouting_data");
 
 			db.version(DATABASE_VERSION).stores({
-				offline_reports: "++uuid",
+				offline_reports: "++uuid, data, event_name, event_code, custom, year",
+				backups: "++uuid",
+				offline_pit_scouting: "++uuid",
 			});
 
 			db.offline_reports
@@ -280,7 +284,7 @@ document.addEventListener("alpine:init", () => {
 				const db = new Dexie("scouting_data");
 
 				db.version(DATABASE_VERSION).stores({
-					offline_reports: "++uuid",
+					offline_reports: "++uuid, data, event_name, event_code, custom, year",
 					backups: "++uuid",
 					offline_pit_scouting: "++uuid",
 				});
@@ -315,7 +319,7 @@ document.addEventListener("alpine:init", () => {
 			const db = new Dexie("scouting_data");
 
 			db.version(DATABASE_VERSION).stores({
-				offline_reports: "++uuid",
+				offline_reports: "++uuid, data, event_name, event_code, custom, year",
 				backups: "++uuid",
 				offline_pit_scouting: "++uuid",
 			});

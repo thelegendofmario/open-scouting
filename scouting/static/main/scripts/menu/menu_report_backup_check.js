@@ -13,7 +13,9 @@ document.addEventListener("alpine:init", () => {
 			const db = new Dexie("scouting_data");
 
 			db.version(DATABASE_VERSION).stores({
+				offline_reports: "++uuid, data, event_name, event_code, custom, year",
 				backups: "++uuid",
+				offline_pit_scouting: "++uuid",
 			});
 
 			db.backups
@@ -33,7 +35,9 @@ document.addEventListener("alpine:init", () => {
 			const db = new Dexie("scouting_data");
 
 			db.version(DATABASE_VERSION).stores({
+				offline_reports: "++uuid, data, event_name, event_code, custom, year",
 				backups: "++uuid",
+				offline_pit_scouting: "++uuid",
 			});
 
 			db.backups.toArray().then(async (reports) => {
@@ -84,7 +88,9 @@ document.addEventListener("alpine:init", () => {
 			const db = new Dexie("scouting_data");
 
 			db.version(DATABASE_VERSION).stores({
+				offline_reports: "++uuid, data, event_name, event_code, custom, year",
 				backups: "++uuid",
+				offline_pit_scouting: "++uuid",
 			});
 
 			db.backups

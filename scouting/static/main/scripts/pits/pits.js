@@ -260,147 +260,103 @@ document.addEventListener("alpine:init", () => {
 		 * Locally store pit data for offline scouting
 		 */
 		store_pit_data_locally() {
-			const openRequest = indexedDB.open("scouting_data", 4);
+			const db = new Dexie("scouting_data");
 
-			openRequest.onupgradeneeded = (event) => {
-				const db = event.target.result;
-				db.createObjectStore("offline_reports", { keyPath: "uuid" });
-				db.createObjectStore("backups", { keyPath: "uuid" });
-				db.createObjectStore("offline_pit_scouting", { keyPath: "uuid" });
-			};
+			db.version(DATABASE_VERSION).stores({
+				offline_reports: "++uuid, data, event_name, event_code, custom, year",
+				backups: "++uuid",
+				offline_pit_scouting: "++uuid",
+			});
 
-			openRequest.onsuccess = (event) => {
-				const db = event.target.result;
+			db.open()
+				.then(() => {
+					const urlParams = new URLSearchParams(window.location.search);
+					const event_name = urlParams.get("event_name");
+					const event_code = urlParams.get("event_code");
+					const year = urlParams.get("year");
+					const custom = urlParams.get("custom");
 
-				const transaction = db.transaction(
-					["offline_pit_scouting"],
-					"readwrite",
-				);
-				const objectStore = transaction.objectStore("offline_pit_scouting");
+					const pit_scouting_backup = {
+						uuid: `${event_code}_${year}`,
+						data: JSON.stringify(this.pit_data),
+						event_name: event_name,
+						event_code: event_code,
+						year: year,
+						custom: custom,
+					};
 
-				const urlParams = new URLSearchParams(window.location.search);
-				const event_name = urlParams.get("event_name");
-				const event_code = urlParams.get("event_code");
-				const year = urlParams.get("year");
-				const custom = urlParams.get("custom");
-
-				const pit_scouting_backup = {
-					uuid: `${event_code}_${year}`,
-					data: JSON.stringify(this.pit_data),
-					event_name: event_name,
-					event_code: event_code,
-					year: year,
-					custom: custom,
-				};
-
-				const request = objectStore.put(pit_scouting_backup);
-
-				request.onsuccess = (event) => {
-					log("WARNING", "Data added to the database");
-				};
-
-				request.onerror = (event) => {
-					log(
-						"WARNING",
-						`Error adding data to the database: ${event.target.errorCode}`,
-					);
-				};
-			};
+					db.offline_pit_scouting
+						.put(pit_scouting_backup)
+						.then(() => {
+							log("WARNING", "Data added to the database");
+						})
+						.catch((error) => {
+							log("WARNING", `Error adding data to the database: ${error}`);
+						});
+				})
+				.catch((error) => {
+					log("WARNING", `Error opening the database: ${error}`);
+				});
 		},
 
 		/**
 		 * Store the master list of questions locally for adding teams while offline
 		 */
 		store_master_list_of_questions_locally() {
-			const openRequest = indexedDB.open("scouting_data", 4);
+			const db = new Dexie("scouting_data");
 
-			openRequest.onupgradeneeded = (event) => {
-				const db = event.target.result;
-				db.createObjectStore("offline_reports", { keyPath: "uuid" });
-				db.createObjectStore("backups", { keyPath: "uuid" });
-				db.createObjectStore("offline_pit_scouting", { keyPath: "uuid" });
-			};
+			db.version(DATABASE_VERSION).stores({
+				offline_reports: "++uuid, data, event_name, event_code, custom, year",
+				backups: "++uuid",
+				offline_pit_scouting: "++uuid",
+			});
 
-			openRequest.onsuccess = (event) => {
-				const db = event.target.result;
-
-				const transaction = db.transaction(
-					["offline_pit_scouting"],
-					"readwrite",
-				);
-				const objectStore = transaction.objectStore("offline_pit_scouting");
-
-				const pit_scouting_backup = {
+			db.offline_pit_scouting
+				.put({
 					uuid: "master_questions",
 					data: JSON.stringify(this.master_questions),
 					event_name: "",
 					event_code: "",
 					year: "",
 					custom: "",
-				};
-
-				const request = objectStore.put(pit_scouting_backup);
-
-				request.onsuccess = (event) => {
+				})
+				.then(() => {
 					log("WARNING", "Data added to the database");
-				};
-
-				request.onerror = (event) => {
-					log(
-						"WARNING",
-						`Error adding data to the database: ${event.target.errorCode}`,
-					);
-				};
-			};
+				})
+				.catch((error) => {
+					log("WARNING", `Error adding data to the database: ${error}`);
+				});
 		},
 
 		/**
 		 * Remove the locally stored pit data for this event and year
 		 */
 		remove_pit_data_locally() {
-			const openRequest = indexedDB.open("scouting_data", 4);
+			const db = new Dexie("scouting_data");
 
-			openRequest.onupgradeneeded = (event) => {
-				const db = event.target.result;
-				db.createObjectStore("offline_reports", { keyPath: "uuid" });
-				db.createObjectStore("backups", { keyPath: "uuid" });
-				db.createObjectStore("offline_pit_scouting", { keyPath: "uuid" });
-			};
+			db.version(DATABASE_VERSION).stores({
+				offline_reports: "++uuid, data, event_name, event_code, custom, year",
+				backups: "++uuid",
+				offline_pit_scouting: "++uuid",
+			});
 
-			openRequest.onsuccess = (event) => {
-				const db = event.target.result;
+			const urlParams = new URLSearchParams(window.location.search);
+			const event_name = urlParams.get("event_name");
+			const event_code = urlParams.get("event_code");
+			const year = urlParams.get("year");
 
-				const transaction = db.transaction(
-					["offline_pit_scouting"],
-					"readwrite",
-				);
-				const objectStore = transaction.objectStore("offline_pit_scouting");
-
-				const urlParams = new URLSearchParams(window.location.search);
-				const event_name = urlParams.get("event_name");
-				const event_code = urlParams.get("event_code");
-				const year = urlParams.get("year");
-
-				const request = objectStore.delete(`${event_code}_${year}`);
-
-				request.onsuccess = (event) => {
+			db.offline_pit_scouting
+				.delete(`${event_code}_${year}`)
+				.then(() => {
 					log("WARNING", "Data removed from the database");
-				};
-
-				request.onerror = (event) => {
-					if (event.target.error.name === "DataError") {
-						log(
-							"WARNING",
-							`Key not found in the database: ${event.target.errorCode}`,
-						);
+				})
+				.catch((error) => {
+					if (error.name === "DataError") {
+						log("WARNING", `Key not found in the database: ${error}`);
 					} else {
-						log(
-							"WARNING",
-							`Error removing data from the database: ${event.target.errorCode}`,
-						);
+						log("WARNING", `Error removing data from the database: ${error}`);
 					}
-				};
-			};
+				});
 		},
 
 		/**
@@ -570,34 +526,25 @@ document.addEventListener("alpine:init", () => {
 					// The user is offline, so try and fetch things from the local database
 					// First, try and get the pit data locally
 
-					const openRequest = indexedDB.open("scouting_data", 4);
+					const db = new Dexie("scouting_data");
 
-					openRequest.onupgradeneeded = (event) => {
-						const db = event.target.result;
-						db.createObjectStore("offline_reports", { keyPath: "uuid" });
-						db.createObjectStore("backups", { keyPath: "uuid" });
-						db.createObjectStore("offline_pit_scouting", { keyPath: "uuid" });
-					};
+					db.version(DATABASE_VERSION).stores({
+						offline_reports:
+							"++uuid, data, event_name, event_code, custom, year",
+						backups: "++uuid",
+						offline_pit_scouting: "++uuid",
+					});
 
-					openRequest.onsuccess = (event) => {
-						const db = event.target.result;
+					db.open()
+						.then(() => {
+							const urlParams = new URLSearchParams(window.location.search);
+							const event_name = urlParams.get("event_name");
+							const event_code = urlParams.get("event_code");
+							const year = urlParams.get("year");
 
-						const transaction = db.transaction(
-							["offline_pit_scouting"],
-							"readwrite",
-						);
-						const objectStore = transaction.objectStore("offline_pit_scouting");
-
-						const urlParams = new URLSearchParams(window.location.search);
-						const event_name = urlParams.get("event_name");
-						const event_code = urlParams.get("event_code");
-						const year = urlParams.get("year");
-
-						const request = objectStore.get(`${event_code}_${year}`);
-
-						request.onsuccess = async (event) => {
-							const data = event.target.result;
-
+							return db.offline_pit_scouting.get(`${event_code}_${year}`);
+						})
+						.then((data) => {
 							if (data) {
 								this.pit_data = JSON.parse(data.data);
 								this.pit_data_old = JSON.parse(data.data);
@@ -633,39 +580,19 @@ document.addEventListener("alpine:init", () => {
 									}),
 								);
 							}
-						};
+						})
+						.catch((error) => {
+							log("WARNING", `Error getting data from the database: ${error}`);
+						});
 
-						request.onerror = (event) => {
-							log(
-								"WARNING",
-								`Error getting data from the database: ${event.target.errorCode}`,
-							);
-						};
-
-						const master_questions_request =
-							objectStore.get("master_questions");
-
-						master_questions_request.onsuccess = async (event) => {
-							const data = event.target.result;
-
-							if (data) {
-								this.master_questions = JSON.parse(data.data);
-							} else {
-								this.master_questions = [];
-							}
-						};
-
-						master_questions_request.onerror = (event) => {
-							log(
-								"WARNING",
-								`Error getting data from the database: ${event.target.errorCode}`,
-							);
-						};
-					};
-
-					openRequest.onerror = (event) => {
-						log("WARNING", `Error opening database: ${event.target.errorCode}`);
-					};
+					db.offline_pit_scouting
+						.get("master_questions")
+						.then((data) => {
+							this.master_questions = data ? JSON.parse(data.data) : [];
+						})
+						.catch((error) => {
+							log("WARNING", `Error getting data from the database: ${error}`);
+						});
 				}
 			}, 100);
 
