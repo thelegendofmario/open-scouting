@@ -1,3 +1,6 @@
+// biome-ignore lint/style/noVar: <explanation>
+var DATABASE_VERSION = 4;
+
 const registerServiceWorker = async () => {
 	if ("serviceWorker" in navigator) {
 		try {
