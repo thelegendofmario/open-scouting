@@ -155,14 +155,6 @@ document.addEventListener("alpine:init", () => {
 				if (this.check_fields()) {
 					const report_uuid = crypto.randomUUID();
 
-					const db = new Dexie("scouting_data");
-					db.version(DATABASE_VERSION).stores({
-						offline_reports:
-							"++uuid, data, event_name, event_code, custom, year",
-						backups: "++uuid",
-						offline_pit_scouting: "++uuid",
-					});
-
 					db.open()
 						.then(() => {
 							const report_backup = {
@@ -221,14 +213,6 @@ document.addEventListener("alpine:init", () => {
 						});
 					} else {
 						log("INFO", "You're offline, report will be saved offline.");
-
-						const db = new Dexie("scouting_data");
-						db.version(DATABASE_VERSION).stores({
-							offline_reports:
-								"++uuid, data, event_name, event_code, custom, year",
-							backups: "++uuid",
-							offline_pit_scouting: "++uuid",
-						});
 
 						db.offline_reports
 							.put({

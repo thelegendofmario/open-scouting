@@ -151,14 +151,6 @@ document.addEventListener("alpine:init", () => {
 		 * Clear the IndexedDB database
 		 */
 		clear_database() {
-			const db = new Dexie("scouting_data");
-
-			db.version(DATABASE_VERSION).stores({
-				offline_reports: "++uuid, data, event_name, event_code, custom, year",
-				backups: "++uuid",
-				offline_pit_scouting: "++uuid",
-			});
-
 			db.offline_reports.clear();
 			db.backups.clear();
 			db.offline_pit_scouting.clear();
@@ -180,14 +172,6 @@ document.addEventListener("alpine:init", () => {
 		 */
 		check_for_offline_reports() {
 			if (globalThis.offline === false) {
-				const db = new Dexie("scouting_data");
-
-				db.version(DATABASE_VERSION).stores({
-					offline_reports: "++uuid, data, event_name, event_code, custom, year",
-					backups: "++uuid",
-					offline_pit_scouting: "++uuid",
-				});
-
 				db.offline_reports
 					.count()
 					.then((count) => {
@@ -214,14 +198,6 @@ document.addEventListener("alpine:init", () => {
 		 * Upload offline reports to the server
 		 */
 		upload_offline_reports() {
-			const db = new Dexie("scouting_data");
-
-			db.version(DATABASE_VERSION).stores({
-				offline_reports: "++uuid, data, event_name, event_code, custom, year",
-				backups: "++uuid",
-				offline_pit_scouting: "++uuid",
-			});
-
 			db.offline_reports
 				.toArray()
 				.then((reports) => {
@@ -281,14 +257,6 @@ document.addEventListener("alpine:init", () => {
 		 */
 		check_for_offline_pit_scouting() {
 			if (globalThis.offline === false) {
-				const db = new Dexie("scouting_data");
-
-				db.version(DATABASE_VERSION).stores({
-					offline_reports: "++uuid, data, event_name, event_code, custom, year",
-					backups: "++uuid",
-					offline_pit_scouting: "++uuid",
-				});
-
 				db.offline_pit_scouting
 					.filter((element) => element.uuid !== "master_questions")
 					.count()
@@ -316,14 +284,6 @@ document.addEventListener("alpine:init", () => {
 		 * Upload offline pit scouting data to the server
 		 */
 		upload_offline_pit_scouting() {
-			const db = new Dexie("scouting_data");
-
-			db.version(DATABASE_VERSION).stores({
-				offline_reports: "++uuid, data, event_name, event_code, custom, year",
-				backups: "++uuid",
-				offline_pit_scouting: "++uuid",
-			});
-
 			db.offline_pit_scouting
 				.where("uuid")
 				.notEqual("master_questions")

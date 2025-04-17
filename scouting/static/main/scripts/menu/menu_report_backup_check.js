@@ -10,14 +10,6 @@ document.addEventListener("alpine:init", () => {
 		 * Check the database for any reports that are backed up
 		 */
 		get_local_backup_reports() {
-			const db = new Dexie("scouting_data");
-
-			db.version(DATABASE_VERSION).stores({
-				offline_reports: "++uuid, data, event_name, event_code, custom, year",
-				backups: "++uuid",
-				offline_pit_scouting: "++uuid",
-			});
-
 			db.backups
 				.count()
 				.then((count) => {
@@ -32,14 +24,6 @@ document.addEventListener("alpine:init", () => {
 		 * Check to be sure reports have been backed up to the server
 		 */
 		async check_local_backup_reports() {
-			const db = new Dexie("scouting_data");
-
-			db.version(DATABASE_VERSION).stores({
-				offline_reports: "++uuid, data, event_name, event_code, custom, year",
-				backups: "++uuid",
-				offline_pit_scouting: "++uuid",
-			});
-
 			db.backups.toArray().then(async (reports) => {
 				const report_list = [];
 
@@ -85,14 +69,6 @@ document.addEventListener("alpine:init", () => {
 		 * Delete all locally backed up reports
 		 */
 		clear_saved_backup_reports() {
-			const db = new Dexie("scouting_data");
-
-			db.version(DATABASE_VERSION).stores({
-				offline_reports: "++uuid, data, event_name, event_code, custom, year",
-				backups: "++uuid",
-				offline_pit_scouting: "++uuid",
-			});
-
 			db.backups
 				.clear()
 				.catch((error) => {

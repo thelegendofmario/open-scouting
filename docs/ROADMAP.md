@@ -18,6 +18,7 @@ This document describes the roadmap for Open Scouting, and roughly when each fea
 - [ ] [#18](https://github.com/FRC-Team3484/open-scouting/issues/18) - Export data
 - [ ] [#22](https://github.com/FRC-Team3484/open-scouting/issues/22) - Add the ability to import data
 - [ ] [#77](https://github.com/FRC-Team3484/open-scouting/issues/77) - Auto save match scouting progress
+- [ ] [#32](https://github.com/FRC-Team3484/open-scouting/issues/32) - Prompt the user to clear their service worker cache with the site updates
 
 ---
 ## Completed

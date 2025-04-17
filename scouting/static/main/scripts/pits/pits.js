@@ -260,14 +260,6 @@ document.addEventListener("alpine:init", () => {
 		 * Locally store pit data for offline scouting
 		 */
 		store_pit_data_locally() {
-			const db = new Dexie("scouting_data");
-
-			db.version(DATABASE_VERSION).stores({
-				offline_reports: "++uuid, data, event_name, event_code, custom, year",
-				backups: "++uuid",
-				offline_pit_scouting: "++uuid",
-			});
-
 			db.open()
 				.then(() => {
 					const urlParams = new URLSearchParams(window.location.search);
@@ -303,14 +295,6 @@ document.addEventListener("alpine:init", () => {
 		 * Store the master list of questions locally for adding teams while offline
 		 */
 		store_master_list_of_questions_locally() {
-			const db = new Dexie("scouting_data");
-
-			db.version(DATABASE_VERSION).stores({
-				offline_reports: "++uuid, data, event_name, event_code, custom, year",
-				backups: "++uuid",
-				offline_pit_scouting: "++uuid",
-			});
-
 			db.offline_pit_scouting
 				.put({
 					uuid: "master_questions",
@@ -332,14 +316,6 @@ document.addEventListener("alpine:init", () => {
 		 * Remove the locally stored pit data for this event and year
 		 */
 		remove_pit_data_locally() {
-			const db = new Dexie("scouting_data");
-
-			db.version(DATABASE_VERSION).stores({
-				offline_reports: "++uuid, data, event_name, event_code, custom, year",
-				backups: "++uuid",
-				offline_pit_scouting: "++uuid",
-			});
-
 			const urlParams = new URLSearchParams(window.location.search);
 			const event_name = urlParams.get("event_name");
 			const event_code = urlParams.get("event_code");
@@ -525,15 +501,6 @@ document.addEventListener("alpine:init", () => {
 				} else {
 					// The user is offline, so try and fetch things from the local database
 					// First, try and get the pit data locally
-
-					const db = new Dexie("scouting_data");
-
-					db.version(DATABASE_VERSION).stores({
-						offline_reports:
-							"++uuid, data, event_name, event_code, custom, year",
-						backups: "++uuid",
-						offline_pit_scouting: "++uuid",
-					});
 
 					db.open()
 						.then(() => {
