@@ -154,6 +154,9 @@ document.addEventListener("alpine:init", () => {
 			db.offline_reports.clear();
 			db.backups.clear();
 			db.offline_pit_scouting.clear();
+			db.delete();
+
+			window.location.href = SERVER_IP;
 		},
 
 		/**
