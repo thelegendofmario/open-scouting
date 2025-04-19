@@ -468,6 +468,9 @@ document.addEventListener("alpine:init", () => {
 
 					get_pits_response.text().then(async (text) => {
 						this.pit_data = JSON.parse(text);
+
+						console.log("Pit data:", this.pit_data);
+
 						this.pit_data_old = JSON.parse(text);
 
 						this.filter_pit_data();

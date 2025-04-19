@@ -749,14 +749,21 @@ def get_pits(request):
         if pit_group:
             pits = Pit.objects.filter(pit_group=pit_group)
 
-            pit_data = []
+            pit_data = {
+                "event_name": event.name,
+                "event_code": event.event_code,
+                "year": event.year,
+                "pits": [],
+            }
             for pit in pits:
                 pit_entry = {
+                    "uuid": pit.uuid,
                     "team_number": pit.team_number,
                     "nickname": pit.nickname,
+                    "needs_synced": False,
                     "questions": pit.data,
                 }
-                pit_data.append(pit_entry)
+                pit_data["pits"].append(pit_entry)
 
             return JsonResponse(pit_data, safe=False, status=200)
 
@@ -778,6 +785,7 @@ def get_pits(request):
             if response.ok:
                 pits_to_create = [
                     Pit(
+                        uuid=uuid.uuid4(),
                         team_number=team["team_number"],
                         nickname=team["nickname"],
                         pit_group=pit_group,
@@ -789,14 +797,22 @@ def get_pits(request):
                 Pit.objects.bulk_create(pits_to_create)
 
             pits = Pit.objects.filter(pit_group=pit_group)
-            pit_data = []
+
+            pit_data = {
+                "event_name": event.name,
+                "event_code": event.event_code,
+                "year": event.year,
+                "pits": [],
+            }
             for pit in pits:
                 pit_entry = {
+                    "uuid": pit.uuid,
                     "team_number": pit.team_number,
                     "nickname": pit.nickname,
+                    "needs_synced": False,
                     "questions": pit.data,
                 }
-                pit_data.append(pit_entry)
+                pit_data["pits"].append(pit_entry)
 
             return JsonResponse(pit_data, safe=False, status=200)
     else:
