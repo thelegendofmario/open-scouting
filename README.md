@@ -116,7 +116,7 @@ Contributions are welcome to this project! Please see the [issues](https://githu
 
 You can view the guide on how `season_fields.py` is formatted [here](/docs/Formatting_Season_Fields.md) if your contribution involves this file
 
-Additionally, there's a document explaining how to send notifications, use common styles, and show dialogs [here](/docs/Client_Systems.md)
+Additionally, there's a document explaining how to use several systems provided in the client that may be needed while adding new features [here](/docs/Client_Systems.md)
 
 When contributing, please fork this repository (ensure you uncheck the "Copy the `main` branch only" check box, this gives you access to the `development` branch with the latest changes)
 
