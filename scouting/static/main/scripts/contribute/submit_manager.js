@@ -275,7 +275,7 @@ document.addEventListener("alpine:init", () => {
 					this.wakeLock = await navigator.wakeLock.request("screen");
 					log("DEBUG", "Wake lock acquired");
 				} catch (err) {
-					console.error(`${err.name}, ${err.message}`);
+					log("WARNING", `${err.name}, ${err.message}`);
 				}
 			} else {
 				log("WARNING", "Wake lock not supported");
