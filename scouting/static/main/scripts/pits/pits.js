@@ -233,16 +233,83 @@ document.addEventListener("alpine:init", () => {
 		 */
 		setup_pit_data(pit_data) {
 			for (const pit in pit_data.pits) {
-				db.pit_scouting.put({
-					uuid: pit.uuid,
-					event_name: pit_data.event_name,
-					event_code: pit_data.event_code,
-					year: pit_data.year,
-					team_number: pit.team_number,
-					nickname: pit.nickname,
-					needs_synced: false,
-					questions: pit.questions,
-				});
+				db.pit_scouting
+					.put({
+						uuid: pit_data.pits[pit].uuid,
+						event_name: pit_data.event_name,
+						event_code: pit_data.event_code,
+						year: pit_data.year,
+						team_number: pit_data.pits[pit].team_number,
+						nickname: pit_data.pits[pit].nickname,
+						needs_synced: false,
+						questions: pit_data.pits[pit].questions,
+					})
+					.then(() => {
+						log("INFO", "Pit data added to the database");
+					})
+					.catch((error) => {
+						log("WARNING", `Error adding data to the database: ${error}`);
+					});
+			}
+		},
+
+		/**
+		 * Get pit data from the server
+		 */
+		async get_pit_data() {
+			const urlParams = new URLSearchParams(window.location.search);
+			const event_name = urlParams.get("event_name");
+			const event_code = urlParams.get("event_code");
+			const year = urlParams.get("year");
+			const custom = urlParams.get("custom");
+
+			this.state = "loading";
+
+			const pits_response = await fetch(`${SERVER_IP}/get_pits`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					"X-CSRFToken": CSRF_TOKEN,
+				},
+				body: JSON.stringify({
+					event_name: event_name,
+					event_code: event_code,
+					year: year,
+					custom: custom,
+				}),
+			});
+
+			if (pits_response.ok) {
+				this.setup_pit_data(await pits_response.json());
+				// console.log(await pits_response.json());
+			}
+		},
+
+		/**
+		 * Get the master list of questions from the server
+		 */
+		async get_master_questions() {
+			const urlParams = new URLSearchParams(window.location.search);
+			const year = urlParams.get("year");
+
+			const master_list_of_questions_response = await fetch(
+				`${SERVER_IP}/get_pit_questions`,
+				{
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+						"X-CSRFToken": CSRF_TOKEN,
+					},
+					body: JSON.stringify({
+						year: year,
+					}),
+				},
+			);
+
+			if (master_list_of_questions_response.ok) {
+				this.store_master_list_of_questions_locally(
+					await master_list_of_questions_response.json(),
+				);
 			}
 		},
 
@@ -271,48 +338,8 @@ document.addEventListener("alpine:init", () => {
 				if (globalThis.offline === false) {
 					// Get pit data and master list of questions from server, and save in IndexedDB
 
-					const urlParams = new URLSearchParams(window.location.search);
-					const event_name = urlParams.get("event_name");
-					const event_code = urlParams.get("event_code");
-					const year = urlParams.get("year");
-					const custom = urlParams.get("custom");
-
-					this.state = "loading";
-
-					const pits_response = await fetch(`${SERVER_IP}/get_pits`, {
-						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
-							"X-CSRFToken": CSRF_TOKEN,
-						},
-						body: JSON.stringify({
-							event_name: event_name,
-							event_code: event_code,
-							year: year,
-							custom: custom,
-						}),
-					});
-
-					if (pits_response.ok) {
-						this.setup_pit_data(await pits_response.json());
-					}
-
-					const master_list_of_questions_response = await fetch(
-						`${SERVER_IP}/get_pit_questions`,
-						{
-							method: "POST",
-							headers: {
-								"Content-Type": "application/json",
-								"X-CSRFToken": CSRF_TOKEN,
-							},
-						},
-					);
-
-					if (master_list_of_questions_response.ok) {
-						this.store_master_list_of_questions_locally(
-							await master_list_of_questions_response.json(),
-						);
-					}
+					await this.get_pit_data();
+					await this.get_master_questions();
 				}
 
 				setInterval(() => {
