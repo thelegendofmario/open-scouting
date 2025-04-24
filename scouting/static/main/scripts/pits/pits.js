@@ -6,7 +6,7 @@
 
 document.addEventListener("alpine:init", () => {
 	Alpine.data("pits", () => ({
-		pit_data: {},
+		pit_data: [],
 		filter: "all",
 		pit_status: [],
 		state: "loading",
@@ -18,41 +18,60 @@ document.addEventListener("alpine:init", () => {
 		 * @param {string} simple_name - The simple name of the question
 		 * @param {string} type - The type of the question
 		 */
-		submit_answer(event, simple_name, type) {
-			// TODO: Fix for new pit scouting system
+		async submit_answer(event, simple_name, type) {
 			const input = event.target
 				.closest("div")
 				.querySelector(".ui_input, .ui_checkbox");
 			const team_number = event.target
 				.closest(".pit_top")
 				.getAttribute("team_number");
+			const uuid = event.target.closest(".pit_top").getAttribute("team_uuid");
 
 			const today = new Date();
 			const date = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
 
-			const pit_index = this.pit_data.findIndex(
-				(obj) => obj.team_number === team_number,
-			);
-			const question_index = this.pit_data[pit_index].questions.findIndex(
-				(obj) => obj.simple_name === simple_name,
-			);
+			const value =
+				type === "text"
+					? input.value
+					: type === "number"
+						? Number(input.value)
+						: type === "boolean"
+							? input.checked
+							: type === "choice"
+								? input.value
+								: console.error("Unknown question type:", type);
 
-			const new_value = type === "boolean" ? input.checked : input.value;
-
-			// Check if the answer already exists to prevent duplicates
-			const existing_answer = this.pit_data[pit_index].questions[
-				question_index
-			].answers.find((ans) => ans.value === new_value && ans.user === USERNAME);
-
-			if (!existing_answer) {
-				this.pit_data[pit_index].questions[question_index].answers.push({
-					value: new_value,
-					user: USERNAME,
-					contributed: date,
-				});
-
-				this.state = "unsaved";
+			// Fetch the pit object from the DB
+			const pit = await db.pit_scouting.get(uuid);
+			if (!pit) {
+				console.error("Pit data not found for uuid:", uuid);
+				return;
 			}
+
+			// Find the question in the pit data
+			const question = pit.questions.find((q) => q.simple_name === simple_name);
+			if (!question) {
+				console.error("Question not found:", simple_name);
+				return;
+			}
+
+			// Add the new answer
+			if (!Array.isArray(question.answers)) {
+				question.answers = [];
+			}
+			question.answers.push({
+				date: date,
+				type: type,
+				value: value,
+				uuid: String(crypto.randomUUID()),
+			});
+
+			// Set needs_synced to true
+			pit.needs_synced = true;
+
+			// Update the DB
+			await db.pit_scouting.put(pit);
+			console.log(`Answer saved for ${team_number} - ${simple_name}:`, value);
 		},
 
 		/**
@@ -282,6 +301,7 @@ document.addEventListener("alpine:init", () => {
 
 			if (pits_response.ok) {
 				this.setup_pit_data(await pits_response.json());
+				this.state = "saved";
 				// console.log(await pits_response.json());
 			}
 		},
@@ -323,6 +343,36 @@ document.addEventListener("alpine:init", () => {
 		},
 
 		/**
+		 * Check if there are any unsaved changes to update the status indicator
+		 */
+		check_for_unsaved_changes() {
+			const urlParams = new URLSearchParams(window.location.search);
+			const event_name = urlParams.get("event_name");
+			const event_code = urlParams.get("event_code");
+			const year = Number(urlParams.get("year"));
+
+			db.pit_scouting
+				.filter(
+					(item) =>
+						item.event_name === event_name &&
+						item.event_code === event_code &&
+						item.year === year &&
+						!item.needs_synced,
+				)
+				.count()
+				.then((count) => {
+					if (count > 0) {
+						this.state = "unsaved";
+					} else {
+						this.state = "saved";
+					}
+				})
+				.catch((error) => {
+					log("WARNING", `Error counting unsaved changes: ${error}`);
+				});
+		},
+
+		/**
 		 * Initialize the pit scouting page
 		 *
 		 * If the user isn't offline, get the pit data and master list of questions and store them locally
@@ -342,10 +392,6 @@ document.addEventListener("alpine:init", () => {
 					await this.get_pit_data();
 					await this.get_master_questions();
 				}
-
-				setInterval(() => {
-					this.sync_pit_data();
-				}, 10000);
 			}, 100);
 
 			window.addEventListener("beforeunload", (event) => {
@@ -375,11 +421,20 @@ document.addEventListener("alpine:init", () => {
 			const subscription = pit_scouting_observable.subscribe({
 				next: (result) => {
 					this.pit_data = result;
+					console.log(result);
 				},
 				error: (error) => {
 					log("ERROR", "Error subscribing to pit scouting db", error);
 				},
 			});
+
+			setInterval(() => {
+				this.sync_pit_data();
+			}, 10000);
+
+			setInterval(() => {
+				this.check_for_unsaved_changes();
+			}, 500);
 		},
 	}));
 });
