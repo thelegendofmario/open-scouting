@@ -19,6 +19,9 @@ document.addEventListener("alpine:init", () => {
 		 * @param {string} type - The type of the question
 		 */
 		async submit_answer(event, simple_name, type) {
+			const urlParams = new URLSearchParams(window.location.search);
+			const username = urlParams.get("username");
+
 			const input = event.target
 				.closest("div")
 				.querySelector(".ui_input, .ui_checkbox");
@@ -60,49 +63,52 @@ document.addEventListener("alpine:init", () => {
 				question.answers = [];
 			}
 			question.answers.push({
-				date: date,
-				type: type,
+				contributed: date,
 				value: value,
 				uuid: String(crypto.randomUUID()),
+				user: username,
 			});
 
-			// Set needs_synced to true
 			pit.needs_synced = true;
 
-			// Update the DB
 			await db.pit_scouting.put(pit);
-			console.log(`Answer saved for ${team_number} - ${simple_name}:`, value);
 		},
 
 		/**
 		 * Add a question to the local database
 		 *
 		 * @param {Event} event - The event object
-		 * @param {string} name - The name of the question
+		 * @param {HTMLInputElement} name - The input element containing the question text
 		 */
-		submit_question(event, name) {
-			// TODO: Fix for new pit scouting system
+		async submit_question(event, name) {
 			const team_number = event.target
 				.closest(".pit_top")
 				.getAttribute("team_number");
-			const simple_name = name.value
-				.toLowerCase()
-				.replace("?", "")
-				.replace(" ", "_");
-			const pit_index = this.pit_data.findIndex(
-				(obj) => obj.team_number === team_number,
-			);
+			const uuid = event.target.closest(".pit_top").getAttribute("team_uuid");
 
-			this.pit_data[pit_index].questions.push({
+			const simple_name = name.value.toLowerCase().replace(/[^\w]+/g, "_");
+
+			// Get the pit from the database by UUID
+			const pit = await db.pit_scouting.get(uuid);
+			if (!pit) {
+				console.error("Pit data not found for uuid:", uuid);
+				return;
+			}
+
+			// Add the new question to the database
+			pit.questions.push({
 				text: name.value,
 				simple_name: simple_name,
 				type: "text",
 				answers: [],
 			});
 
-			name.value = "";
+			pit.needs_synced = true;
 
-			this.state = "unsaved";
+			// Save the pit
+			await db.pit_scouting.put(pit);
+
+			name.value = "";
 		},
 
 		/**
@@ -111,58 +117,55 @@ document.addEventListener("alpine:init", () => {
 		 * Uses The Blue Alliance to attempt to get the team's nickname
 		 *
 		 * @param {Event} event - The event object
-		 * @param {string} team_number - The team number
+		 * @param {HTMLInputElement} team_number - The input element with the team number
 		 */
 		async submit_team(event, team_number) {
-			// TODO: Fix for new pit scouting system
-			if (globalThis.offline === false) {
-				const response = await fetch(
-					`https://www.thebluealliance.com/api/v3/team/frc${team_number.value}`,
-					{
-						method: "GET",
-						headers: {
-							"X-TBA-Auth-Key": TBA_API_KEY,
-						},
-					},
-				);
+			const urlParams = new URLSearchParams(window.location.search);
+			const event_name = urlParams.get("event_name");
+			const event_code = urlParams.get("event_code");
+			const year = Number(urlParams.get("year")); // ensure correct type
 
-				if (response.ok) {
-					response
-						.json()
-						.then(async (json) => {
-							this.pit_data.push({
-								team_number: team_number.value,
-								nickname: json.nickname,
-								questions: this.master_questions,
-							});
-							team_number.value = "";
-						})
-						.catch((error) => {
-							this.pit_data.push({
-								team_number: team_number.value,
-								nickname: " ",
-								questions: this.master_questions,
-							});
-							team_number.value = "";
-						});
-				} else {
-					this.pit_data.push({
-						team_number: team_number.value,
-						nickname: " ",
-						questions: this.master_questions,
-					});
-					team_number.value = "";
+			let nickname = " ";
+			if (globalThis.offline === false) {
+				try {
+					const response = await fetch(
+						`https://www.thebluealliance.com/api/v3/team/frc${team_number.value}`,
+						{
+							method: "GET",
+							headers: {
+								"X-TBA-Auth-Key": TBA_API_KEY,
+							},
+						},
+					);
+					if (response.ok) {
+						const json = await response.json();
+						nickname = json.nickname || " ";
+					}
+				} catch (error) {
+					log("WARNING", "TBA fetch failed:", error);
 				}
-			} else {
-				this.pit_data.push({
-					team_number: team_number.value,
-					nickname: " ",
-					questions: this.master_questions,
-				});
-				team_number.value = "";
 			}
 
-			this.state = "unsaved";
+			// Retrieve the master list of questions from the local database
+			const masterQuestions = await db.pit_scouting
+				.where("uuid")
+				.equals("master_questions")
+				.first();
+
+			const new_pit = {
+				uuid: crypto.randomUUID(),
+				event_name,
+				event_code,
+				year,
+				team_number: team_number.value,
+				nickname: nickname,
+				needs_synced: true,
+				questions: masterQuestions.questions,
+			};
+
+			await db.pit_scouting.put(new_pit);
+
+			team_number.value = "";
 		},
 
 		/**
@@ -172,11 +175,13 @@ document.addEventListener("alpine:init", () => {
 			db.pit_scouting
 				.put({
 					uuid: "master_questions",
-					data: JSON.stringify(questions),
 					event_name: "",
 					event_code: "",
 					year: "",
-					custom: "",
+					team_number: "",
+					nickname: "",
+					needs_synced: false,
+					questions: questions,
 				})
 				.then(() => {
 					log("INFO", "Master questions added to the database");
