@@ -6,6 +6,7 @@
 
 document.addEventListener("alpine:init", () => {
 	Alpine.data("pits", () => ({
+		pit_data: {},
 		filter: "all",
 		pit_status: [],
 		state: "loading",
@@ -353,6 +354,31 @@ document.addEventListener("alpine:init", () => {
 					event.returnValue = "";
 					return "";
 				}
+			});
+
+			const urlParams = new URLSearchParams(window.location.search);
+			const event_name = urlParams.get("event_name");
+			const event_code = urlParams.get("event_code");
+			const year = Number(urlParams.get("year"));
+
+			const pit_scouting_observable = Dexie.liveQuery(() =>
+				db.pit_scouting
+					.filter(
+						(pit) =>
+							pit.event_name === event_name &&
+							pit.event_code === event_code &&
+							pit.year === year,
+					)
+					.toArray(),
+			);
+
+			const subscription = pit_scouting_observable.subscribe({
+				next: (result) => {
+					this.pit_data = result;
+				},
+				error: (error) => {
+					log("ERROR", "Error subscribing to pit scouting db", error);
+				},
 			});
 		},
 	}));
