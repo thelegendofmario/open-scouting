@@ -837,6 +837,7 @@ def update_pit(request):
         year: The year that this event is from
         custom: Whether or not this event is a custom event
         team_number: The team number of the pit
+        nickname: The nickname of the pit
         questions: The questions in the pit
 
     Returns:
@@ -868,7 +869,7 @@ def update_pit(request):
             nickname=body["nickname"],
             pit_group=pit_group,
             created=timezone.now(),
-            data=body["data"],
+            data=body["questions"],
         )
         pit.save()
 

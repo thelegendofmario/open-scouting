@@ -25,9 +25,6 @@ document.addEventListener("alpine:init", () => {
 			const input = event.target
 				.closest("div")
 				.querySelector(".ui_input, .ui_checkbox");
-			const team_number = event.target
-				.closest(".pit_top")
-				.getAttribute("team_number");
 			const uuid = event.target.closest(".pit_top").getAttribute("team_uuid");
 
 			const today = new Date();
@@ -81,9 +78,6 @@ document.addEventListener("alpine:init", () => {
 		 * @param {HTMLInputElement} name - The input element containing the question text
 		 */
 		async submit_question(event, name) {
-			const team_number = event.target
-				.closest(".pit_top")
-				.getAttribute("team_number");
 			const uuid = event.target.closest(".pit_top").getAttribute("team_uuid");
 
 			const simple_name = name.value.toLowerCase().replace(/[^\w]+/g, "_");
@@ -343,8 +337,66 @@ document.addEventListener("alpine:init", () => {
 		 * Sync the pit data by saving the local database to the server
 		 * and then retrieving the data from the server
 		 */
-		sync_pit_data() {
-			// TODO: Implement syncing
+		async sync_pit_data() {
+			const urlParams = new URLSearchParams(window.location.search);
+			const event_name = urlParams.get("event_name");
+			const event_code = urlParams.get("event_code");
+			const year = Number(urlParams.get("year"));
+			const custom = urlParams.get("custom") || false;
+
+			if (!globalThis.offline) {
+				// User is online, so check for any unsaved changes and sync if needed
+
+				db.pit_scouting
+					.filter(
+						(item) =>
+							item.needs_synced === true &&
+							item.event_name === event_name &&
+							item.event_code === event_code &&
+							item.year === year,
+					)
+					.toArray()
+					.then(async (data) => {
+						if (data.length > 0) {
+							// There's changes that need synced
+							this.state = "syncing";
+
+							for (const item of data) {
+								try {
+									const response = await fetch(`${SERVER_IP}/update_pit`, {
+										method: "POST",
+										headers: {
+											"X-TBA-Auth-Key": TBA_API_KEY,
+											"Content-Type": "application/json",
+											"X-CSRFToken": CSRF_TOKEN,
+										},
+										body: JSON.stringify({
+											uuid: item.uuid,
+											event_name: item.event_name,
+											event_code: item.event_code,
+											year: item.year,
+											custom: custom,
+											team_number: item.team_number,
+											nickname: item.nickname,
+											questions: item.questions || [], // In case questions are empty, send a blank list
+										}),
+									});
+									// if (response.ok) {
+									// 	log("DEBUG", `Pit ${item.uuid} synced`);
+									// }
+								} catch (error) {
+									log("WARNING", "Pit sync failed:", error);
+								}
+							}
+
+							// Fetch any new data from the server
+							this.get_pit_data();
+						} else {
+							// There's no changes that need synced
+							this.get_pit_data();
+						}
+					});
+			}
 		},
 
 		/**
@@ -394,7 +446,7 @@ document.addEventListener("alpine:init", () => {
 				if (globalThis.offline === false) {
 					// Get pit data and master list of questions from server, and save in IndexedDB
 
-					await this.get_pit_data();
+					await this.sync_pit_data();
 					await this.get_master_questions();
 				}
 			}, 100);
