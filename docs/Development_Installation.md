@@ -30,15 +30,18 @@ cp .env.development.template .env.development
 ```
 You should add your TBA API key here, and credentials for sending emails
 
+- Information for obtaining this key is available [here](https://www.thebluealliance.com/apidocs)
+- If you don't want your development server to send emails, simply set `EMAIL_ENABLED` to `False`
+
 Next, create a django superuser and make and migrate the models
 ```bash
 cd scouting
-python manage.py createsuperuser
+python manage.py createsuperuser # Follow the steps to create your superuser when running this command
 python manage.py makemigrations
 python manage.py migrate
 ```
 
-Now run the server using the following command, or run the `Start server` task in your Visual Studio Code
+Now run the server using the following command, or run the `Start server` task in Visual Studio Code
 ```bash
 python manage.py runserver
 ```
@@ -52,7 +55,9 @@ npm run build:css
 
 ## Development
 ### djlint
-This project uses `djlint` to lint the templates. You can run this using the following command
+This project uses [`djlint`](https://github.com/djlint/djLint) to lint the Django templates. Install `djlint` to use in VSCode [here](https://marketplace.visualstudio.com/items?itemName=monosans.djlint)
+
+You can run this using the following command
 ```bash
 djlint scouting --reformat
 ```
@@ -61,6 +66,17 @@ djlint scouting --reformat
 This project uses [`ruff`](https://docs.astral.sh/ruff/) to lint and format the python code.
 You can run the following command to run the linter once
 ```bash
-ruff check cardie --fix
+ruff check scouting --fix
 ```
-For VS Code users, you can install the `ruff` extension to get linting and formatting on save.
+For VS Code users, you can install the `ruff` extension [here](https://marketplace.visualstudio.com/items?itemName=charliermarsh.ruff) to get linting and formatting on save.
+
+
+### biome
+[`biome`](https://biomejs.dev/) is used to format and lint the JavaScript files
+
+You can check for any linting or formatting issues using the following command
+```bash
+biome check scouting
+```
+
+You can install biome as a VSCode extension [here](https://marketplace.visualstudio.com/items?itemName=biomejs.biome) to get linting and formatting on save.

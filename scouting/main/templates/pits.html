@@ -4,14 +4,33 @@
     Open Scouting | Pit Scouting
 {% endblock head_title %}
 
-{% block head_scripts %}{% endblock %}
+{% block head_scripts %}
+{% endblock head_scripts %}
 
-{% block stylesheets %}{% endblock %}
+{% block stylesheets %}
+{% endblock stylesheets %}
 
 {% block body %}
+    <script>
+        const SERVER_IP = "{{ SERVER_IP }}";
+        const CSRF_TOKEN = "{{ csrf_token }}";
+        const TBA_API_KEY = "{{ TBA_API_KEY }}";
+        const DEMO = "{{ demo }}";
+
+        const USERNAME = "{{ username }}";
+
+        const EVENT_NAME = "{{ event_name }}";
+        const EVENT_CODE = "{{ event_code }}";
+        const CUSTOM = "{{ custom }}";
+        const YEAR = "{{ year }}";
+    </script>
+
     <div class="flex justify-center items-center flex-col w-screen">
+
+        <script src="{% static '/main/scripts/pits/header.js' %}"></script>
+
         <div class="flex flex-row w-full md:w-3/4 lg:w-2/3 mx-8 my-4 py-2 dark:bg-slate-800 border-2 dark:border-slate-700 bg-slate-200 border-slate-300 rounded-lg mb-4 items-center justify-center"
-             x-data="pits_header()">
+             x-data="header">
             <img class="w-16 h-16 aspect-square m-2 hover:scale-110 transition-all ease-in-out active:scale-95"
                  src="{% static '/main/images/icon_rounded.png' %}"
                  @click="window.location.href = '{{ SERVER_IP }}'">
@@ -28,15 +47,15 @@
                          x-show="page_dropdown"
                          x-anchor.offset.10="$refs.page_button"
                          x-transition>
-                        <button class="ui_button_small !my-1 !py-1 !px-2 !w-full !text-left"
+                        <button class="ui_button_small my-1! py-1! px-2! w-full! text-left!"
                                 @click="go_to_contribute">
                             <i class="ph-bold ph-pencil"></i> Add Scouting Reports
                         </button>
-                        <button class="ui_button_small !my-1 !py-1 !px-2 !w-full !text-left"
+                        <button class="ui_button_small my-1! py-1! px-2! w-full! text-left!"
                                 @click="go_to_data">
                             <i class="ph-bold ph-database"></i> View Scouting Data
                         </button>
-                        <button class="ui_button_small !my-1 !py-1 !px-2 !w-full !text-left"
+                        <button class="ui_button_small my-1! py-1! px-2! w-full! text-left!"
                                 @click="go_to_pits">
                             <i class="ph-bold ph-garage"></i> Pit Scouting
                         </button>
@@ -61,68 +80,38 @@
             </div>
         </div>
 
-        <script>
-            function pits_header() {
-                return {
-                    demo: false,
-                    page_dropdown: false,
-                    page_path: "/pits",
+        <script src="{% static '/main/scripts/pits/pits.js' %}"></script>
 
-                    go_to_contribute() {
-                        let url = new URL(window.location.href);
-                        url.pathname = url.pathname.replace(this.page_path, "/contribute");
-                        window.location.href = url.toString();
-                    },
-
-                    go_to_data() {
-                        let url = new URL(window.location.href);
-                        url.pathname = url.pathname.replace(this.page_path, "/data");
-                        window.location.href = url.toString();
-                    },
-
-                    go_to_pits() {
-                        let url = new URL(window.location.href);
-                        url.pathname = url.pathname.replace(this.page_path, "/pits");
-                        window.location.href = url.toString();
-                    },
-
-                    init() {
-                        try {
-                            this.demo = JSON.parse("{{ demo }}");
-                        } catch {
-                            this.demo = false;
-                        }
-                    }
-                }
-            }
-        </script>
-
-        <div x-data="pits()" class="w-full md:w-3/4 lg:w-2/3 mx-8">
+        <div x-data="pits" class="w-full md:w-3/4 lg:w-2/3 mx-8">
             <div class="flex flex-col bg-slate-200/80 dark:bg-slate-700/80 border-2 dark:border-slate-600 border-slate-300 rounded-xl backdrop-blur-md p-4 my-2">
                 <div class="flex flex-row flex-wrap">
-                    <button class="ui_button_small !m-1"
+                    <button class="ui_button_small m-1!"
                             :disabled="filter == 'all'"
                             @click="filter = 'all'; filter_pit_data(); get_pit_status()">
                         <i class="ph-bold ph-selection-all"></i> View All Pits
                     </button>
-                    <button class="ui_button_small !m-1"
+                    <button class="ui_button_small m-1!"
                             :disabled="filter == 'incomplete'"
                             @click="filter = 'incomplete'; filter_pit_data(); get_pit_status()">
                         <i class="ph-bold ph-arrows-clockwise"></i> View Incomplete Pits
                     </button>
-                    <button class="ui_button_small !m-1"
+                    <button class="ui_button_small m-1!"
                             :disabled="filter == 'no_data'"
                             @click="filter = 'no_data'; filter_pit_data(); get_pit_status()">
                         <i class="ph-bold ph-x"></i> View Pits With No Data
                     </button>
-                    <button class="ui_button_small !m-1"
+                    <button class="ui_button_small m-1!"
                             :disabled="filter == 'completed'"
                             @click="filter = 'completed'; filter_pit_data(); get_pit_status()">
                         <i class="ph-bold ph-check"></i> View Completed Pits
                     </button>
                 </div>
 
-                <div class="flex flex-row flex-wrap my-4">
+                <p x-show="pit_status.length > 0"
+                   x-transition
+                   class="dark:text-white text-black text-sans text-md my-2 ml-2">Select a team number below to jump to that team in the list</p>
+
+                <div class="flex flex-row flex-wrap mb-4">
                     <template x-for="pit in pit_status">
                         <div class="cursor-pointer" @click="scroll_to_pit(pit.team_number)">
                             <template x-if="pit.status == 'completed'">
@@ -148,14 +137,15 @@
                 </div>
 
                 <p class="dark:text-white text-black text-sm opacity-80 ml-4"
-                   x-text="'Viewing ' + pit_data_filtered.length + ' pits'"></p>
+                   x-text="'Viewing ' + filtered_pit_data.length + ' pits'"></p>
             </div>
 
             <div class="h-auto">
-                <template x-for="pit in pit_data_filtered">
+                <template x-for="pit in filtered_pit_data" :key="pit.uuid">
                     <div class="flex flex-col bg-slate-200/80 dark:bg-slate-700/80 border-2 dark:border-slate-600 border-slate-300 rounded-xl backdrop-blur-md p-4 my-2 pit_top"
-                         x-data="{ open: true }"
-                         :team_number="pit.team_number">
+                         x-data="{ open: false }"
+                         :team_number="pit.team_number"
+                         :team_uuid="pit.uuid">
                         <div class="flex flex-row items-center">
                             <div class="flex flex-row justify-between">
                                 <div class="rounded-md w-12 h-12 mr-2 bg-slate-200/80 dark:bg-slate-700/80 border-2 dark:border-slate-600 border-slate-300">
@@ -194,17 +184,17 @@
                                              @click.outside="editing = false; open = false">
                                             <div class="ml-4 flex flex-row items-center my-1">
                                                 <i class="ph-bold ph-check text-md text-green-600 mr-1"></i>
-                                                <button class="ui_button_icon ml-2 mr-1 !w-10 !h-10"
+                                                <button class="ui_button_icon ml-2 mr-1 w-10! h-10!"
                                                         @click="editing = !editing">
-                                                    <i class="ph-bold ph-plus-circle !text-md" x-show="!editing"></i>
-                                                    <i class="ph-bold ph-x-circle !text-md" x-show="editing"></i>
+                                                    <i class="ph-bold ph-plus-circle text-md!" x-show="!editing"></i>
+                                                    <i class="ph-bold ph-x-circle text-md!" x-show="editing"></i>
                                                 </button>
-                                                <button class="ui_button_icon mr-2 ml-1 !w-10 !h-10"
+                                                <button class="ui_button_icon mr-2 ml-1 w-10! h-10!"
                                                         @click="open = !open"
                                                         x-show="!editing"
                                                         x-transition>
-                                                    <i class="ph-bold ph-eye !text-md" x-show="!open"></i>
-                                                    <i class="ph-bold ph-eye-closed !text-md" x-show="open"></i>
+                                                    <i class="ph-bold ph-eye text-md!" x-show="!open"></i>
+                                                    <i class="ph-bold ph-eye-closed text-md!" x-show="open"></i>
                                                 </button>
                                                 <p class="dark:text-white text-black" x-text="question.text"></p>
                                                 <p class="dark:text-white text-black opacity-80 ml-2 mr-2"
@@ -222,32 +212,32 @@
                                                  x-ref="inputs"
                                                  x-collapse>
                                                 <template x-if="question.type == 'choice'">
-                                                    <select class="ui_input !max-h-8">
+                                                    <select class="ui_input max-h-8!">
                                                         <template x-for="choice in question.choices">
                                                             <option x-text="choice"></option>
                                                         </template>
                                                     </select>
                                                 </template>
                                                 <template x-if="question.type == 'boolean'">
-                                                    <input class="ui_checkbox !max-h-8" type="checkbox">
+                                                    <input class="ui_checkbox max-h-8!" type="checkbox">
                                                 </template>
                                                 <template x-if="question.type == 'number'">
-                                                    <input class="ui_input !max-h-8" type="number">
+                                                    <input class="ui_input max-h-8!" type="number">
                                                 </template>
                                                 <template x-if="question.type == 'text'">
-                                                    <input class="ui_input !max-h-8" type="text">
+                                                    <input class="ui_input max-h-8!" type="text">
                                                 </template>
 
-                                                <button class="ui_button_icon !w-10 !h-10 ml-2"
+                                                <button class="ui_button_icon w-10! h-10! ml-2"
                                                         @click="submit_answer($event, question.simple_name, question.type); editing = false;">
-                                                    <i class="ph-bold ph-check !text-md"></i>
+                                                    <i class="ph-bold ph-check text-md!"></i>
                                                 </button>
                                             </div>
                                             <div class="flex flex-row ml-8 flex-wrap"
                                                  x-show="open || editing"
                                                  x-collapse>
-                                                <template x-for="answer in question.answers">
-                                                    <div class="flex flex-row items-end mx-1 mb-1">
+                                                <template x-for="answer in question.answers" :key="answer.uuid">
+                                                    <div class="flex flex-row items-end mx-1 mb-1" :answer_uuid="answer.uuid">
                                                         <p class="dark:text-white text-black opacity-80" x-text="answer.value"></p>
                                                         <p class="dark:text-white text-black opacity-70 ml-1 text-xs"
                                                            x-text="'(' + answer.user + ')'"></p>
@@ -266,10 +256,10 @@
                                              @click.outside="editing = false">
                                             <div class="ml-4 flex flex-row items-center my-1">
                                                 <i class="ph-bold ph-x text-md text-red-500 mr-1"></i>
-                                                <button class="ui_button_icon ml-2 mr-1 !w-10 !h-10"
+                                                <button class="ui_button_icon ml-2 mr-1 w-10! h-10!"
                                                         @click="editing = !editing">
-                                                    <i class="ph-bold ph-plus-circle !text-md" x-show="!editing"></i>
-                                                    <i class="ph-bold ph-x-circle !text-md" x-show="editing"></i>
+                                                    <i class="ph-bold ph-plus-circle text-md!" x-show="!editing"></i>
+                                                    <i class="ph-bold ph-x-circle text-md!" x-show="editing"></i>
                                                 </button>
                                                 <p class="dark:text-white text-black" x-text="question.text"></p>
                                             </div>
@@ -277,25 +267,25 @@
                                                  x-show="editing"
                                                  x-collapse>
                                                 <template x-if="question.type == 'choice'">
-                                                    <select class="ui_input !max-h-8">
+                                                    <select class="ui_input max-h-8!">
                                                         <template x-for="choice in question.choices">
                                                             <option x-text="choice"></option>
                                                         </template>
                                                     </select>
                                                 </template>
                                                 <template x-if="question.type == 'boolean'">
-                                                    <input class="ui_checkbox !max-h-8" type="checkbox">
+                                                    <input class="ui_checkbox max-h-8!" type="checkbox">
                                                 </template>
                                                 <template x-if="question.type == 'number'">
-                                                    <input class="ui_input !max-h-8" type="number">
+                                                    <input class="ui_input max-h-8!" type="number">
                                                 </template>
                                                 <template x-if="question.type == 'text'">
-                                                    <input class="ui_input !max-h-8" type="text">
+                                                    <input class="ui_input max-h-8!" type="text">
                                                 </template>
 
-                                                <button class="ui_button_icon !w-10 !h-10 ml-2"
+                                                <button class="ui_button_icon w-10! h-10! ml-2"
                                                         @click="submit_answer($event, question.simple_name, question.type)">
-                                                    <i class="ph-bold ph-check !text-md"></i>
+                                                    <i class="ph-bold ph-check text-md!"></i>
                                                 </button>
                                             </div>
                                         </div>
@@ -343,7 +333,7 @@
                              x-data="{ team_number_input: '' }"
                              x-collapse>
                             <p class="dark:text-white text-black text-md text-center">Add a new pit</p>
-                            <input class="ui_input mt-1 !w-full"
+                            <input class="ui_input mt-1 w-full!"
                                    type="number"
                                    placeholder="Team Number"
                                    x-ref="team_number_input"
@@ -359,7 +349,7 @@
                 </div>
 
                 <div class="fixed bottom-1 left-1 md:bottom-2 md:left-2 z-5 drop-shadow-xl bg-slate-200/80 dark:bg-slate-700/80 border-2 dark:border-slate-600 border-slate-300 rounded-full backdrop-blur-md p-2 flex flex-row align-middle items-center">
-                    <button class="ui_button_icon mr-2 !w-8 !h-8 md:!w-12 md:!h-12"
+                    <button class="ui_button_icon mr-2 w-8! h-8! md:w-12! md:h-12!"
                             @click="go_to_top"
                             x-show="scrollTop > 0"
                             x-transition
@@ -367,7 +357,7 @@
                             @scroll.window="scrollTop = window.scrollY">
                         <i class="ph-bold ph-arrow-line-up"></i>
                     </button>
-                    <button class="ui_button_icon mr-2 !w-8 !h-8 md:!w-12 md:!h-12"
+                    <button class="ui_button_icon mr-2 w-8! h-8! md:w-12! md:h-12!"
                             @click="sync_pit_data">
                         <i class="ph-bold ph-arrows-clockwise"></i>
                     </button>
@@ -398,538 +388,8 @@
                     </p>
                 </div>
             </div>
-
-            <script>
-            function pits() {
-                return {
-                    pit_data: [],
-                    pit_data_old: [],
-                    pit_data_filtered: [],
-                    filter: "all",
-                    pit_status: [],
-                    master_questions: [],
-                    state: "loading",
-
-                    submit_answer(event, simple_name, type) {
-                        let input = event.target.closest("div").querySelector(".ui_input, .ui_checkbox");
-                        let team_number = event.target.closest(".pit_top").getAttribute("team_number");
-
-                        var today = new Date();
-                        var date = today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate();
-
-                        let pit_index = this.pit_data.findIndex(obj => obj.team_number == team_number);
-                        let question_index = this.pit_data[pit_index].questions.findIndex(obj => obj.simple_name == simple_name);
-
-                        let new_value = type == "boolean" ? input.checked : input.value;
-
-                        // Check if the answer already exists to prevent duplicates
-                        let existing_answer = this.pit_data[pit_index].questions[question_index].answers.find(
-                            ans => ans.value == new_value && ans.user == "{{ username }}"
-                        );
-
-                        if (!existing_answer) {
-                            this.pit_data[pit_index].questions[question_index].answers.push({
-                                value: new_value,
-                                user: "{{ username }}",
-                                contributed: date
-                            });
-
-                            this.state = "unsaved";
-                        }
-                    },
-
-                    submit_question(event, name) {
-                        let team_number = event.target.closest(".pit_top").getAttribute("team_number");
-                        let simple_name = name.value.toLowerCase().replace("?", "").replace(" ", "_");
-                        let pit_index = this.pit_data.findIndex(obj => obj.team_number == team_number);
-
-                        this.pit_data[pit_index].questions.push({text: name.value, simple_name: simple_name, type: "text", answers: []});
-
-                        name.value = "";
-
-                        this.state = "unsaved";
-                    },
-
-                    async submit_team(event, team_number) {
-                        if (globalThis.offline == false) {
-                            var response = await fetch(`https://www.thebluealliance.com/api/v3/team/frc${team_number.value}`, {
-                                method: "GET",
-                                headers: {
-                                        "X-TBA-Auth-Key": "{{ TBA_API_KEY }}"
-                                    }
-                                });
-
-                            if (response.ok) {
-                                response.json().then(async (json) => {
-                                    this.pit_data.push({team_number: team_number.value, nickname: json.nickname, questions: this.master_questions});
-                                    team_number.value = "";   
-                                }).catch((error) => {
-                                    this.pit_data.push({team_number: team_number.value, nickname: " ", questions: this.master_questions});
-                                    team_number.value = "";
-                                }); 
-                            } else {
-                                this.pit_data.push({team_number: team_number.value, nickname: " ", questions: this.master_questions});
-                                team_number.value = "";
-                            }
-                        } else {
-                            this.pit_data.push({team_number: team_number.value, nickname: " ", questions: this.master_questions});
-                            team_number.value = "";
-                        }
-
-                        this.state = "unsaved";
-                    },
-
-                    async update_pit_data() {
-                        if (JSON.stringify(this.pit_data) != JSON.stringify(this.pit_data_old)) {
-                            if (globalThis.offline == false) {
-                                if (this.state != "syncing") {
-                                    var response = await fetch("{{ SERVER_IP }}/update_pits", {
-                                        method: "POST",
-                                        headers: {
-                                                "Content-Type": "application/json",
-                                                "X-CSRFToken": "{{ csrf_token }}"
-                                            },
-                                        body: JSON.stringify({
-                                            event_name: encodeURIComponent("{{ event_name }}"),
-                                            event_code: "{{ event_code }}",
-                                            custom: "{{ custom }}",
-                                            year: "{{ year }}",
-                                            data: this.pit_data
-                                        })
-                                    });
-
-                                    await response.text().then(async (text) => {
-                                        this.pit_data_old = JSON.parse(JSON.stringify(this.pit_data));
-
-                                        this.remove_pit_data_locally();
-
-                                        this.state = "saved";
-                                    });
-                                }
-                            } else {
-                                this.store_pit_data_locally();
-                                this.state = "offline";
-                                this.pit_data_old = JSON.parse(JSON.stringify(this.pit_data));
-                            }
-                        } else {
-                            if (globalThis.offline == false) {
-                                this.state = "saved";
-                            } else {
-                                this.state = "offline";
-                            }
-                        }
-                        
-                    },
-
-                    async sync_pit_data() {
-                        this.state = "syncing";
-
-                        if (!globalThis.offline) {
-                            try {
-                                // First, push the data to the server
-                                let response = await fetch("{{ SERVER_IP }}/update_pits", {
-                                    method: "POST",
-                                    headers: {
-                                        "Content-Type": "application/json",
-                                        "X-CSRFToken": "{{ csrf_token }}"
-                                    },
-                                    body: JSON.stringify({
-                                        event_name: encodeURIComponent("{{ event_name }}"),
-                                        event_code: "{{ event_code }}",
-                                        custom: "{{ custom }}",
-                                        year: "{{ year }}",
-                                        data: this.pit_data
-                                    })
-                                });
-
-                                if (!response.ok) throw new Error("Failed to update pits on server");
-
-                                // Then, fetch the updated data from the server
-                                let get_response = await fetch("{{ SERVER_IP }}/get_pits", {
-                                    method: "POST",
-                                    headers: {
-                                        "Content-Type": "application/json",
-                                        "X-CSRFToken": "{{ csrf_token }}"
-                                    },
-                                    body: JSON.stringify({
-                                        event_name: encodeURIComponent("{{ event_name }}"),
-                                        event_code: "{{ event_code }}",
-                                        custom: "{{ custom }}",
-                                        year: "{{ year }}"
-                                    })
-                                });
-
-                                if (!get_response.ok) throw new Error("Failed to fetch updated pits");
-
-                                let data = await get_response.json();
-
-                                // Update local state
-                                this.pit_data = data;
-                                this.pit_data_old = JSON.parse(JSON.stringify(data));
-
-                                this.filter_pit_data();
-                                this.get_pit_status();
-                                this.remove_pit_data_locally();
-
-                                this.state = "saved";
-                            } catch (error) {
-                                console.error("Sync Error:", error);
-                                this.state = "offline"; // Handle failure by marking offline
-                            }
-                        } else {
-                            this.store_pit_data_locally();
-                            this.state = "offline";
-                            this.pit_data_old = JSON.parse(JSON.stringify(this.pit_data));
-                        }
-                    },
-
-
-                    store_pit_data_locally() {
-                        const openRequest = indexedDB.open("scouting_data", 4);
-
-                        openRequest.onupgradeneeded = (event) => {
-                            const db = event.target.result;
-                            db.createObjectStore("offline_reports", { keyPath: "uuid" });
-                            db.createObjectStore("backups", { keyPath: "uuid" });
-                            db.createObjectStore("offline_pit_scouting", { keyPath: "uuid" });
-                        };
-
-                        openRequest.onsuccess = (event) => {
-                            const db = event.target.result;
-                            
-                            const transaction = db.transaction(["offline_pit_scouting"], "readwrite");
-                            const objectStore = transaction.objectStore("offline_pit_scouting");
-
-                            var urlParams = new URLSearchParams(window.location.search);
-                            var event_name = urlParams.get('event_name');
-                            var event_code = urlParams.get('event_code');
-                            var year = urlParams.get('year');
-                            var custom = urlParams.get('custom');
-
-                            const pit_scouting_backup = {
-                                uuid: `${event_code}_${year}`,
-                                data: JSON.stringify(this.pit_data),
-                                event_name: event_name,
-                                event_code: event_code,
-                                year: year,
-                                custom: custom
-                            }
-
-                            const request = objectStore.put(pit_scouting_backup);
-
-                            request.onsuccess = (event) => {
-                                console.log("Data added to the database");
-                            };
-
-                            request.onerror = (event) => {
-                                console.log("Error adding data to the database: " + event.target.errorCode);
-                            };
-                        };
-                    },
-
-                    store_master_list_of_questions_locally() {
-                        const openRequest = indexedDB.open("scouting_data", 4);
-
-                        openRequest.onupgradeneeded = (event) => {
-                            const db = event.target.result;
-                            db.createObjectStore("offline_reports", { keyPath: "uuid" });
-                            db.createObjectStore("backups", { keyPath: "uuid" });
-                            db.createObjectStore("offline_pit_scouting", { keyPath: "uuid" });
-                        };
-
-                        openRequest.onsuccess = (event) => {
-                            const db = event.target.result;
-                            
-                            const transaction = db.transaction(["offline_pit_scouting"], "readwrite");
-                            const objectStore = transaction.objectStore("offline_pit_scouting");
-
-
-                            const pit_scouting_backup = {
-                                uuid: `master_questions`,
-                                data: JSON.stringify(this.master_questions),
-                                event_name: "",
-                                event_code: "",
-                                year: "",
-                                custom: ""
-                            }
-
-                            const request = objectStore.put(pit_scouting_backup);
-
-                            request.onsuccess = (event) => {
-                                console.log("Data added to the database");
-                            };
-
-                            request.onerror = (event) => {
-                                console.log("Error adding data to the database: " + event.target.errorCode);
-                            };
-                        };
-                    },
-
-                    remove_pit_data_locally() {
-                        const openRequest = indexedDB.open("scouting_data", 4);
-
-                        openRequest.onupgradeneeded = (event) => {
-                            const db = event.target.result;
-                            db.createObjectStore("offline_reports", { keyPath: "uuid" });
-                            db.createObjectStore("backups", { keyPath: "uuid" });
-                            db.createObjectStore("offline_pit_scouting", { keyPath: "uuid" });
-                        };
-
-                        openRequest.onsuccess = (event) => {
-                            const db = event.target.result;
-                            
-                            const transaction = db.transaction(["offline_pit_scouting"], "readwrite");
-                            const objectStore = transaction.objectStore("offline_pit_scouting");
-
-                            var urlParams = new URLSearchParams(window.location.search);
-                            var event_name = urlParams.get('event_name');
-                            var event_code = urlParams.get('event_code');
-                            var year = urlParams.get('year');
-
-                            const request = objectStore.delete(`${event_code}_${year}`);
-
-                            request.onsuccess = (event) => {
-                                console.log("Data removed from the database");
-                            };
-
-                            request.onerror = (event) => {
-                                if (event.target.error.name == "DataError") {
-                                    console.log("Key not found in the database: " + event.target.errorCode);
-
-                                } else {
-                                    console.log("Error removing data from the database: " + event.target.errorCode);
-                                }
-                            };
-                        };
-                    },
-
-                    filter_pit_data() {
-                        // Determines what pits in the database are complete, incomplete, or have no data
-                        const completed = [];
-                        const incomplete = [];
-                        const no_data = [];
-
-                        this.pit_data.forEach(pit => {
-                            const questions = pit.questions || []; // Default to empty array if undefined
-                            const totalQuestions = questions.length;
-                            const answeredQuestions = questions.filter(q => (q.answers || []).length > 0).length;
-
-                            if (answeredQuestions === 0) {
-                                no_data.push(pit);
-                            } else if (answeredQuestions === totalQuestions) {
-                                completed.push(pit);
-                            } else {
-                                incomplete.push(pit);
-                            }
-                        });
-
-                        if (this.filter === "completed") {
-                            this.pit_data_filtered = completed;
-                        } else if (this.filter === "incomplete") {
-                            this.pit_data_filtered = incomplete;
-                        } else if (this.filter === "no_data") {
-                            this.pit_data_filtered = no_data;
-                        } else if (this.filter === "all") {
-                            this.pit_data_filtered = this.pit_data;
-                        } else {
-                            this.pit_data_filtered = this.pit_data;
-                        }
-                    },
-
-                    get_pit_status() {
-                        // Creates a list of all the teams and their status to add buttons for the scout to scroll to
-                        const completed = [];
-                        const incomplete = [];
-                        const no_data = [];
-
-                        this.pit_data.forEach(pit => {
-                            const questions = pit.questions || []; // Default to empty array if undefined
-                            const totalQuestions = questions.length;
-                            const answeredQuestions = questions.filter(q => (q.answers || []).length > 0).length;
-
-                            if (answeredQuestions === 0) {
-                                no_data.push({team_number: pit.team_number, status: "no_data"});
-                            } else if (answeredQuestions === totalQuestions) {
-                                completed.push({team_number: pit.team_number, status: "completed"});
-                            } else {
-                                incomplete.push({team_number: pit.team_number, status: "incomplete"});
-                            }
-                        });
-
-                        const all = [...no_data, ...incomplete, ...completed];
-
-                        if (this.filter === "completed") {
-                            this.pit_status = completed;
-                        } else if (this.filter === "incomplete") {
-                            this.pit_status = incomplete;
-                        } else if (this.filter === "no_data") {
-                            this.pit_status = no_data;
-                        } else if (this.filter === "all") {
-                            this.pit_status = all;
-                        } else {
-                            this.pit_status = all;
-                        }
-                    },
-
-                    scroll_to_pit(pit) {
-                        const pit_div = document.querySelector(`div[team_number='${pit}']`);
-                        pit_div.scrollIntoView({behavior: "smooth"});
-                    },
-
-                    go_to_top() {
-                        window.scrollTo({top: 0, behavior: "smooth"});
-                    },
-
-                     init() {
-                        // Delay by 100ms to make sure globalThis.offline is defined by menu
-                        setTimeout(async () => {
-                            if (globalThis.offline == false) {
-                                // The user is online, so fetch things from the server
-                                var response = await fetch("{{ SERVER_IP }}/get_pits", {
-                                    method: "POST",
-                                    headers: {
-                                            "Content-Type": "application/json",
-                                            "X-CSRFToken": "{{ csrf_token }}"
-                                        },
-                                    body: JSON.stringify({
-                                            event_name: encodeURIComponent("{{ event_name }}"),
-                                            event_code: "{{ event_code }}",
-                                            custom: "{{ custom }}",
-                                            year: "{{ year }}"
-                                        })
-                                    });
-                                
-                                response.text().then(async (text) => {
-                                    this.pit_data = JSON.parse(text);
-                                    this.pit_data_old = JSON.parse(text);
-
-                                    this.filter_pit_data();
-                                    this.get_pit_status();
-
-                                    this.update_pit_data();
-
-                                    setInterval(() => {
-                                        this.update_pit_data();
-                                    }, 5000);
-                                });
-
-                                var response = await fetch("{{ SERVER_IP }}/get_pit_questions", {
-                                    method: "POST",
-                                    headers: {
-                                            "Content-Type": "application/json",
-                                            "X-CSRFToken": "{{ csrf_token }}"
-                                        },
-                                    body: JSON.stringify({
-                                            year: "{{ year }}"
-                                        })
-                                    });
-
-                                response.text().then(async (text) => {
-                                    this.master_questions = JSON.parse(text);
-                                    this.store_master_list_of_questions_locally();
-                                });
-                            } else {
-                                // The user is offline, so try and fetch things from the local database
-                                // First, try and get the pit data locally
-
-                                const openRequest = indexedDB.open("scouting_data", 4);
-
-                                openRequest.onupgradeneeded = (event) => {
-                                    const db = event.target.result;
-                                    db.createObjectStore("offline_reports", { keyPath: "uuid" });
-                                    db.createObjectStore("backups", { keyPath: "uuid" });
-                                    db.createObjectStore("offline_pit_scouting", { keyPath: "uuid" });
-                                };
-
-                                openRequest.onsuccess = (event) => {
-                                    const db = event.target.result;
-                                    
-                                    const transaction = db.transaction(["offline_pit_scouting"], "readwrite");
-                                    const objectStore = transaction.objectStore("offline_pit_scouting");
-
-                                    var urlParams = new URLSearchParams(window.location.search);
-                                    var event_name = urlParams.get('event_name');
-                                    var event_code = urlParams.get('event_code');
-                                    var year = urlParams.get('year');
-
-                                    const request = objectStore.get(`${event_code}_${year}`);
-
-                                    request.onsuccess = async (event) => {
-                                        let data = event.target.result;
-
-                                        if (data) {
-                                            this.pit_data = JSON.parse(data.data);
-                                            this.pit_data_old = JSON.parse(data.data);
-
-                                            this.filter_pit_data();
-                                            this.get_pit_status();
-
-                                            this.update_pit_data();
-
-                                            setInterval(() => {
-                                                this.update_pit_data();
-                                            }, 5000);
-                                        } else {
-                                            this.pit_data = [];
-                                            this.pit_data_old = [];
-
-                                            this.filter_pit_data();
-                                            this.get_pit_status();
-
-                                            this.update_pit_data();
-
-                                            setInterval(() => {
-                                                this.update_pit_data();
-                                            }, 5000);
-
-                                            window.dispatchEvent(new CustomEvent('scouting_notification', {
-                                                detail: { title:"No local pit scouting data found for this event", body:"Set up locally with blank data", icon:"warning" }
-                                            }));
-                                        }
-                                    };
-
-                                    request.onerror = (event) => {
-                                        console.log("Error getting data from the database: " + event.target.errorCode);
-                                    }
-
-                                    const master_questions_request = objectStore.get(`master_questions`);
-
-                                    master_questions_request.onsuccess = async (event) => {
-                                        let data = event.target.result;
-
-                                        if (data) {
-                                            this.master_questions = JSON.parse(data.data);
-
-                                        } else {
-                                            this.master_questions = [];
-                                        }
-                                    };
-
-                                    master_questions_request.onerror = (event) => {
-                                        console.log("Error getting data from the database: " + event.target.errorCode);
-                                    };
-                                };
-
-                                openRequest.onerror = (event) => {
-                                    console.log("Error opening database: " + event.target.errorCode);
-                                };
-                            }
-                        }, 100);
-                        
-
-                        window.addEventListener("beforeunload", (event) => {
-                            if (this.state != "saved") {
-                                event.preventDefault();
-                                event.returnValue = '';
-                                return '';
-                            }
-                        });
-                    }
-                }
-            }
-            </script>
         </div>
-    {% endblock %}
+    {% endblock body %}
 
     {% block scripts %}
-    {% endblock %}
+    {% endblock scripts %}

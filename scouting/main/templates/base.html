@@ -1,9 +1,12 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
         {% block head_scripts %}
         {% endblock head_scripts %}
+
+        <meta name="description"
+              content="An open source application for easier scouting at FIRST Robotics competitions">
 
         <!-- Phosphor Icons -->
         <link rel="stylesheet"
@@ -26,7 +29,12 @@
         <script src="https://unpkg.com/@popperjs/core@2"></script>
         <script src="https://unpkg.com/tippy.js@6"></script>
 
+        <!-- Dexie.js -->
+        <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
+
         <!-- Open Scouting -->
+        <script src="{% static '/main/scripts/db.js' %}"></script>
+        <script src="{% static '/main/scripts/log.js' %}"></script>
         <script src="{% static '/main/scripts/app.js' %}"></script>
 
         <script>
@@ -49,13 +57,16 @@
             {% endblock head_title %}
         </title>
     </head>
-    <body class="bg-gradient-to-br from-rose-200 to-blue-200 dark:bg-gradient-to-br dark:from-slate-800 dark:to-slate-900">
-        {% block body %}{% endblock %}
+    <body class="bg-linear-to-br from-rose-200 to-blue-200 dark:bg-linear-to-br dark:from-slate-800 dark:to-slate-900">
+        {% block body %}
+        {% endblock body %}
 
-        {% include 'menu.html' %}
+        {% include "menu.html" %}
         {% include "server_message.html" %}
+        {% include "dialog.html" %}
 
-        {% block scripts %}{% endblock %}
+        {% block scripts %}
+        {% endblock scripts %}
 
         <script>tippy('[data-tippy-content]', { theme: "open-scouting", arrow: false });</script>
     </body>

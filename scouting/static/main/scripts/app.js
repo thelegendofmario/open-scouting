@@ -5,14 +5,14 @@ const registerServiceWorker = async () => {
 				scope: "/",
 			});
 			if (registration.installing) {
-				console.log("Service worker installing");
+				log("INFO", "Service worker installing");
 			} else if (registration.waiting) {
-				console.log("Service worker installed");
+				log("INFO", "Service worker installed");
 			} else if (registration.active) {
-				console.log("Service worker active");
+				log("INFO", "Service worker active");
 			}
 		} catch (error) {
-			console.error(`Registration failed with ${error}`);
+			log("WARNING", `Registration failed with ${error}`);
 		}
 	}
 };
