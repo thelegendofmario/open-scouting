@@ -1,6 +1,12 @@
 # Client Systems
 
-This page documents how to use several of the systems and utilities that are built into Open Scouting's client for some common use cases
+This page documents how to use several of the systems and utilities that are built into Open Scouting's client to aid in development
+
+- [Sending notifications](#sending-notifications)
+- [Using common styles](#using-common-styles)
+- [Showing dialogs](#showing-dialogs)
+- [Client logging](#client-logging)
+- [Accessing the client database](#accessing-the-client-database)
 
 ## Sending notifications
 Notifications are shown next to the menu and can be used to provide the user with some information if an action succeeds or fails
@@ -96,3 +102,60 @@ window.addEventListener("dialog_confirm", (event) => {
     }
 });
 ```
+
+## Client logging
+Open Scouting comes with a way to handle client side logging. Log messages sent using this function allows users to view those messages in a user interface, and submit a log file when opening bug reports if needed
+
+Messages will be logged to the console with the file and line number (in most cases). Users can view logged messages in the menu, and export a file of those messages. Only a maximum of 100 log messages are stored in the client between page loads.
+
+The function definition for the log function in [`log.js`](/scouting/static/main/scripts/log.js):
+
+```js
+/**
+ * Logs a message to the console with colors and location information
+ *
+ * The location information is colored as needed in different environments
+ *
+ * Also stores the logs in the global array
+ *
+ * @param {string} [level="INFO"] - The level of the log message.
+ * @param {...*} messages - The messages to be logged.
+ */
+function log(level = "INFO", ...messages)
+```
+
+And basic usage:
+```js
+log("INFO", "Example info message")
+log("WARNING", "Example warning message")
+log("ERROR" , "Example error message")
+log("DEBUG", "Example debug message")
+```
+Permitted log levels are `INFO`, `WARNING`, `ERROR` and `DEBUG`
+
+## Accessing the client database
+The client database is defined in a global [`db.js`](/scouting/static/main/scripts/db.js) file and uses [Dexie.js](https://dexie.org/)
+
+If any database migrations (new object store, add new fields to store) are needed, they should be specified in this file. 
+
+You can access the client database for saving or querying data using `db`:
+```js
+db.open()
+    .then(() => {
+        const data = "";
+
+        db.backups
+            .add(data)
+            .then(() => {
+                // Do something when the operation completes
+            })
+            .catch((error) => {
+                // Do something if the operation fails
+            });
+    })
+    .catch((error) => {
+        // Do something if unable to open the database
+    });
+```
+
+Check the [Dexie.js documentation](https://dexie.org/docs/API-Reference#quick-reference) for more information on usage

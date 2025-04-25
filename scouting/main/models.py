@@ -64,6 +64,7 @@ class PitGroup(models.Model):
 
 # Represents a team's pit at an event
 class Pit(models.Model):
+    uuid = models.UUIDField(null=True, blank=True)
     team_number = models.CharField(max_length=6)
     nickname = models.CharField(max_length=999, blank=True)
     pit_group = models.ForeignKey(

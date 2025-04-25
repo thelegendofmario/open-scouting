@@ -749,14 +749,22 @@ def get_pits(request):
         if pit_group:
             pits = Pit.objects.filter(pit_group=pit_group)
 
-            pit_data = []
+            pit_data = {
+                "event_name": event.name,
+                "event_code": event.event_code,
+                "year": event.year,
+                "custom": event.custom,
+                "pits": [],
+            }
             for pit in pits:
                 pit_entry = {
+                    "uuid": pit.uuid,
                     "team_number": pit.team_number,
                     "nickname": pit.nickname,
+                    "needs_synced": False,
                     "questions": pit.data,
                 }
-                pit_data.append(pit_entry)
+                pit_data["pits"].append(pit_entry)
 
             return JsonResponse(pit_data, safe=False, status=200)
 
@@ -778,6 +786,7 @@ def get_pits(request):
             if response.ok:
                 pits_to_create = [
                     Pit(
+                        uuid=uuid.uuid4(),
                         team_number=team["team_number"],
                         nickname=team["nickname"],
                         pit_group=pit_group,
@@ -789,46 +798,65 @@ def get_pits(request):
                 Pit.objects.bulk_create(pits_to_create)
 
             pits = Pit.objects.filter(pit_group=pit_group)
-            pit_data = []
+
+            pit_data = {
+                "event_name": event.name,
+                "event_code": event.event_code,
+                "year": event.year,
+                "custom": event.custom,
+                "pits": [],
+            }
             for pit in pits:
                 pit_entry = {
+                    "uuid": pit.uuid,
                     "team_number": pit.team_number,
                     "nickname": pit.nickname,
+                    "needs_synced": False,
                     "questions": pit.data,
                 }
-                pit_data.append(pit_entry)
+                pit_data["pits"].append(pit_entry)
 
             return JsonResponse(pit_data, safe=False, status=200)
     else:
         return HttpResponse(request, "Request is not a POST request!", status=501)
 
 
-def update_pits(request):
+def update_pit(request):
     """
-    Takes a pit db (json), compares the received one with the one in the server, and apply the changes to the database
+    Takes a single pit from the client and applies the changes to the server pit db
 
-    1. Check if an event exists for this event code and year
-    2. Find the changes between the two databases
-    3. Apply the changes to the local db from the server
+    1. First, checks to see if this pit exists on the server at all. If it doesn't simply add everything to the server and exit, otherwise:
+    2. For each question, checks if an answer uuid from the client does not exist in the server
+    3. Add the new answers to the server
+    4. Checks if there's any new questions with a simple name that does not exist
+    5. Add the new questions to the server
+    6. Return the updated pit as JSON to the client
 
     Body Parameters:
+        uuid: The uuid of the pit
         event_name: The event name for the event
         event_code: The event code for the event
         year: The year that this event is from
-        custom: Whether or not this is a custom event
-        data: The pit scouting json db from the client
+        custom: Whether or not this event is a custom event
+        team_number: The team number of the pit
+        nickname: The nickname of the pit
+        questions: The questions in the pit
 
     Returns:
-        The changes made to the database as JSON
+        The updated pit as JSON
     """
 
-    if request.method == "POST":
-        try:
-            body = json.loads(request.body)
-            client_db = body["data"]
-        except KeyError:
-            return HttpResponse(request, "No data found in request", status=400)
+    if request.method != "POST":
+        return HttpResponse("Request is not a POST request!", status=501)
 
+    try:
+        body = json.loads(request.body)
+    except json.JSONDecodeError:
+        return HttpResponse("Invalid JSON in request body", status=400)
+
+    pit = Pit.objects.filter(uuid=body["uuid"]).first()
+    if not pit:
+        # Add new pit if it doesn't exist
         event = check_if_event_exists(
             request,
             body["event_name"],
@@ -836,87 +864,60 @@ def update_pits(request):
             body["year"],
             body["custom"],
         )
-
         pit_group = PitGroup.objects.filter(event=event).first()
+        pit = Pit(
+            uuid=body["uuid"],
+            team_number=body["team_number"],
+            nickname=body["nickname"],
+            pit_group=pit_group,
+            created=timezone.now(),
+            data=body["questions"],
+        )
+        pit.save()
 
-        if pit_group:
-            pits = Pit.objects.filter(pit_group=pit_group)
+        return JsonResponse(
+            {
+                "uuid": pit.uuid,
+                "team_number": pit.team_number,
+                "nickname": pit.nickname,
+                "needs_synced": False,
+                "questions": pit.data,
+            },
+            status=200,
+        )
 
-            server_db = []
-            for pit in pits:
-                pit_entry = {
-                    "team_number": pit.team_number,
-                    "nickname": pit.nickname,
-                    "questions": pit.data,
-                }
-                server_db.append(pit_entry)
+    existing_simple_names = {q["simple_name"] for q in pit.data}
 
-            diff = deepdiff.DeepDiff(client_db, server_db, view="tree")
+    # Add new questions
+    for question in body["questions"]:
+        if question["simple_name"] not in existing_simple_names:
+            pit.data.append(question)
 
-            if diff:
-                try:
-                    pits_to_update = []
-                    pits_to_create = []
+    # Add new answers
+    for question in body["questions"]:
+        server_question = next(
+            (q for q in pit.data if q["simple_name"] == question["simple_name"]), None
+        )
+        if not server_question:
+            continue
 
-                    for change in list(diff["iterable_item_removed"]):
-                        if "root" and "questions" and "answers" in change.path():
-                            team_number = client_db[
-                                change.path(output_format="list")[0]
-                            ]["team_number"]
-                            pit = Pit.objects.filter(
-                                team_number=team_number, pit_group=pit_group
-                            ).first()
+        existing_uuids = {a.get("uuid") for a in server_question.get("answers", [])}
+        for answer in question.get("answers", []):
+            if answer.get("uuid") not in existing_uuids:
+                server_question.setdefault("answers", []).append(answer)
 
-                            if (
-                                change.t1
-                                not in pit.data[change.path(output_format="list")[2]][
-                                    "answers"
-                                ]
-                            ):
-                                pit.data[change.path(output_format="list")[2]][
-                                    "answers"
-                                ].append(change.t1)
-                            pits_to_update.append(pit)
+    pit.save()
 
-                        elif "root" and "questions" in change.path():
-                            team_number = client_db[
-                                change.path(output_format="list")[0]
-                            ]["team_number"]
-                            pit = Pit.objects.filter(
-                                team_number=team_number, pit_group=pit_group
-                            ).first()
-
-                            pit.data.append(change.t1)
-                            pits_to_update.append(pit)
-
-                        elif "root" in change.path():
-                            pit_data = change.t1
-                            pit = Pit(
-                                team_number=pit_data["team_number"],
-                                nickname=pit_data["nickname"],
-                                pit_group=pit_group,
-                                created=timezone.now(),
-                                data=pit_data["questions"],
-                            )
-                            pits_to_create.append(pit)
-
-                    # Bulk update and create
-                    Pit.objects.bulk_update(pits_to_update, ["data"])
-                    Pit.objects.bulk_create(pits_to_create)
-
-                    return JsonResponse("done", safe=False, status=200)
-
-                except KeyError:
-                    return HttpResponse("No changes", status=200)
-
-            else:
-                return JsonResponse("no changes", safe=False, status=200)
-
-        else:
-            return HttpResponse(request, "No pits found for this event", status=404)
-
-    else:
-        return HttpResponse(request, "Request is not a POST request!", status=501)
+    return JsonResponse(
+        {
+            "uuid": pit.uuid,
+            "team_number": pit.team_number,
+            "nickname": pit.nickname,
+            "needs_synced": False,
+            "questions": pit.data,
+        },
+        status=200,
+    )
 
 
 def get_pit_questions(request):

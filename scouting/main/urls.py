@@ -25,7 +25,7 @@ urlpatterns = [
         name="upload_offline_reports",
     ),
     path("get_pits", views.get_pits, name="get_pits"),
-    path("update_pits", views.update_pits, name="update_pits"),
+    path("update_pit", views.update_pit, name="update_pit"),
     path("get_pit_questions", views.get_pit_questions, name="get_pit_questions"),
     path(
         "get_teams_with_filters",

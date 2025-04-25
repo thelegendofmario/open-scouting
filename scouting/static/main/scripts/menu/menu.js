@@ -151,32 +151,12 @@ document.addEventListener("alpine:init", () => {
 		 * Clear the IndexedDB database
 		 */
 		clear_database() {
-			const openRequest = indexedDB.open("scouting_data", 4);
+			db.offline_reports.clear();
+			db.backups.clear();
+			db.pit_scouting.clear();
+			db.delete();
 
-			openRequest.onsuccess = (event) => {
-				const db = event.target.result;
-				const transaction = db.transaction(
-					["offline_reports", "backups", "offline_pit_scouting"],
-					"readwrite",
-				);
-
-				const objectStore = transaction.objectStore("offline_reports");
-				const clearReports = objectStore.clear();
-
-				const objectStore2 = transaction.objectStore("backups");
-				const clearBackups = objectStore2.clear();
-
-				const objectStore3 = transaction.objectStore("offline_pit_scouting");
-				const clearPitScouting = objectStore3.clear();
-
-				clearReports.onsuccess = () => {
-					clearBackups.onsuccess = () => {
-						clearPitScouting.onsuccess = () => {
-							log("INFO", "Deleted the contents of the object stores");
-						};
-					};
-				};
-			};
+			window.location.href = SERVER_IP;
 		},
 
 		/**
@@ -195,47 +175,23 @@ document.addEventListener("alpine:init", () => {
 		 */
 		check_for_offline_reports() {
 			if (globalThis.offline === false) {
-				const openRequest = indexedDB.open("scouting_data", 4);
-
-				openRequest.onupgradeneeded = (event) => {
-					const db = event.target.result;
-					db.createObjectStore("offline_reports", { keyPath: "uuid" });
-					db.createObjectStore("backups", { keyPath: "uuid" });
-					db.createObjectStore("offline_pit_scouting", { keyPath: "uuid" });
-				};
-
-				openRequest.onsuccess = (event) => {
-					const db = event.target.result;
-
-					const transaction = db.transaction(["offline_reports"], "readwrite");
-					const objectStore = transaction.objectStore("offline_reports");
-
-					request = objectStore.count();
-
-					request.onsuccess = (event) => {
-						if (event.target.result > 0) {
+				db.offline_reports
+					.count()
+					.then((count) => {
+						if (count > 0) {
 							this.offline_reports = true;
 							this.show_notification(
 								"Reports available to upload.",
-								`You have ${event.target.result} reports that were saved offline ready to upload`,
+								`You have ${count} reports that were saved offline ready to upload`,
 								"cloud-arrow-up",
 							);
 						} else {
 							this.offline_reports = false;
 						}
-					};
-
-					request.onerror = (event) => {
-						log(
-							"WARNING",
-							`Error adding data to the database: ${event.target.errorCode}`,
-						);
-					};
-				};
-
-				openRequest.onerror = (event) => {
-					log("WARNING", `Error opening database: ${event.target.errorCode}`);
-				};
+					})
+					.catch((error) => {
+						log("WARNING", `Error counting offline reports: ${error}`);
+					});
 			} else {
 				this.offline_reports = false;
 			}
@@ -245,26 +201,9 @@ document.addEventListener("alpine:init", () => {
 		 * Upload offline reports to the server
 		 */
 		upload_offline_reports() {
-			const openRequest = indexedDB.open("scouting_data", 4);
-
-			openRequest.onupgradeneeded = (event) => {
-				const db = event.target.result;
-				db.createObjectStore("offline_reports", { keyPath: "uuid" });
-				db.createObjectStore("backups", { keyPath: "uuid" });
-				db.createObjectStore("offline_pit_scouting", { keyPath: "uuid" });
-			};
-
-			openRequest.onsuccess = (event) => {
-				const db = event.target.result;
-
-				const transaction = db.transaction(["offline_reports"], "readwrite");
-				const objectStore = transaction.objectStore("offline_reports");
-
-				const request = objectStore.getAll();
-
-				request.onsuccess = async (event) => {
-					const reports = event.target.result;
-
+			db.offline_reports
+				.toArray()
+				.then((reports) => {
 					const report_list = [];
 
 					for (report in reports) {
@@ -280,7 +219,7 @@ document.addEventListener("alpine:init", () => {
 						report_list.push(data);
 					}
 
-					const response = await fetch(`${SERVER_IP}/upload_offline_reports`, {
+					const response = fetch(`${SERVER_IP}/upload_offline_reports`, {
 						method: "POST",
 						headers: {
 							"Content-Type": "application/json",
@@ -291,27 +230,16 @@ document.addEventListener("alpine:init", () => {
 						}),
 					});
 
-					response.json().then(async (json) => {
-						if (response.ok) {
-							const transaction = db.transaction(
-								["offline_reports"],
-								"readwrite",
-							);
-							const objectStore = transaction.objectStore("offline_reports");
-							const clear_request = objectStore.clear();
-
-							clear_request.onsuccess = (event) => {
+					response.then((res) => {
+						if (res.ok) {
+							db.offline_reports.clear().then(() => {
 								this.offline_reports = false;
 								this.show_notification(
 									"Reports have been uploaded",
 									"All your reports have been stored on the server",
 									"check-circle",
 								);
-							};
-
-							clear_request.onerror = (event) => {
-								log("WARNING", "Error clearing the object store");
-							};
+							});
 						} else {
 							log("WARNING", "There was an issue uploading scouting reports");
 							this.show_notification(
@@ -321,15 +249,10 @@ document.addEventListener("alpine:init", () => {
 							);
 						}
 					});
-				};
-
-				request.onerror = (event) => {
-					log(
-						"WARNING",
-						`Error adding data to the database: ${event.target.errorCode}`,
-					);
-				};
-			};
+				})
+				.catch((error) => {
+					log("WARNING", `Error adding data to the database: ${error}`);
+				});
 		},
 
 		/**
@@ -337,57 +260,28 @@ document.addEventListener("alpine:init", () => {
 		 */
 		check_for_offline_pit_scouting() {
 			if (globalThis.offline === false) {
-				const openRequest = indexedDB.open("scouting_data", 4);
-
-				openRequest.onupgradeneeded = (event) => {
-					const db = event.target.result;
-					db.createObjectStore("offline_reports", { keyPath: "uuid" });
-					db.createObjectStore("backups", { keyPath: "uuid" });
-					db.createObjectStore("offline_pit_scouting", { keyPath: "uuid" });
-				};
-
-				openRequest.onsuccess = (event) => {
-					const db = event.target.result;
-
-					const transaction = db.transaction(
-						["offline_pit_scouting"],
-						"readwrite",
-					);
-					const objectStore = transaction.objectStore("offline_pit_scouting");
-
-					request = objectStore.getAll();
-
-					request.onsuccess = (event) => {
-						let count = 0;
-						for (const element of event.target.result) {
-							if (element.uuid != "master_questions") {
-								count++;
-							}
-						}
-
+				db.pit_scouting
+					.filter(
+						(element) =>
+							element.uuid !== "master_questions" &&
+							element.needs_synced === true,
+					)
+					.count()
+					.then((count) => {
 						if (count > 0) {
 							this.offline_pit_scouting = true;
 							this.show_notification(
-								"Reports available to upload.",
-								`You have ${count} pit scouting reports that were saved offline ready to upload`,
+								"Pit scouting data ready to upload",
+								`You have ${count} pit scouting data that are saved offline ready to upload`,
 								"cloud-arrow-up",
 							);
 						} else {
 							this.offline_pit_scouting = false;
 						}
-					};
-
-					request.onerror = (event) => {
-						log(
-							"WARNING",
-							`Error adding data to the database: ${event.target.errorCode}`,
-						);
-					};
-				};
-
-				openRequest.onerror = (event) => {
-					log("WARNING", `Error opening database: ${event.target.errorCode}`);
-				};
+					})
+					.catch((error) => {
+						log("WARNING", `Error counting offline pit scouting: ${error}`);
+					});
 			} else {
 				this.offline_pit_scouting = false;
 			}
@@ -397,102 +291,63 @@ document.addEventListener("alpine:init", () => {
 		 * Upload offline pit scouting data to the server
 		 */
 		upload_offline_pit_scouting() {
-			const openRequest = indexedDB.open("scouting_data", 4);
+			let upload_failed = false;
 
-			openRequest.onupgradeneeded = (event) => {
-				const db = event.target.result;
-				db.createObjectStore("offline_reports", { keyPath: "uuid" });
-				db.createObjectStore("backups", { keyPath: "uuid" });
-				db.createObjectStore("offline_pit_scouting", { keyPath: "uuid" });
-			};
+			db.pit_scouting
+				.filter((item) => item.needs_synced === true)
+				.toArray()
+				.then(async (data) => {
+					if (data.length > 0) {
+						// There's changes that need synced
 
-			openRequest.onsuccess = (event) => {
-				const db = event.target.result;
-
-				const transaction = db.transaction(
-					["offline_pit_scouting"],
-					"readwrite",
-				);
-				const objectStore = transaction.objectStore("offline_pit_scouting");
-
-				const request = objectStore.getAll();
-
-				request.onsuccess = async (event) => {
-					const reports = event.target.result;
-					let upload_failed = false;
-
-					for (report in reports) {
-						// Ignore if it's not the master question list
-						if (reports[report].uuid !== "master_questions") {
-							const response = await fetch(`${SERVER_IP}/update_pits`, {
-								method: "POST",
-								headers: {
-									"Content-Type": "application/json",
-									"X-CSRFToken": CSRF_TOKEN,
-								},
-								body: JSON.stringify({
-									event_name: encodeURIComponent(reports[report].event_name),
-									event_code: reports[report].event_code,
-									custom: reports[report].custom,
-									year: reports[report].year,
-									data: JSON.parse(reports[report].data),
-								}),
-							});
-
-							response.json().then(async (json) => {
+						for (const item of data) {
+							try {
+								const response = await fetch(`${SERVER_IP}/update_pit`, {
+									method: "POST",
+									headers: {
+										"X-TBA-Auth-Key": TBA_API_KEY,
+										"Content-Type": "application/json",
+										"X-CSRFToken": CSRF_TOKEN,
+									},
+									body: JSON.stringify({
+										uuid: item.uuid,
+										event_name: item.event_name,
+										event_code: item.event_code,
+										year: item.year,
+										custom: item.custom,
+										team_number: item.team_number,
+										nickname: item.nickname,
+										questions: item.questions || [], // In case questions are empty, send a blank list
+									}),
+								});
 								if (response.ok) {
-									const transaction = db.transaction(
-										["offline_pit_scouting"],
-										"readwrite",
-									);
-									const objectStore = transaction.objectStore(
-										"offline_pit_scouting",
-									);
-									const delete_request = objectStore.delete(
-										`${reports[report].uuid}`,
-									);
-
-									delete_request.onsuccess = (event) => {
-										this.offline_pit_scouting = false;
-									};
-
-									delete_request.onerror = (event) => {
-										log("WARNING", "Error clearing the object store");
-										upload_failed = true;
-									};
-								} else {
-									log(
-										"WARNING",
-										"There was an issue uploading scouting reports",
-									);
-									upload_failed = true;
+									await db.pit_scouting.update(item.uuid, {
+										needs_synced: false,
+									});
 								}
-							});
-
-							if (upload_failed === true) {
-								this.show_notification(
-									"There was an issue uploading scouting reports",
-									"Your reports may have not been uploaded",
-									"warning",
-								);
-							} else {
-								this.show_notification(
-									"Pit scouting reports have been uploaded",
-									"All your pit scouting reports have been stored on the server",
-									"check-circle",
-								);
+							} catch (error) {
+								log("WARNING", "Menu: pit uploaded failed:", error);
+								upload_failed = true;
 							}
 						}
-					}
-				};
 
-				request.onerror = (event) => {
-					log(
-						"WARNING",
-						`Error adding data to the database: ${event.target.errorCode}`,
-					);
-				};
-			};
+						if (!upload_failed) {
+							this.show_notification(
+								"Pit scouting data has been uploaded",
+								"All your pit scouting data has been stored on the server",
+								"check-circle",
+							);
+						} else {
+							this.show_notification(
+								"There was an issue uploading pit scouting data",
+								"Your pit scouting data may have not been uploaded",
+								"warning",
+							);
+						}
+
+						this.offline_pit_scouting = false;
+					}
+				});
 		},
 
 		/**

@@ -155,47 +155,29 @@ document.addEventListener("alpine:init", () => {
 				if (this.check_fields()) {
 					const report_uuid = crypto.randomUUID();
 
-					const openRequest = indexedDB.open("scouting_data", 4);
+					db.open()
+						.then(() => {
+							const report_backup = {
+								uuid: report_uuid,
+								data: this.create_json_data(),
+								event_name: encodeURIComponent(EVENT_NAME),
+								event_code: EVENT_CODE,
+								custom: CUSTOM,
+								year: YEAR,
+							};
 
-					openRequest.onupgradeneeded = (event) => {
-						const db = event.target.result;
-						db.createObjectStore("offline_reports", { keyPath: "uuid" });
-						db.createObjectStore("backups", { keyPath: "uuid" });
-						db.createObjectStore("offline_pit_scouting", { keyPath: "uuid" });
-					};
-
-					openRequest.onsuccess = (event) => {
-						const db = event.target.result;
-
-						const transaction = db.transaction(["backups"], "readwrite");
-						const objectStore = transaction.objectStore("backups");
-
-						const report_backup = {
-							uuid: report_uuid,
-							data: this.create_json_data(),
-							event_name: encodeURIComponent(EVENT_NAME),
-							event_code: EVENT_CODE,
-							custom: CUSTOM,
-							year: YEAR,
-						};
-
-						const request = objectStore.add(report_backup);
-
-						request.onsuccess = (event) => {
-							log("INFO", "Data added to the database");
-						};
-
-						request.onerror = (event) => {
-							log(
-								"WARNING",
-								`Error adding data to the database: ${event.target.errorCode}`,
-							);
-						};
-					};
-
-					openRequest.onerror = (event) => {
-						log("WARNING", `Error opening database: ${event.target.errorCode}`);
-					};
+							db.backups
+								.add(report_backup)
+								.then(() => {
+									log("INFO", "Data added to the database");
+								})
+								.catch((error) => {
+									log("WARNING", `Error adding data to the database: ${error}`);
+								});
+						})
+						.catch((error) => {
+							log("WARNING", `Error opening database: ${error}`);
+						});
 
 					if (globalThis.offline === false) {
 						const response = await fetch(`${SERVER_IP}/submit`, {
@@ -232,36 +214,16 @@ document.addEventListener("alpine:init", () => {
 					} else {
 						log("INFO", "You're offline, report will be saved offline.");
 
-						const openRequest = indexedDB.open("scouting_data", 4);
-
-						openRequest.onupgradeneeded = (event) => {
-							const db = event.target.result;
-							db.createObjectStore("offline_reports", { keyPath: "uuid" });
-							db.createObjectStore("backups", { keyPath: "uuid" });
-							db.createObjectStore("offline_pit_scouting", { keyPath: "uuid" });
-						};
-
-						openRequest.onsuccess = (event) => {
-							const db = event.target.result;
-
-							const transaction = db.transaction(
-								["offline_reports"],
-								"readwrite",
-							);
-							const objectStore = transaction.objectStore("offline_reports");
-
-							const offline_report = {
+						db.offline_reports
+							.put({
 								uuid: report_uuid,
 								data: this.create_json_data(),
 								event_name: encodeURIComponent(EVENT_NAME),
 								event_code: EVENT_CODE,
 								custom: CUSTOM,
 								year: YEAR,
-							};
-
-							const request = objectStore.add(offline_report);
-
-							request.onsuccess = (event) => {
+							})
+							.then(() => {
 								log("INFO", "Data added to the database");
 
 								const url = new URL(window.location.href);
@@ -277,22 +239,10 @@ document.addEventListener("alpine:init", () => {
 								url.searchParams.set("match_type", encodeURIComponent(type));
 
 								window.location.href = url.toString();
-							};
-
-							request.onerror = (event) => {
-								log(
-									"WARNING",
-									`Error adding data to the database: ${event.target.errorCode}`,
-								);
-							};
-						};
-
-						openRequest.onerror = (event) => {
-							log(
-								"WARNING",
-								`Error opening database: ${event.target.errorCode}`,
-							);
-						};
+							})
+							.catch((error) => {
+								log("WARNING", `Error adding data to the database: ${error}`);
+							});
 					}
 				}
 			} else {
@@ -325,7 +275,7 @@ document.addEventListener("alpine:init", () => {
 					this.wakeLock = await navigator.wakeLock.request("screen");
 					log("DEBUG", "Wake lock acquired");
 				} catch (err) {
-					console.error(`${err.name}, ${err.message}`);
+					log("WARNING", `${err.name}, ${err.message}`);
 				}
 			} else {
 				log("WARNING", "Wake lock not supported");

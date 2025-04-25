@@ -107,7 +107,11 @@
                     </button>
                 </div>
 
-                <div class="flex flex-row flex-wrap my-4">
+                <p x-show="pit_status.length > 0"
+                   x-transition
+                   class="dark:text-white text-black text-sans text-md my-2 ml-2">Select a team number below to jump to that team in the list</p>
+
+                <div class="flex flex-row flex-wrap mb-4">
                     <template x-for="pit in pit_status">
                         <div class="cursor-pointer" @click="scroll_to_pit(pit.team_number)">
                             <template x-if="pit.status == 'completed'">
@@ -133,14 +137,15 @@
                 </div>
 
                 <p class="dark:text-white text-black text-sm opacity-80 ml-4"
-                   x-text="'Viewing ' + pit_data_filtered.length + ' pits'"></p>
+                   x-text="'Viewing ' + filtered_pit_data.length + ' pits'"></p>
             </div>
 
             <div class="h-auto">
-                <template x-for="pit in pit_data_filtered">
+                <template x-for="pit in filtered_pit_data" :key="pit.uuid">
                     <div class="flex flex-col bg-slate-200/80 dark:bg-slate-700/80 border-2 dark:border-slate-600 border-slate-300 rounded-xl backdrop-blur-md p-4 my-2 pit_top"
-                         x-data="{ open: true }"
-                         :team_number="pit.team_number">
+                         x-data="{ open: false }"
+                         :team_number="pit.team_number"
+                         :team_uuid="pit.uuid">
                         <div class="flex flex-row items-center">
                             <div class="flex flex-row justify-between">
                                 <div class="rounded-md w-12 h-12 mr-2 bg-slate-200/80 dark:bg-slate-700/80 border-2 dark:border-slate-600 border-slate-300">
@@ -231,8 +236,8 @@
                                             <div class="flex flex-row ml-8 flex-wrap"
                                                  x-show="open || editing"
                                                  x-collapse>
-                                                <template x-for="answer in question.answers">
-                                                    <div class="flex flex-row items-end mx-1 mb-1">
+                                                <template x-for="answer in question.answers" :key="answer.uuid">
+                                                    <div class="flex flex-row items-end mx-1 mb-1" :answer_uuid="answer.uuid">
                                                         <p class="dark:text-white text-black opacity-80" x-text="answer.value"></p>
                                                         <p class="dark:text-white text-black opacity-70 ml-1 text-xs"
                                                            x-text="'(' + answer.user + ')'"></p>

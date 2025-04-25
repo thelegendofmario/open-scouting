@@ -7,11 +7,9 @@
 document.addEventListener("alpine:init", () => {
 	Alpine.data("pits", () => ({
 		pit_data: [],
-		pit_data_old: [],
-		pit_data_filtered: [],
+		filtered_pit_data: [],
 		filter: "all",
 		pit_status: [],
-		master_questions: [],
 		state: "loading",
 
 		/**
@@ -21,70 +19,91 @@ document.addEventListener("alpine:init", () => {
 		 * @param {string} simple_name - The simple name of the question
 		 * @param {string} type - The type of the question
 		 */
-		submit_answer(event, simple_name, type) {
+		async submit_answer(event, simple_name, type) {
+			const urlParams = new URLSearchParams(window.location.search);
+			const username = urlParams.get("username");
+
 			const input = event.target
 				.closest("div")
 				.querySelector(".ui_input, .ui_checkbox");
-			const team_number = event.target
-				.closest(".pit_top")
-				.getAttribute("team_number");
+			const uuid = event.target.closest(".pit_top").getAttribute("team_uuid");
 
 			const today = new Date();
 			const date = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
 
-			const pit_index = this.pit_data.findIndex(
-				(obj) => obj.team_number === team_number,
-			);
-			const question_index = this.pit_data[pit_index].questions.findIndex(
-				(obj) => obj.simple_name === simple_name,
-			);
+			const value =
+				type === "text"
+					? input.value
+					: type === "number"
+						? Number(input.value)
+						: type === "boolean"
+							? input.checked
+							: type === "choice"
+								? input.value
+								: console.error("Unknown question type:", type);
 
-			const new_value = type === "boolean" ? input.checked : input.value;
-
-			// Check if the answer already exists to prevent duplicates
-			const existing_answer = this.pit_data[pit_index].questions[
-				question_index
-			].answers.find((ans) => ans.value === new_value && ans.user === USERNAME);
-
-			if (!existing_answer) {
-				this.pit_data[pit_index].questions[question_index].answers.push({
-					value: new_value,
-					user: USERNAME,
-					contributed: date,
-				});
-
-				this.state = "unsaved";
+			// Fetch the pit object from the DB
+			const pit = await db.pit_scouting.get(uuid);
+			if (!pit) {
+				console.error("Pit data not found for uuid:", uuid);
+				return;
 			}
+
+			// Find the question in the pit data
+			const question = pit.questions.find((q) => q.simple_name === simple_name);
+			if (!question) {
+				console.error("Question not found:", simple_name);
+				return;
+			}
+
+			// Add the new answer
+			if (!Array.isArray(question.answers)) {
+				question.answers = [];
+			}
+			question.answers.push({
+				contributed: date,
+				value: value,
+				uuid: String(crypto.randomUUID()),
+				user: username,
+			});
+
+			pit.needs_synced = true;
+
+			await db.pit_scouting.put(pit);
 		},
 
 		/**
 		 * Add a question to the local database
 		 *
 		 * @param {Event} event - The event object
-		 * @param {string} name - The name of the question
+		 * @param {HTMLInputElement} name - The input element containing the question text
 		 */
-		submit_question(event, name) {
-			const team_number = event.target
-				.closest(".pit_top")
-				.getAttribute("team_number");
-			const simple_name = name.value
-				.toLowerCase()
-				.replace("?", "")
-				.replace(" ", "_");
-			const pit_index = this.pit_data.findIndex(
-				(obj) => obj.team_number === team_number,
-			);
+		async submit_question(event, name) {
+			const uuid = event.target.closest(".pit_top").getAttribute("team_uuid");
 
-			this.pit_data[pit_index].questions.push({
+			const simple_name = name.value.toLowerCase().replace(/[^\w]+/g, "_");
+
+			// Get the pit from the database by UUID
+			const pit = await db.pit_scouting.get(uuid);
+			if (!pit) {
+				console.error("Pit data not found for uuid:", uuid);
+				return;
+			}
+
+			// Add the new question to the database
+			pit.questions.push({
 				text: name.value,
 				simple_name: simple_name,
 				type: "text",
 				answers: [],
 			});
 
-			name.value = "";
+			pit.needs_synced = true;
 
-			this.state = "unsaved";
+			// Save the pit
+			await db.pit_scouting.put(pit);
+
+			name.value = "";
 		},
 
 		/**
@@ -93,356 +112,81 @@ document.addEventListener("alpine:init", () => {
 		 * Uses The Blue Alliance to attempt to get the team's nickname
 		 *
 		 * @param {Event} event - The event object
-		 * @param {string} team_number - The team number
+		 * @param {HTMLInputElement} team_number - The input element with the team number
 		 */
 		async submit_team(event, team_number) {
+			const urlParams = new URLSearchParams(window.location.search);
+			const event_name = urlParams.get("event_name");
+			const event_code = urlParams.get("event_code");
+			const year = Number(urlParams.get("year")); // ensure correct type
+			const custom = urlParams.get("custom") || false;
+
+			let nickname = " ";
 			if (globalThis.offline === false) {
-				const response = await fetch(
-					`https://www.thebluealliance.com/api/v3/team/frc${team_number.value}`,
-					{
-						method: "GET",
-						headers: {
-							"X-TBA-Auth-Key": TBA_API_KEY,
-						},
-					},
-				);
-
-				if (response.ok) {
-					response
-						.json()
-						.then(async (json) => {
-							this.pit_data.push({
-								team_number: team_number.value,
-								nickname: json.nickname,
-								questions: this.master_questions,
-							});
-							team_number.value = "";
-						})
-						.catch((error) => {
-							this.pit_data.push({
-								team_number: team_number.value,
-								nickname: " ",
-								questions: this.master_questions,
-							});
-							team_number.value = "";
-						});
-				} else {
-					this.pit_data.push({
-						team_number: team_number.value,
-						nickname: " ",
-						questions: this.master_questions,
-					});
-					team_number.value = "";
-				}
-			} else {
-				this.pit_data.push({
-					team_number: team_number.value,
-					nickname: " ",
-					questions: this.master_questions,
-				});
-				team_number.value = "";
-			}
-
-			this.state = "unsaved";
-		},
-
-		/**
-		 * Update the server with the local database's changes
-		 */
-		async update_pit_data() {
-			if (JSON.stringify(this.pit_data) !== JSON.stringify(this.pit_data_old)) {
-				if (globalThis.offline === false) {
-					if (this.state !== "syncing") {
-						const response = await fetch(`${SERVER_IP}/update_pits`, {
-							method: "POST",
-							headers: {
-								"Content-Type": "application/json",
-								"X-CSRFToken": CSRF_TOKEN,
-							},
-							body: JSON.stringify({
-								event_name: encodeURIComponent(EVENT_NAME),
-								event_code: EVENT_CODE,
-								custom: CUSTOM,
-								year: YEAR,
-								data: this.pit_data,
-							}),
-						});
-
-						await response.text().then(async (text) => {
-							this.pit_data_old = JSON.parse(JSON.stringify(this.pit_data));
-
-							this.remove_pit_data_locally();
-
-							this.state = "saved";
-						});
-					}
-				} else {
-					this.store_pit_data_locally();
-					this.state = "offline";
-					this.pit_data_old = JSON.parse(JSON.stringify(this.pit_data));
-				}
-			} else {
-				if (globalThis.offline == false) {
-					this.state = "saved";
-				} else {
-					this.state = "offline";
-				}
-			}
-		},
-
-		/**
-		 * Update the server with the local database's changes,
-		 * then pull the latest changes from the server
-		 */
-		async sync_pit_data() {
-			this.state = "syncing";
-
-			if (!globalThis.offline) {
 				try {
-					// First, push the data to the server
-					const response = await fetch(`${SERVER_IP}/update_pits`, {
-						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
-							"X-CSRFToken": CSRF_TOKEN,
+					const response = await fetch(
+						`https://www.thebluealliance.com/api/v3/team/frc${team_number.value}`,
+						{
+							method: "GET",
+							headers: {
+								"X-TBA-Auth-Key": TBA_API_KEY,
+							},
 						},
-						body: JSON.stringify({
-							event_name: encodeURIComponent(EVENT_NAME),
-							event_code: EVENT_CODE,
-							custom: CUSTOM,
-							year: YEAR,
-							data: this.pit_data,
-						}),
-					});
-
-					if (!response.ok) throw new Error("Failed to update pits on server");
-
-					// Then, fetch the updated data from the server
-					const get_response = await fetch(`${SERVER_IP}/get_pits`, {
-						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
-							"X-CSRFToken": CSRF_TOKEN,
-						},
-						body: JSON.stringify({
-							event_name: encodeURIComponent(EVENT_NAME),
-							event_code: EVENT_CODE,
-							custom: CUSTOM,
-							year: YEAR,
-						}),
-					});
-
-					if (!get_response.ok) throw new Error("Failed to fetch updated pits");
-
-					const data = await get_response.json();
-
-					// Update local state
-					this.pit_data = data;
-					this.pit_data_old = JSON.parse(JSON.stringify(data));
-
-					this.filter_pit_data();
-					this.get_pit_status();
-					this.remove_pit_data_locally();
-
-					this.state = "saved";
-				} catch (error) {
-					console.error("Sync Error:", error);
-					this.state = "offline"; // Handle failure by marking offline
-				}
-			} else {
-				this.store_pit_data_locally();
-				this.state = "offline";
-				this.pit_data_old = JSON.parse(JSON.stringify(this.pit_data));
-			}
-		},
-
-		/**
-		 * Locally store pit data for offline scouting
-		 */
-		store_pit_data_locally() {
-			const openRequest = indexedDB.open("scouting_data", 4);
-
-			openRequest.onupgradeneeded = (event) => {
-				const db = event.target.result;
-				db.createObjectStore("offline_reports", { keyPath: "uuid" });
-				db.createObjectStore("backups", { keyPath: "uuid" });
-				db.createObjectStore("offline_pit_scouting", { keyPath: "uuid" });
-			};
-
-			openRequest.onsuccess = (event) => {
-				const db = event.target.result;
-
-				const transaction = db.transaction(
-					["offline_pit_scouting"],
-					"readwrite",
-				);
-				const objectStore = transaction.objectStore("offline_pit_scouting");
-
-				const urlParams = new URLSearchParams(window.location.search);
-				const event_name = urlParams.get("event_name");
-				const event_code = urlParams.get("event_code");
-				const year = urlParams.get("year");
-				const custom = urlParams.get("custom");
-
-				const pit_scouting_backup = {
-					uuid: `${event_code}_${year}`,
-					data: JSON.stringify(this.pit_data),
-					event_name: event_name,
-					event_code: event_code,
-					year: year,
-					custom: custom,
-				};
-
-				const request = objectStore.put(pit_scouting_backup);
-
-				request.onsuccess = (event) => {
-					log("WARNING", "Data added to the database");
-				};
-
-				request.onerror = (event) => {
-					log(
-						"WARNING",
-						`Error adding data to the database: ${event.target.errorCode}`,
 					);
-				};
+					if (response.ok) {
+						const json = await response.json();
+						nickname = json.nickname || " ";
+					}
+				} catch (error) {
+					log("WARNING", "TBA fetch failed:", error);
+				}
+			}
+
+			// Retrieve the master list of questions from the local database
+			const masterQuestions = await db.pit_scouting
+				.where("uuid")
+				.equals("master_questions")
+				.first();
+
+			const new_pit = {
+				uuid: crypto.randomUUID(),
+				event_name: event_name,
+				event_code: event_code,
+				year: year,
+				custom: custom,
+				team_number: team_number.value,
+				nickname: nickname,
+				needs_synced: true,
+				questions: masterQuestions.questions,
 			};
+
+			await db.pit_scouting.put(new_pit);
+
+			team_number.value = "";
 		},
 
 		/**
 		 * Store the master list of questions locally for adding teams while offline
 		 */
-		store_master_list_of_questions_locally() {
-			const openRequest = indexedDB.open("scouting_data", 4);
-
-			openRequest.onupgradeneeded = (event) => {
-				const db = event.target.result;
-				db.createObjectStore("offline_reports", { keyPath: "uuid" });
-				db.createObjectStore("backups", { keyPath: "uuid" });
-				db.createObjectStore("offline_pit_scouting", { keyPath: "uuid" });
-			};
-
-			openRequest.onsuccess = (event) => {
-				const db = event.target.result;
-
-				const transaction = db.transaction(
-					["offline_pit_scouting"],
-					"readwrite",
-				);
-				const objectStore = transaction.objectStore("offline_pit_scouting");
-
-				const pit_scouting_backup = {
+		store_master_list_of_questions_locally(questions) {
+			db.pit_scouting
+				.put({
 					uuid: "master_questions",
-					data: JSON.stringify(this.master_questions),
 					event_name: "",
 					event_code: "",
 					year: "",
-					custom: "",
-				};
-
-				const request = objectStore.put(pit_scouting_backup);
-
-				request.onsuccess = (event) => {
-					log("WARNING", "Data added to the database");
-				};
-
-				request.onerror = (event) => {
-					log(
-						"WARNING",
-						`Error adding data to the database: ${event.target.errorCode}`,
-					);
-				};
-			};
-		},
-
-		/**
-		 * Remove the locally stored pit data for this event and year
-		 */
-		remove_pit_data_locally() {
-			const openRequest = indexedDB.open("scouting_data", 4);
-
-			openRequest.onupgradeneeded = (event) => {
-				const db = event.target.result;
-				db.createObjectStore("offline_reports", { keyPath: "uuid" });
-				db.createObjectStore("backups", { keyPath: "uuid" });
-				db.createObjectStore("offline_pit_scouting", { keyPath: "uuid" });
-			};
-
-			openRequest.onsuccess = (event) => {
-				const db = event.target.result;
-
-				const transaction = db.transaction(
-					["offline_pit_scouting"],
-					"readwrite",
-				);
-				const objectStore = transaction.objectStore("offline_pit_scouting");
-
-				const urlParams = new URLSearchParams(window.location.search);
-				const event_name = urlParams.get("event_name");
-				const event_code = urlParams.get("event_code");
-				const year = urlParams.get("year");
-
-				const request = objectStore.delete(`${event_code}_${year}`);
-
-				request.onsuccess = (event) => {
-					log("WARNING", "Data removed from the database");
-				};
-
-				request.onerror = (event) => {
-					if (event.target.error.name === "DataError") {
-						log(
-							"WARNING",
-							`Key not found in the database: ${event.target.errorCode}`,
-						);
-					} else {
-						log(
-							"WARNING",
-							`Error removing data from the database: ${event.target.errorCode}`,
-						);
-					}
-				};
-			};
-		},
-
-		/**
-		 * Filter the pit data based on the selected filter
-		 */
-		filter_pit_data() {
-			// Determines what pits in the database are complete, incomplete, or have no data
-			const completed = [];
-			const incomplete = [];
-			const no_data = [];
-
-			for (const pit of this.pit_data) {
-				const questions = pit.questions || []; // Default to empty array if undefined
-				const totalQuestions = questions.length;
-				let answeredQuestions = 0;
-
-				for (const question of questions) {
-					if ((question.answers || []).length > 0) {
-						answeredQuestions++;
-					}
-				}
-
-				if (answeredQuestions === 0) {
-					no_data.push(pit);
-				} else if (answeredQuestions === totalQuestions) {
-					completed.push(pit);
-				} else {
-					incomplete.push(pit);
-				}
-			}
-
-			if (this.filter === "completed") {
-				this.pit_data_filtered = completed;
-			} else if (this.filter === "incomplete") {
-				this.pit_data_filtered = incomplete;
-			} else if (this.filter === "no_data") {
-				this.pit_data_filtered = no_data;
-			} else if (this.filter === "all") {
-				this.pit_data_filtered = this.pit_data;
-			} else {
-				this.pit_data_filtered = this.pit_data;
-			}
+					custom: false,
+					team_number: "",
+					nickname: "",
+					needs_synced: false,
+					questions: questions,
+				})
+				.then(() => {
+					log("INFO", "Master questions added to the database");
+				})
+				.catch((error) => {
+					log("WARNING", `Error adding data to the database: ${error}`);
+				});
 		},
 
 		/**
@@ -451,6 +195,7 @@ document.addEventListener("alpine:init", () => {
 		 */
 		get_pit_status() {
 			// Creates a list of all the teams and their status to add buttons for the scout to scroll to
+			// TODO: Fix for new pit scouting system
 			const completed = [];
 			const incomplete = [];
 			const no_data = [];
@@ -490,6 +235,43 @@ document.addEventListener("alpine:init", () => {
 		},
 
 		/**
+		 * Filters the displayed pit data by
+		 */
+		filter_pit_data() {
+			const completed = [];
+			const incomplete = [];
+			const no_data = [];
+
+			for (const pit of this.pit_data) {
+				const questions = pit.questions || []; // Default to empty array if undefined
+				const totalQuestions = questions.length;
+				const answeredQuestions = questions.filter(
+					(q) => (q.answers || []).length > 0,
+				).length;
+
+				if (answeredQuestions === 0) {
+					no_data.push(pit);
+				} else if (answeredQuestions === totalQuestions) {
+					completed.push(pit);
+				} else {
+					incomplete.push(pit);
+				}
+			}
+
+			if (this.filter === "completed") {
+				this.filtered_pit_data = completed;
+			} else if (this.filter === "incomplete") {
+				this.filtered_pit_data = incomplete;
+			} else if (this.filter === "no_data") {
+				this.filtered_pit_data = no_data;
+			} else if (this.filter === "all") {
+				this.filtered_pit_data = this.pit_data;
+			} else {
+				this.filtered_pit_data = this.pit_data;
+			}
+		},
+
+		/**
 		 * Scroll to a pit on the page
 		 *
 		 * @param {string} pit - The team number of the pit to scroll to
@@ -507,11 +289,201 @@ document.addEventListener("alpine:init", () => {
 		},
 
 		/**
+		 * Store pit data from server into the local database
+		 */
+		setup_pit_data(pit_data) {
+			for (const pit in pit_data.pits) {
+				db.pit_scouting
+					.put({
+						uuid: pit_data.pits[pit].uuid,
+						event_name: pit_data.event_name,
+						event_code: pit_data.event_code,
+						year: pit_data.year,
+						custom: pit_data.custom,
+						team_number: pit_data.pits[pit].team_number,
+						nickname: pit_data.pits[pit].nickname,
+						needs_synced: false,
+						questions: pit_data.pits[pit].questions,
+					})
+					.then(() => {
+						log("INFO", "Pit data added to the database");
+					})
+					.catch((error) => {
+						log("WARNING", `Error adding data to the database: ${error}`);
+					});
+			}
+		},
+
+		/**
+		 * Get pit data from the server
+		 */
+		async get_pit_data() {
+			const urlParams = new URLSearchParams(window.location.search);
+			const event_name = urlParams.get("event_name");
+			const event_code = urlParams.get("event_code");
+			const year = urlParams.get("year");
+			const custom = urlParams.get("custom");
+
+			this.state = "loading";
+
+			const pits_response = await fetch(`${SERVER_IP}/get_pits`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					"X-CSRFToken": CSRF_TOKEN,
+				},
+				body: JSON.stringify({
+					event_name: event_name,
+					event_code: event_code,
+					year: year,
+					custom: custom,
+				}),
+			});
+
+			if (pits_response.ok) {
+				this.setup_pit_data(await pits_response.json());
+				this.state = "saved";
+				this.get_pit_status();
+				this.filter_pit_data();
+			}
+		},
+
+		/**
+		 * Get the master list of questions from the server
+		 */
+		async get_master_questions() {
+			const urlParams = new URLSearchParams(window.location.search);
+			const year = urlParams.get("year");
+
+			const master_list_of_questions_response = await fetch(
+				`${SERVER_IP}/get_pit_questions`,
+				{
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+						"X-CSRFToken": CSRF_TOKEN,
+					},
+					body: JSON.stringify({
+						year: year,
+					}),
+				},
+			);
+
+			if (master_list_of_questions_response.ok) {
+				this.store_master_list_of_questions_locally(
+					await master_list_of_questions_response.json(),
+				);
+			}
+		},
+
+		/**
+		 * Sync the pit data by saving the local database to the server
+		 * and then retrieving the data from the server
+		 */
+		async sync_pit_data() {
+			const urlParams = new URLSearchParams(window.location.search);
+			const event_name = urlParams.get("event_name");
+			const event_code = urlParams.get("event_code");
+			const year = Number(urlParams.get("year"));
+			const custom = urlParams.get("custom") || false;
+
+			if (!globalThis.offline) {
+				// User is online, so check for any unsaved changes and sync if needed
+
+				db.pit_scouting
+					.filter(
+						(item) =>
+							item.needs_synced === true &&
+							item.event_name === event_name &&
+							item.event_code === event_code &&
+							item.year === year,
+					)
+					.toArray()
+					.then(async (data) => {
+						if (data.length > 0) {
+							// There's changes that need synced
+							this.state = "syncing";
+
+							for (const item of data) {
+								try {
+									const response = await fetch(`${SERVER_IP}/update_pit`, {
+										method: "POST",
+										headers: {
+											"X-TBA-Auth-Key": TBA_API_KEY,
+											"Content-Type": "application/json",
+											"X-CSRFToken": CSRF_TOKEN,
+										},
+										body: JSON.stringify({
+											uuid: item.uuid,
+											event_name: item.event_name,
+											event_code: item.event_code,
+											year: item.year,
+											custom: custom,
+											team_number: item.team_number,
+											nickname: item.nickname,
+											questions: item.questions || [], // In case questions are empty, send a blank list
+										}),
+									});
+									if (response.ok) {
+										await db.pit_scouting.update(item.uuid, {
+											needs_synced: false,
+										});
+										// log("DEBUG", `Pit ${item.uuid} synced`);
+									}
+								} catch (error) {
+									log("WARNING", "Pit sync failed:", error);
+								}
+							}
+
+							// Fetch any new data from the server
+							this.get_pit_data();
+						} else {
+							// There's no changes that need synced
+							this.get_pit_data();
+						}
+					});
+			}
+		},
+
+		/**
+		 * Check if there are any unsaved changes to update the status indicator
+		 */
+		check_for_unsaved_changes() {
+			const urlParams = new URLSearchParams(window.location.search);
+			const event_name = urlParams.get("event_name");
+			const event_code = urlParams.get("event_code");
+			const year = Number(urlParams.get("year"));
+
+			db.pit_scouting
+				.filter(
+					(item) =>
+						item.event_name === event_name &&
+						item.event_code === event_code &&
+						item.year === year &&
+						item.needs_synced === true &&
+						item.uuid !== "master_questions",
+				)
+				.count()
+				.then((count) => {
+					if (count > 0) {
+						this.state = "unsaved";
+					} else {
+						this.state = "saved";
+					}
+				})
+				.catch((error) => {
+					log("WARNING", `Error counting unsaved changes: ${error}`);
+				});
+		},
+
+		/**
 		 * Initialize the pit scouting page
 		 *
 		 * If the user isn't offline, get the pit data and master list of questions and store them locally
 		 *
-		 * If the user is offline, attempt to get the pit data from the local database
+		 * If the user is offline, don't do anything
+		 *
+		 * Start the syncing process
 		 *
 		 * Also doesn't let the page be closed with unsaved changes
 		 */
@@ -519,153 +491,10 @@ document.addEventListener("alpine:init", () => {
 			// Delay by 100ms to make sure globalThis.offline is defined by menu
 			setTimeout(async () => {
 				if (globalThis.offline === false) {
-					// The user is online, so fetch things from the server
-					const get_pits_response = await fetch(`${SERVER_IP}/get_pits`, {
-						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
-							"X-CSRFToken": CSRF_TOKEN,
-						},
-						body: JSON.stringify({
-							event_name: encodeURIComponent(EVENT_NAME),
-							event_code: EVENT_CODE,
-							custom: CUSTOM,
-							year: YEAR,
-						}),
-					});
+					// Get pit data and master list of questions from server, and save in IndexedDB
 
-					get_pits_response.text().then(async (text) => {
-						this.pit_data = JSON.parse(text);
-						this.pit_data_old = JSON.parse(text);
-
-						this.filter_pit_data();
-						this.get_pit_status();
-
-						this.update_pit_data();
-
-						setInterval(() => {
-							this.update_pit_data();
-						}, 5000);
-					});
-
-					const get_pit_questions_response = await fetch(
-						`${SERVER_IP}/get_pit_questions`,
-						{
-							method: "POST",
-							headers: {
-								"Content-Type": "application/json",
-								"X-CSRFToken": CSRF_TOKEN,
-							},
-							body: JSON.stringify({
-								year: YEAR,
-							}),
-						},
-					);
-
-					get_pit_questions_response.text().then(async (text) => {
-						this.master_questions = JSON.parse(text);
-						this.store_master_list_of_questions_locally();
-					});
-				} else {
-					// The user is offline, so try and fetch things from the local database
-					// First, try and get the pit data locally
-
-					const openRequest = indexedDB.open("scouting_data", 4);
-
-					openRequest.onupgradeneeded = (event) => {
-						const db = event.target.result;
-						db.createObjectStore("offline_reports", { keyPath: "uuid" });
-						db.createObjectStore("backups", { keyPath: "uuid" });
-						db.createObjectStore("offline_pit_scouting", { keyPath: "uuid" });
-					};
-
-					openRequest.onsuccess = (event) => {
-						const db = event.target.result;
-
-						const transaction = db.transaction(
-							["offline_pit_scouting"],
-							"readwrite",
-						);
-						const objectStore = transaction.objectStore("offline_pit_scouting");
-
-						const urlParams = new URLSearchParams(window.location.search);
-						const event_name = urlParams.get("event_name");
-						const event_code = urlParams.get("event_code");
-						const year = urlParams.get("year");
-
-						const request = objectStore.get(`${event_code}_${year}`);
-
-						request.onsuccess = async (event) => {
-							const data = event.target.result;
-
-							if (data) {
-								this.pit_data = JSON.parse(data.data);
-								this.pit_data_old = JSON.parse(data.data);
-
-								this.filter_pit_data();
-								this.get_pit_status();
-
-								this.update_pit_data();
-
-								setInterval(() => {
-									this.update_pit_data();
-								}, 5000);
-							} else {
-								this.pit_data = [];
-								this.pit_data_old = [];
-
-								this.filter_pit_data();
-								this.get_pit_status();
-
-								this.update_pit_data();
-
-								setInterval(() => {
-									this.update_pit_data();
-								}, 5000);
-
-								window.dispatchEvent(
-									new CustomEvent("scouting_notification", {
-										detail: {
-											title: "No local pit scouting data found for this event",
-											body: "Set up locally with blank data",
-											icon: "warning",
-										},
-									}),
-								);
-							}
-						};
-
-						request.onerror = (event) => {
-							log(
-								"WARNING",
-								`Error getting data from the database: ${event.target.errorCode}`,
-							);
-						};
-
-						const master_questions_request =
-							objectStore.get("master_questions");
-
-						master_questions_request.onsuccess = async (event) => {
-							const data = event.target.result;
-
-							if (data) {
-								this.master_questions = JSON.parse(data.data);
-							} else {
-								this.master_questions = [];
-							}
-						};
-
-						master_questions_request.onerror = (event) => {
-							log(
-								"WARNING",
-								`Error getting data from the database: ${event.target.errorCode}`,
-							);
-						};
-					};
-
-					openRequest.onerror = (event) => {
-						log("WARNING", `Error opening database: ${event.target.errorCode}`);
-					};
+					await this.sync_pit_data();
+					await this.get_master_questions();
 				}
 			}, 100);
 
@@ -676,6 +505,40 @@ document.addEventListener("alpine:init", () => {
 					return "";
 				}
 			});
+
+			const urlParams = new URLSearchParams(window.location.search);
+			const event_name = urlParams.get("event_name");
+			const event_code = urlParams.get("event_code");
+			const year = Number(urlParams.get("year"));
+
+			const pit_scouting_observable = Dexie.liveQuery(() =>
+				db.pit_scouting
+					.filter(
+						(pit) =>
+							pit.event_name === event_name &&
+							pit.event_code === event_code &&
+							pit.year === year,
+					)
+					.toArray(),
+			);
+
+			const subscription = pit_scouting_observable.subscribe({
+				next: (result) => {
+					this.pit_data = result.sort((a, b) => a.team_number - b.team_number);
+					this.filter_pit_data();
+				},
+				error: (error) => {
+					log("ERROR", "Error subscribing to pit scouting db", error);
+				},
+			});
+
+			setInterval(() => {
+				this.sync_pit_data();
+			}, 10000);
+
+			setInterval(() => {
+				this.check_for_unsaved_changes();
+			}, 500);
 		},
 	}));
 });
