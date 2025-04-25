@@ -532,6 +532,8 @@ document.addEventListener("alpine:init", () => {
 				.toArray()
 				.then((data) => {
 					this.pit_data = data.sort((a, b) => a.team_number - b.team_number);
+					this.get_pit_status();
+					this.filter_pit_data();
 				});
 
 			const subscription = pit_scouting_observable.subscribe({
