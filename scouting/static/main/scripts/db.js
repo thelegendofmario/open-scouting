@@ -31,6 +31,22 @@ async function init_db() {
 			"&uuid, event_name, event_code, year, team_number, nickname, needs_synced, questions",
 	});
 
+	db.version(2)
+		.stores({
+			offline_reports: "++uuid, data, event_name, event_code, custom, year",
+			backups: "++uuid",
+			pit_scouting:
+				"&uuid, event_name, event_code, year, team_number, nickname, needs_synced, questions, custom",
+		})
+		.upgrade((tx) => {
+			return tx
+				.table("pit_scouting")
+				.toCollection()
+				.modify((item) => {
+					item.custom = false;
+				});
+		});
+
 	await db.open();
 }
 

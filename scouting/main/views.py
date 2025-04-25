@@ -753,6 +753,7 @@ def get_pits(request):
                 "event_name": event.name,
                 "event_code": event.event_code,
                 "year": event.year,
+                "custom": event.custom,
                 "pits": [],
             }
             for pit in pits:
@@ -802,6 +803,7 @@ def get_pits(request):
                 "event_name": event.name,
                 "event_code": event.event_code,
                 "year": event.year,
+                "custom": event.custom,
                 "pits": [],
             }
             for pit in pits:

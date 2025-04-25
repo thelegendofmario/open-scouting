@@ -153,7 +153,7 @@ document.addEventListener("alpine:init", () => {
 		clear_database() {
 			db.offline_reports.clear();
 			db.backups.clear();
-			db.offline_pit_scouting.clear();
+			db.pit_scouting.clear();
 			db.delete();
 
 			window.location.href = SERVER_IP;
@@ -260,15 +260,19 @@ document.addEventListener("alpine:init", () => {
 		 */
 		check_for_offline_pit_scouting() {
 			if (globalThis.offline === false) {
-				db.offline_pit_scouting
-					.filter((element) => element.uuid !== "master_questions")
+				db.pit_scouting
+					.filter(
+						(element) =>
+							element.uuid !== "master_questions" &&
+							element.needs_synced === true,
+					)
 					.count()
 					.then((count) => {
 						if (count > 0) {
 							this.offline_pit_scouting = true;
 							this.show_notification(
-								"Reports available to upload.",
-								`You have ${count} pit scouting reports that were saved offline ready to upload`,
+								"Pit scouting data ready to upload",
+								`You have ${count} pit scouting data that are saved offline ready to upload`,
 								"cloud-arrow-up",
 							);
 						} else {
@@ -276,7 +280,7 @@ document.addEventListener("alpine:init", () => {
 						}
 					})
 					.catch((error) => {
-						log("WARNING", `Error counting offline reports: ${error}`);
+						log("WARNING", `Error counting offline pit scouting: ${error}`);
 					});
 			} else {
 				this.offline_pit_scouting = false;
@@ -287,57 +291,62 @@ document.addEventListener("alpine:init", () => {
 		 * Upload offline pit scouting data to the server
 		 */
 		upload_offline_pit_scouting() {
-			db.offline_pit_scouting
-				.where("uuid")
-				.notEqual("master_questions")
+			let upload_failed = false;
+
+			db.pit_scouting
+				.filter((item) => item.needs_synced === true)
 				.toArray()
-				.then(async (reports) => {
-					let upload_failed = false;
+				.then(async (data) => {
+					if (data.length > 0) {
+						// There's changes that need synced
 
-					for (report of reports) {
-						const response = await fetch(`${SERVER_IP}/update_pits`, {
-							method: "POST",
-							headers: {
-								"Content-Type": "application/json",
-								"X-CSRFToken": CSRF_TOKEN,
-							},
-							body: JSON.stringify({
-								event_name: encodeURIComponent(report.event_name),
-								event_code: report.event_code,
-								custom: report.custom,
-								year: report.year,
-								data: JSON.parse(report.data),
-							}),
-						});
-
-						const json = await response.json();
-
-						if (response.ok) {
-							await db.offline_pit_scouting.delete(report.uuid);
-
-							this.offline_pit_scouting = false;
-						} else {
-							log("WARNING", "There was an issue uploading scouting reports");
-							upload_failed = true;
+						for (const item of data) {
+							try {
+								const response = await fetch(`${SERVER_IP}/update_pit`, {
+									method: "POST",
+									headers: {
+										"X-TBA-Auth-Key": TBA_API_KEY,
+										"Content-Type": "application/json",
+										"X-CSRFToken": CSRF_TOKEN,
+									},
+									body: JSON.stringify({
+										uuid: item.uuid,
+										event_name: item.event_name,
+										event_code: item.event_code,
+										year: item.year,
+										custom: item.custom,
+										team_number: item.team_number,
+										nickname: item.nickname,
+										questions: item.questions || [], // In case questions are empty, send a blank list
+									}),
+								});
+								if (response.ok) {
+									await db.pit_scouting.update(item.uuid, {
+										needs_synced: false,
+									});
+								}
+							} catch (error) {
+								log("WARNING", "Menu: pit uploaded failed:", error);
+								upload_failed = true;
+							}
 						}
-					}
 
-					if (upload_failed === true) {
-						this.show_notification(
-							"There was an issue uploading scouting reports",
-							"Your reports may have not been uploaded",
-							"warning",
-						);
-					} else {
-						this.show_notification(
-							"Pit scouting reports have been uploaded",
-							"All your pit scouting reports have been stored on the server",
-							"check-circle",
-						);
+						if (!upload_failed) {
+							this.show_notification(
+								"Pit scouting data has been uploaded",
+								"All your pit scouting data has been stored on the server",
+								"check-circle",
+							);
+						} else {
+							this.show_notification(
+								"There was an issue uploading pit scouting data",
+								"Your pit scouting data may have not been uploaded",
+								"warning",
+							);
+						}
+
+						this.offline_pit_scouting = false;
 					}
-				})
-				.catch((error) => {
-					log("WARNING", `Error counting offline reports: ${error}`);
 				});
 		},
 

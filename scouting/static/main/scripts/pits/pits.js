@@ -119,6 +119,7 @@ document.addEventListener("alpine:init", () => {
 			const event_name = urlParams.get("event_name");
 			const event_code = urlParams.get("event_code");
 			const year = Number(urlParams.get("year")); // ensure correct type
+			const custom = urlParams.get("custom") || false;
 
 			let nickname = " ";
 			if (globalThis.offline === false) {
@@ -149,9 +150,10 @@ document.addEventListener("alpine:init", () => {
 
 			const new_pit = {
 				uuid: crypto.randomUUID(),
-				event_name,
-				event_code,
-				year,
+				event_name: event_name,
+				event_code: event_code,
+				year: year,
+				custom: custom,
 				team_number: team_number.value,
 				nickname: nickname,
 				needs_synced: true,
@@ -173,6 +175,7 @@ document.addEventListener("alpine:init", () => {
 					event_name: "",
 					event_code: "",
 					year: "",
+					custom: false,
 					team_number: "",
 					nickname: "",
 					needs_synced: false,
@@ -296,6 +299,7 @@ document.addEventListener("alpine:init", () => {
 						event_name: pit_data.event_name,
 						event_code: pit_data.event_code,
 						year: pit_data.year,
+						custom: pit_data.custom,
 						team_number: pit_data.pits[pit].team_number,
 						nickname: pit_data.pits[pit].nickname,
 						needs_synced: false,
@@ -420,9 +424,12 @@ document.addEventListener("alpine:init", () => {
 											questions: item.questions || [], // In case questions are empty, send a blank list
 										}),
 									});
-									// if (response.ok) {
-									// 	log("DEBUG", `Pit ${item.uuid} synced`);
-									// }
+									if (response.ok) {
+										await db.pit_scouting.update(item.uuid, {
+											needs_synced: false,
+										});
+										// log("DEBUG", `Pit ${item.uuid} synced`);
+									}
 								} catch (error) {
 									log("WARNING", "Pit sync failed:", error);
 								}
