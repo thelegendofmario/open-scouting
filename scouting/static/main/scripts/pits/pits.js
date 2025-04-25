@@ -414,7 +414,8 @@ document.addEventListener("alpine:init", () => {
 						item.event_name === event_name &&
 						item.event_code === event_code &&
 						item.year === year &&
-						!item.needs_synced,
+						item.needs_synced === true &&
+						item.uuid !== "master_questions",
 				)
 				.count()
 				.then((count) => {
