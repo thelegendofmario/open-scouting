@@ -7,6 +7,7 @@
 document.addEventListener("alpine:init", () => {
 	Alpine.data("pits", () => ({
 		pit_data: [],
+		filtered_pit_data: [],
 		filter: "all",
 		pit_status: [],
 		state: "loading",
@@ -231,6 +232,43 @@ document.addEventListener("alpine:init", () => {
 		},
 
 		/**
+		 * Filters the displayed pit data by
+		 */
+		filter_pit_data() {
+			const completed = [];
+			const incomplete = [];
+			const no_data = [];
+
+			for (const pit of this.pit_data) {
+				const questions = pit.questions || []; // Default to empty array if undefined
+				const totalQuestions = questions.length;
+				const answeredQuestions = questions.filter(
+					(q) => (q.answers || []).length > 0,
+				).length;
+
+				if (answeredQuestions === 0) {
+					no_data.push(pit);
+				} else if (answeredQuestions === totalQuestions) {
+					completed.push(pit);
+				} else {
+					incomplete.push(pit);
+				}
+			}
+
+			if (this.filter === "completed") {
+				this.filtered_pit_data = completed;
+			} else if (this.filter === "incomplete") {
+				this.filtered_pit_data = incomplete;
+			} else if (this.filter === "no_data") {
+				this.filtered_pit_data = no_data;
+			} else if (this.filter === "all") {
+				this.filtered_pit_data = this.pit_data;
+			} else {
+				this.filtered_pit_data = this.pit_data;
+			}
+		},
+
+		/**
 		 * Scroll to a pit on the page
 		 *
 		 * @param {string} pit - The team number of the pit to scroll to
@@ -301,7 +339,8 @@ document.addEventListener("alpine:init", () => {
 			if (pits_response.ok) {
 				this.setup_pit_data(await pits_response.json());
 				this.state = "saved";
-				// console.log(await pits_response.json());
+				this.get_pit_status();
+				this.filter_pit_data();
 			}
 		},
 
