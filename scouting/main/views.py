@@ -823,17 +823,19 @@ def update_pit(request):
     """
     Takes a single pit from the client and applies the changes to the server pit db
 
-    1. For each question, checks if an answer uuid from the client does not exist in the server
-    2. Add the new answers to the server
-    3. Checks if there's any new questions with a simple name that does not exist
-    4. Add the new questions to the server
-    5. Return the updated pit as JSON to the client
+    1. First, checks to see if this pit exists on the server at all. If it doesn't simply add everything to the server and exit, otherwise:
+    2. For each question, checks if an answer uuid from the client does not exist in the server
+    3. Add the new answers to the server
+    4. Checks if there's any new questions with a simple name that does not exist
+    5. Add the new questions to the server
+    6. Return the updated pit as JSON to the client
 
     Body Parameters:
         uuid: The uuid of the pit
         event_name: The event name for the event
         event_code: The event code for the event
         year: The year that this event is from
+        custom: Whether or not this event is a custom event
         team_number: The team number of the pit
         questions: The questions in the pit
 
@@ -851,7 +853,35 @@ def update_pit(request):
 
     pit = Pit.objects.filter(uuid=body["uuid"]).first()
     if not pit:
-        return HttpResponse("Pit not found", status=404)
+        # Add new pit if it doesn't exist
+        event = check_if_event_exists(
+            request,
+            body["event_name"],
+            body["event_code"],
+            body["year"],
+            body["custom"],
+        )
+        pit_group = PitGroup.objects.filter(event=event).first()
+        pit = Pit(
+            uuid=body["uuid"],
+            team_number=body["team_number"],
+            nickname=body["nickname"],
+            pit_group=pit_group,
+            created=timezone.now(),
+            data=body["data"],
+        )
+        pit.save()
+
+        return JsonResponse(
+            {
+                "uuid": pit.uuid,
+                "team_number": pit.team_number,
+                "nickname": pit.nickname,
+                "needs_synced": False,
+                "questions": pit.data,
+            },
+            status=200,
+        )
 
     existing_simple_names = {q["simple_name"] for q in pit.data}
 
