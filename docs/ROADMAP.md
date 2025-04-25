@@ -4,13 +4,6 @@ This document describes the roadmap for Open Scouting, and roughly when each fea
 ---
 
 ## To-Do
-### `v0.1.3-alpha`
-- [x] [#71](https://github.com/FRC-Team3484/open-scouting/issues/71) - Organize client side code
-- [x] [#54](https://github.com/FRC-Team3484/open-scouting/issues/54) - Update Tailwind.css to v4.0
-- [x] [#60](https://github.com/FRC-Team3484/open-scouting/issues/60) - In certain cases, the `/authentication` page cannot be loaded
-- [x] [#78](https://github.com/FRC-Team3484/open-scouting/issues/78) - Show any client errors in the developer menu
-- [ ] [#62](https://github.com/FRC-Team3484/open-scouting/issues/62) - Issues with saving and syncing pit scouting data (Issue reopened)
-
 ### `v0.1.4-alpha`
 - [ ] [#82](https://github.com/FRC-Team3484/open-scouting/issues/82) - Move common tailwind styles into style.css
 - [ ] [#18](https://github.com/FRC-Team3484/open-scouting/issues/18) - Export data
@@ -24,6 +17,13 @@ This document describes the roadmap for Open Scouting, and roughly when each fea
 
 ---
 ## Completed
+### `v0.1.3-alpha`
+- [x] [#71](https://github.com/FRC-Team3484/open-scouting/issues/71) - Organize client side code
+- [x] [#54](https://github.com/FRC-Team3484/open-scouting/issues/54) - Update Tailwind.css to v4.0
+- [x] [#60](https://github.com/FRC-Team3484/open-scouting/issues/60) - In certain cases, the `/authentication` page cannot be loaded
+- [x] [#78](https://github.com/FRC-Team3484/open-scouting/issues/78) - Show any client errors in the developer menu
+- [x] [#62](https://github.com/FRC-Team3484/open-scouting/issues/62) - Issues with saving and syncing pit scouting data (Issue reopened)
+
 ### `v0.1.2-alpha`
 - [x] [#62](https://github.com/FRC-Team3484/open-scouting/issues/62) - Issues with saving and syncing pit scouting data
 - [x] [#63](https://github.com/FRC-Team3484/open-scouting/issues/63) - Offline pit scouting data doesn't seem to be cleared locally properly
