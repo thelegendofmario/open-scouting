@@ -517,8 +517,7 @@ document.addEventListener("alpine:init", () => {
 
 			const subscription = pit_scouting_observable.subscribe({
 				next: (result) => {
-					this.pit_data = result;
-					console.log(result);
+					this.pit_data = result.sort((a, b) => a.team_number - b.team_number);
 				},
 				error: (error) => {
 					log("ERROR", "Error subscribing to pit scouting db", error);
