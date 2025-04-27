@@ -1,4 +1,5 @@
 from django.test import TestCase, Client
+from django.conf import settings
 from authentication.models import User, Profile
 from main.models import Data, Event, PitGroup
 
@@ -823,3 +824,14 @@ class GetDataFromQuery(TestCase):
 
         response_json = json.loads(response.content)
         self.assertEqual(len(response_json), 1)
+
+
+class GetVersion(TestCase):
+    def test_get_version(self):
+        response = self.client.post("/get_version")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "application/json")
+
+        response_json = json.loads(response.content)
+        self.assertEqual(response_json["version"], settings.SERVER_VERSION)

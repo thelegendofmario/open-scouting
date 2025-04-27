@@ -1133,3 +1133,13 @@ def get_data_from_query(request):
     ]
 
     return JsonResponse(final_data, safe=False, status=200)
+
+
+@csrf_exempt
+def get_version(request):
+    if request.method == "POST":
+        return JsonResponse(
+            {"version": settings.SERVER_VERSION}, safe=False, status=200
+        )
+    else:
+        return HttpResponse("Request is not a POST request!", status=501)
