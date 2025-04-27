@@ -668,7 +668,7 @@ class GetPits(TestCase):
         self.assertEqual(response["Content-Type"], "application/json")
 
 
-class UpdatePits(TestCase):
+class UpdatePit(TestCase):
     def setUp(self):
         self.client = Client()
 
@@ -678,7 +678,7 @@ class UpdatePits(TestCase):
         pit_group = PitGroup(event=event, events_generated=True)
         pit_group.save()
 
-    def test_update_pits(self):
+    def test_update_pit(self):
         data = {
             "event_name": "test",
             "event_code": "test",
@@ -688,7 +688,7 @@ class UpdatePits(TestCase):
         }
 
         response = self.client.post(
-            "/update_pits", data, content_type="application/json"
+            "/update_pit", data, content_type="application/json"
         )
 
         self.assertEqual(response.status_code, 200)
