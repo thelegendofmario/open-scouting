@@ -85,7 +85,7 @@ Later, to react on a button in the dialog getting pressed, you'll need to captur
 These events returns an `event_name` in the details, which can be used to check for what dialog that button was pressed on
 
 > ![NOTE]
-> Ensure you don't call `event.stopImmeadiatePropogation();` until you're sure you wish to react on that event. If multiple components use dialogs, only one component might get the `dialog_confirm` event.
+> Ensure you don't call `event.stopImmediatePropagation();` until you're sure you wish to react on that event. If multiple components use dialogs, only one component might get the `dialog_confirm` event.
 
 ```js
 // Reacting to the dialog_confirm event, and checking that it's of type sign_out before doing anything with that event

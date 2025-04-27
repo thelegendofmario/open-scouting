@@ -5,10 +5,9 @@ This document describes the roadmap for Open Scouting, and roughly when each fea
 
 ## To-Do
 ### `v0.1.4-alpha`
-- [ ] [#82](https://github.com/FRC-Team3484/open-scouting/issues/82) - Move common tailwind styles into style.css
 - [ ] [#18](https://github.com/FRC-Team3484/open-scouting/issues/18) - Export data
 - [ ] [#22](https://github.com/FRC-Team3484/open-scouting/issues/22) - Add the ability to import data
-- [ ] [#32](https://github.com/FRC-Team3484/open-scouting/issues/32) - Prompt the user to clear their service worker cache with the site updates
+- [x] [#32](https://github.com/FRC-Team3484/open-scouting/issues/32) - Prompt the user to clear their service worker cache with the site updates
 
 ### `v0.1.5-alpha`
 - [ ] [#77](https://github.com/FRC-Team3484/open-scouting/issues/77) - Auto save match scouting progress
