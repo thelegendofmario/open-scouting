@@ -2,6 +2,7 @@ document.addEventListener("alpine:init", () => {
 	Alpine.data("advanced_data", () => ({
 		data: {},
 		offline: false,
+		year: JSON.parse(YEARS).reverse()[0],
 
 		/**
 		 * Creates a line chart using Chart.js

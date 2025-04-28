@@ -187,8 +187,16 @@
                         <!-- Team Number -->
                         <div class="flex flex-row justify-between items-center cursor-pointer"
                              @click="open = !open">
-                            <p class="dark:text-white text-black text-sans text-2xl"
-                               x-text="teamNumber"></p>
+                            <div class="flex flex-row items-center">
+                                <div class="rounded-md w-10 h-10 mr-4 bg-slate-200/80 dark:bg-slate-700/80 border-2 dark:border-slate-600 border-slate-300">
+                                    <img :src="'https://www.thebluealliance.com/avatar/'+ year+ '/frc' + teamNumber + '.png'"
+                                         onerror="this.onerror=null;this.src='';this.style.display='none';"
+                                         class="w-full h-full rounded-md">
+                                </div>
+                                <p class="dark:text-white text-black text-sans text-2xl"
+                                   x-text="teamNumber"></p>
+                            </div>
+
                             <i class="ph-bold ph-caret-down dark:text-white text-black"
                                x-show="open"></i>
                             <i class="ph-bold ph-caret-up dark:text-white text-black" x-show="!open"></i>
