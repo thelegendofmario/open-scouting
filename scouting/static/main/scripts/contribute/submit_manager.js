@@ -266,8 +266,24 @@ document.addEventListener("alpine:init", () => {
 		},
 
 		export_as_json() {
+			const report_uuid = crypto.randomUUID();
+
 			const blob = new Blob(
-				[JSON.stringify(this.create_json_data(), null, 2)],
+				[
+					JSON.stringify(
+						{
+							uuid: report_uuid,
+							data: this.create_json_data(),
+							event_name: EVENT_NAME,
+							event_code: EVENT_CODE,
+							custom: CUSTOM,
+							year: YEAR,
+							open_scouting: true,
+						},
+						null,
+						2,
+					),
+				],
 				{
 					type: "application/json",
 				},
@@ -343,6 +359,109 @@ document.addEventListener("alpine:init", () => {
 					.catch((error) => {
 						log("WARNING", `Error adding data to the database: ${error}`);
 					});
+			}
+		},
+
+		async import_from_json(e) {
+			const match_number = document.querySelector(
+				"input[name='match_number']",
+			).value;
+			const type = document.querySelector("select[name='match_type']").value;
+
+			const files = e.target.files;
+
+			for (const file of files) {
+				if (file) {
+					const reader = new FileReader();
+
+					reader.onload = async () => {
+						try {
+							const data = JSON.parse(reader.result);
+							if (data.open_scouting) {
+								if (globalThis.offline === false) {
+									const response = await fetch(`${SERVER_IP}/submit`, {
+										method: "POST",
+										headers: {
+											"Content-Type": "application/json",
+											"X-CSRFToken": CSRF_TOKEN,
+										},
+										body: JSON.stringify({
+											uuid: data.uuid,
+											data: JSON.stringify(data.data),
+											event_name: encodeURIComponent(data.event_name),
+											event_code: data.event_code,
+											custom: data.custom,
+											year: data.year,
+										}),
+									});
+
+									response.text().then(async (text) => {
+										const url = new URL(window.location.href);
+
+										url.searchParams.set("submitted", true);
+										url.searchParams.delete("submitted_offline");
+										url.searchParams.delete("submitted_demo");
+
+										url.searchParams.set(
+											"match_number",
+											Number.parseInt(match_number, 10) + 1,
+										);
+										url.searchParams.set(
+											"match_type",
+											encodeURIComponent(type),
+										);
+
+										window.location.href = url.toString();
+									});
+								} else {
+									log("INFO", "You're offline, report will be saved offline.");
+
+									db.offline_reports
+										.put({
+											uuid: data.uuid,
+											data: data.data,
+											event_name: encodeURIComponent(data.event_name),
+											event_code: data.event_code,
+											custom: data.custom,
+											year: data.year,
+										})
+										.then(() => {
+											log("INFO", "Data added to the database");
+
+											const url = new URL(window.location.href);
+
+											url.searchParams.set("submitted_offline", true);
+											url.searchParams.delete("submitted");
+											url.searchParams.delete("submitted_demo");
+
+											url.searchParams.set(
+												"match_number",
+												Number.parseInt(match_number, 10) + 1,
+											);
+											url.searchParams.set(
+												"match_type",
+												encodeURIComponent(type),
+											);
+
+											window.location.href = url.toString();
+										})
+										.catch((error) => {
+											log(
+												"WARNING",
+												`Error adding data to the database: ${error}`,
+											);
+										});
+								}
+							} else {
+								log("WARNING", "Invalid JSON format for import");
+							}
+						} catch (error) {
+							log("ERROR", "Failed to parse JSON:", error);
+						}
+					};
+
+					reader.readAsText(file);
+				}
 			}
 		},
 

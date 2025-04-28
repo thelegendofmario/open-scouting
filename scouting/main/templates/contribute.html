@@ -240,6 +240,14 @@
                             @click="export_as_json">
                         <i class="ph-bold ph-file-code"></i> Export report as JSON
                     </button>
+                    <label class="ui_button_small flex flex-row items-center my-1! py-1! px-2! w-full!">
+                        <i class="ph-bold ph-upload-simple mr-1"></i> Import JSON report
+                        <input type="file"
+                               accept="application/json"
+                               style="display: none"
+                               @change="import_from_json"
+                               multiple>
+                    </label>
                     <button class="ui_button_small my-1! py-1! px-2! w-full! text-left!"
                             @click="reset">
                         <i class="ph-bold ph-trash"></i> Clear and reset
