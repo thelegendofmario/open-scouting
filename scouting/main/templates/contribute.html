@@ -220,18 +220,42 @@
 
         <script src="{% static '/main/scripts/contribute/submit_manager.js' %}"></script>
 
-        <div class="flex flex-col md:flex-row w-full md:w-3/4 lg:w-2/3 mx-8 my-4 py-2 dark:bg-slate-800 bg-slate-200 border-2 dark:border-slate-700 border-slate-300 rounded-lg mb-4 items-center justify-center"
+        <div class="flex flex-col w-full md:w-3/4 lg:w-2/3 mx-8 my-4 py-2 dark:bg-slate-800 bg-slate-200 border-2 dark:border-slate-700 border-slate-300 rounded-lg mb-4 items-center justify-center"
              x-data="submit_manager()">
-            <button class="ui_button mr-4" @click="submit_button()">
-                <i class="ph-bold ph-check-circle"></i> Submit
-            </button>
+            <div class="flex flex-row items-center">
+                <button class="ui_button mr-4" @click="submit_button()">
+                    <i class="ph-bold ph-check-circle"></i> Submit
+                </button>
+                <button class="ui_button_icon"
+                        x-ref="menu_button"
+                        @click="menu_open = !menu_open">
+                    <i class="ph-bold ph-dots-three"></i>
+                </button>
+                <div class="dark:bg-slate-700/60 bg-slate-200/60 border-2 dark:border-slate-600 border-slate-300 rounded-xl backdrop-blur-md flex flex-col p-4 z-10"
+                     x-show="menu_open"
+                     x-anchor.offset.10="$refs.menu_button"
+                     @click.outside="menu_open = false"
+                     x-transition>
+                    <button class="ui_button_small my-1! py-1! px-2! w-full! text-left!"
+                            @click="export_as_json">
+                        <i class="ph-bold ph-file-code"></i> Export report as JSON
+                    </button>
+                    <button class="ui_button_small my-1! py-1! px-2! w-full! text-left!"
+                            @click="reset">
+                        <i class="ph-bold ph-trash"></i> Clear and reset
+                    </button>
+                    <button class="ui_button_small my-1! py-1! px-2! w-full! text-left!"
+                            @click="save_report_offline">
+                        <i class="ph-bold ph-cloud-slash"></i> Save report offline
+                    </button>
+                </div>
+            </div>
 
             <div x-show="missing_required_fields" x-transition>
                 <p class="text-sans dark:text-red-700 text-red-500 font-bold text-center">Please fill out all of the required fields</p>
             </div>
         </div>
-    </div>
-{% endblock body %}
+    {% endblock body %}
 
-{% block scripts %}
-{% endblock scripts %}
+    {% block scripts %}
+    {% endblock scripts %}

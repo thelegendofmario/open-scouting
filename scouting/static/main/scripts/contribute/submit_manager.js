@@ -10,6 +10,7 @@
 document.addEventListener("alpine:init", () => {
 	Alpine.data("submit_manager", () => ({
 		missing_required_fields: false,
+		menu_open: false,
 
 		/**
 		 * Check fields for any missing required fields
@@ -261,6 +262,87 @@ document.addEventListener("alpine:init", () => {
 				url.searchParams.set("match_type", encodeURIComponent(type));
 
 				window.location.href = url.toString();
+			}
+		},
+
+		export_as_json() {
+			const blob = new Blob(
+				[JSON.stringify(this.create_json_data(), null, 2)],
+				{
+					type: "application/json",
+				},
+			);
+			const url = URL.createObjectURL(blob);
+			const link = document.createElement("a");
+			link.href = url;
+			const date = new Date();
+			const formattedDate = date
+				.toISOString()
+				.replace(/[:.]/g, "-")
+				.slice(0, 19);
+			link.download = `open_scouting_report_${formattedDate}.json`;
+			link.click();
+		},
+
+		reset() {
+			const match_number = document.querySelector(
+				"input[name='match_number']",
+			).value;
+			const type = document.querySelector("select[name='match_type']").value;
+
+			const url = new URL(window.location.href);
+
+			url.searchParams.delete("submitted_offline");
+			url.searchParams.delete("submitted");
+			url.searchParams.delete("submitted_demo");
+
+			url.searchParams.set(
+				"match_number",
+				Number.parseInt(match_number, 10) + 1,
+			);
+			url.searchParams.set("match_type", encodeURIComponent(type));
+
+			window.location.href = url.toString();
+		},
+
+		save_report_offline() {
+			if (this.check_fields()) {
+				const report_uuid = crypto.randomUUID();
+
+				const match_number = document.querySelector(
+					"input[name='match_number']",
+				).value;
+				const type = document.querySelector("select[name='match_type']").value;
+
+				db.offline_reports
+					.put({
+						uuid: report_uuid,
+						data: this.create_json_data(),
+						event_name: encodeURIComponent(EVENT_NAME),
+						event_code: EVENT_CODE,
+						custom: CUSTOM,
+						year: YEAR,
+					})
+					.then(() => {
+						log("INFO", "Data added to the database");
+
+						const url = new URL(window.location.href);
+
+						url.searchParams.set("submitted_offline", true);
+						url.searchParams.delete("submitted");
+						url.searchParams.delete("submitted_demo");
+
+						url.searchParams.set(
+							"match_number",
+							Number.parseInt(match_number, 10) + 1,
+						);
+						url.searchParams.set("match_type", encodeURIComponent(type));
+
+						window.location.href = url.toString();
+					})
+					.catch((error) => {
+						log("WARNING", `Error adding data to the database: ${error}`);
+					});
 			}
 		},
 
