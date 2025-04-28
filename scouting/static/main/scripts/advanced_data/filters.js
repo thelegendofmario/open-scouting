@@ -141,7 +141,7 @@ document.addEventListener("alpine:init", () => {
 		update_team_search() {
 			const search = this.$refs.teams_search.value.toLowerCase();
 			this.team_results_filtered = this.team_results.filter((team) =>
-				team.toLowerCase().includes(search),
+				team?.toString().toLowerCase().includes(search),
 			);
 		},
 
