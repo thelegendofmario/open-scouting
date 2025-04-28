@@ -5,7 +5,7 @@ This document describes the roadmap for Open Scouting, and roughly when each fea
 
 ## To-Do
 ### `v0.1.4-alpha`
-- [ ] [#18](https://github.com/FRC-Team3484/open-scouting/issues/18) - Export data
+- [x] [#18](https://github.com/FRC-Team3484/open-scouting/issues/18) - Export data
 - [ ] [#22](https://github.com/FRC-Team3484/open-scouting/issues/22) - Add the ability to import data
 - [x] [#32](https://github.com/FRC-Team3484/open-scouting/issues/32) - Prompt the user to clear their service worker cache with the site updates
 

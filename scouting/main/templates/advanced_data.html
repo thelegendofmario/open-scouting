@@ -148,6 +148,30 @@
                 <i class="ph-bold ph-trash"></i> Clear Filters
             </button>
 
+            <div class="flex flex-row flex-wrap items-center">
+                <button class="ui_button_small ml-6"
+                        x-ref="data_menu_export"
+                        @click="data_menu_export_open = !data_menu_export_open">
+                    <i class="ph-bold ph-export"></i>
+                </button>
+                <p class="dark:text-white text-black text-sans text-md opacity-80 ml-2"
+                   x-text="'Viewing data for ' + Object.keys(data_sorted).length + ' teams'"></p>
+                <div class="dark:bg-slate-700/60 bg-slate-200/60 border-2 dark:border-slate-600 border-slate-300 rounded-xl backdrop-blur-md flex flex-col p-4 z-10"
+                     x-show="data_menu_export_open"
+                     x-anchor.offset.10="$refs.data_menu_export"
+                     @click.outside="data_menu_export_open = false"
+                     x-transition>
+                    <button class="ui_button_small my-1! py-1! px-2! w-full! text-left!"
+                            @click="export_as_json()">
+                        <i class="ph-bold ph-file-code"></i> Export data as JSON
+                    </button>
+                    <button class="ui_button_small my-1! py-1! px-2! w-full! text-left!"
+                            @click="export_as_csv()">
+                        <i class="ph-bold ph-file-csv"></i> Export data as CSV
+                    </button>
+                </div>
+            </div>
+
             <!-- TODO: Fix this later -->
             <div class="flex flex-col hidden!">
                 <p class="dark:text-white text-black text-sans text-2xl ml-4 mt-4">
