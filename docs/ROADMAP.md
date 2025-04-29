@@ -6,8 +6,10 @@ This document describes the roadmap for Open Scouting, and roughly when each fea
 ## To-Do
 ### `v0.1.4-alpha`
 - [x] [#18](https://github.com/FRC-Team3484/open-scouting/issues/18) - Export data
-- [ ] [#22](https://github.com/FRC-Team3484/open-scouting/issues/22) - Add the ability to import data
+- [x] [#22](https://github.com/FRC-Team3484/open-scouting/issues/22) - Add the ability to import data
 - [x] [#32](https://github.com/FRC-Team3484/open-scouting/issues/32) - Prompt the user to clear their service worker cache with the site updates
+- [x] [#75](https://github.com/FRC-Team3484/open-scouting/issues/75) - Show the number of reports used for data in the advanced data view
+- [x] [#69](https://github.com/FRC-Team3484/open-scouting/issues/69) - Create team summaries in the advanced data view
 
 ### `v0.1.5-alpha`
 - [ ] [#77](https://github.com/FRC-Team3484/open-scouting/issues/77) - Auto save match scouting progress
