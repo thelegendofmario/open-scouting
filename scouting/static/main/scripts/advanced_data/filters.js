@@ -14,6 +14,7 @@ document.addEventListener("alpine:init", () => {
 		data_sorted: [],
 		sort_fields: [],
 		offline: false,
+		data_menu_export_open: false,
 
 		/**
 		 * Get the query string from the filters
@@ -140,7 +141,7 @@ document.addEventListener("alpine:init", () => {
 		update_team_search() {
 			const search = this.$refs.teams_search.value.toLowerCase();
 			this.team_results_filtered = this.team_results.filter((team) =>
-				team.toLowerCase().includes(search),
+				team?.toString().toLowerCase().includes(search),
 			);
 		},
 
@@ -493,6 +494,84 @@ document.addEventListener("alpine:init", () => {
 					}),
 				);
 			}
+		},
+
+		export_as_json() {
+			const jsonData = JSON.stringify(this.data_sorted, null, 2);
+			const blob = new Blob([jsonData], { type: "application/json" });
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement("a");
+			a.href = url;
+			a.download = `open_scouting_data_${this.query}.json`;
+			a.click();
+			URL.revokeObjectURL(url);
+		},
+
+		flattenTeam(teamNumber, teamData) {
+			const flat = { team: teamNumber };
+
+			function walk(obj, prefix = "") {
+				for (const key in obj) {
+					const value = obj[key];
+					const newKey = prefix ? `${prefix}_${key}` : key;
+
+					if (
+						typeof value === "object" &&
+						value !== null &&
+						!Array.isArray(value)
+					) {
+						walk(value, newKey);
+					} else if (Array.isArray(value)) {
+						flat[newKey] = value.join("; "); // join arrays into strings
+					} else {
+						flat[newKey] = value;
+					}
+				}
+			}
+
+			walk(teamData);
+			return flat;
+		},
+
+		export_as_csv() {
+			// Step 1: Flatten all teams
+			const flattened = [];
+			for (const teamNumber in this.data_sorted) {
+				flattened.push(
+					this.flattenTeam(teamNumber, this.data_sorted[teamNumber]),
+				);
+			}
+
+			// Step 2: Build CSV
+			const allKeys = new Set();
+			for (const team of flattened) {
+				for (const key of Object.keys(team)) {
+					allKeys.add(key);
+				}
+			}
+			const headers = Array.from(allKeys);
+
+			const csvRows = [];
+			csvRows.push(headers.join(",")); // header row
+
+			for (const team of flattened) {
+				const row = headers.map((header) => {
+					const value = team[header] ?? "";
+					return `"${String(value).replace(/"/g, '""')}"`; // escape quotes
+				});
+				csvRows.push(row.join(","));
+			}
+
+			const csvString = csvRows.join("\n");
+
+			// Done! You can now download or log it
+			console.log(csvString);
+
+			const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
+			const link = document.createElement("a");
+			link.href = URL.createObjectURL(blob);
+			link.download = `open_scouting_data_${this.query}.csv`;
+			link.click();
 		},
 
 		/**

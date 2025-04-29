@@ -322,6 +322,15 @@ def submit(request):
             body["custom"],
         )
 
+        team_number = next(
+            (
+                field["value"]
+                for field in json.loads(body["data"])
+                if field["name"] == "team_number"
+            ),
+            None,
+        )
+
         if request.user.is_authenticated:
             data = Data(
                 uuid=body["uuid"],
@@ -335,6 +344,7 @@ def submit(request):
                 username_created=request.user.username,
                 team_number_created=request.user.profile.team_number,
                 account=True,
+                team_number=team_number,
             )
             data.save()
 
@@ -350,6 +360,7 @@ def submit(request):
                 username_created=request.session["username"],
                 team_number_created=request.session["team_number"],
                 account=False,
+                team_number=team_number,
             )
             data.save()
 
@@ -1133,3 +1144,13 @@ def get_data_from_query(request):
     ]
 
     return JsonResponse(final_data, safe=False, status=200)
+
+
+@csrf_exempt
+def get_version(request):
+    if request.method == "POST":
+        return JsonResponse(
+            {"version": settings.SERVER_VERSION}, safe=False, status=200
+        )
+    else:
+        return HttpResponse("Request is not a POST request!", status=501)

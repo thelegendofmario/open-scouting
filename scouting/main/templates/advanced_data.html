@@ -148,6 +148,30 @@
                 <i class="ph-bold ph-trash"></i> Clear Filters
             </button>
 
+            <div class="flex flex-row flex-wrap items-center">
+                <button class="ui_button_small ml-6"
+                        x-ref="data_menu_export"
+                        @click="data_menu_export_open = !data_menu_export_open">
+                    <i class="ph-bold ph-export"></i>
+                </button>
+                <p class="dark:text-white text-black text-sans text-md opacity-80 ml-2"
+                   x-text="'Viewing data for ' + Object.keys(data_sorted).length + ' teams'"></p>
+                <div class="dark:bg-slate-700/60 bg-slate-200/60 border-2 dark:border-slate-600 border-slate-300 rounded-xl backdrop-blur-md flex flex-col p-4 z-10"
+                     x-show="data_menu_export_open"
+                     x-anchor.offset.10="$refs.data_menu_export"
+                     @click.outside="data_menu_export_open = false"
+                     x-transition>
+                    <button class="ui_button_small my-1! py-1! px-2! w-full! text-left!"
+                            @click="export_as_json()">
+                        <i class="ph-bold ph-file-code"></i> Export data as JSON
+                    </button>
+                    <button class="ui_button_small my-1! py-1! px-2! w-full! text-left!"
+                            @click="export_as_csv()">
+                        <i class="ph-bold ph-file-csv"></i> Export data as CSV
+                    </button>
+                </div>
+            </div>
+
             <!-- TODO: Fix this later -->
             <div class="flex flex-col hidden!">
                 <p class="dark:text-white text-black text-sans text-2xl ml-4 mt-4">
@@ -187,18 +211,104 @@
                         <!-- Team Number -->
                         <div class="flex flex-row justify-between items-center cursor-pointer"
                              @click="open = !open">
-                            <p class="dark:text-white text-black text-sans text-2xl"
-                               x-text="teamNumber"></p>
+                            <div class="flex flex-row items-center">
+                                <div class="rounded-md w-10 h-10 mr-4 bg-slate-200/80 dark:bg-slate-700/80 border-2 dark:border-slate-600 border-slate-300">
+                                    <img :src="'https://www.thebluealliance.com/avatar/'+ year+ '/frc' + teamNumber + '.png'"
+                                         onerror="this.onerror=null;this.src='';this.style.display='none';"
+                                         class="w-full h-full rounded-md">
+                                </div>
+                                <p class="dark:text-white text-black text-sans text-2xl"
+                                   x-text="teamNumber"></p>
+                            </div>
+
                             <i class="ph-bold ph-caret-down dark:text-white text-black"
                                x-show="open"></i>
                             <i class="ph-bold ph-caret-up dark:text-white text-black" x-show="!open"></i>
                         </div>
 
+                        <!-- Summary -->
                         <div x-show="open" x-collapse>
+                            <div class="mt-4 px-4 py-2 border-l-2 dark:border-slate-600 border-slate-200"
+                                 x-data="{ open: true }">
+                                <div class="flex flex-row justify-between items-center cursor-pointer"
+                                     @click="open = !open">
+                                    <p class="dark:text-white text-black text-xl font-semibold">Summary</p>
+                                    <i class="ph-bold ph-caret-down dark:text-white text-black"
+                                       x-show="open"></i>
+                                    <i class="ph-bold ph-caret-up dark:text-white text-black" x-show="!open"></i>
+                                </div>
+
+                                <div x-show="open" x-collapse class="mt-2 text-sm">
+                                    <!-- Averages for scores and misses -->
+                                    <!-- Averages for scores and misses -->
+                                    <div class="mb-4">
+                                        <p class="text-md dark:text-white text-black font-semibold mb-2">Score & Miss Averages</p>
+                                        <ul class="ml-4 list-disc list-inside">
+                                            <template x-for="phase in ['auton']" :key="phase">
+                                                <template x-if="teamData[phase]">
+                                                    <template x-for="(pieceData, pieceName) in teamData[phase]" :key="pieceName">
+                                                        <template x-for="(categoryData, categoryName) in pieceData" :key="categoryName">
+                                                            <template x-for="(fieldData, fieldName) in categoryData" :key="fieldName">
+                                                                <li class="dark:text-white text-black">
+                                                                    <span class="font-medium"
+                                                                          x-text="`${phase.charAt(0).toUpperCase() + phase.slice(1)} - ${categoryName.charAt(0).toUpperCase() + categoryName.slice(1)} - ${fieldName.replace(/_/g, ' ').charAt(0).toUpperCase() + fieldName.replace(/_/g, ' ').slice(1)}`"></span>:
+                                                                    <span class="ml-2"
+                                                                          :class="{ 'text-green-500': categoryName === 'score', 'text-red-500': categoryName === 'miss', 'dark:text-white text-black': categoryName !== 'score' && categoryName !== 'miss' }"
+                                                                          x-text="`${fieldData.average?.toFixed(2) ?? 'N/A'}`"></span>
+                                                                </li>
+                                                            </template>
+                                                        </template>
+                                                    </template>
+                                                </template>
+                                            </template>
+                                        </ul>
+
+                                        <ul class="ml-4 list-disc list-inside mt-2">
+                                            <template x-for="phase in ['teleop']" :key="phase">
+                                                <template x-if="teamData[phase]">
+                                                    <template x-for="(pieceData, pieceName) in teamData[phase]" :key="pieceName">
+                                                        <template x-for="(categoryData, categoryName) in pieceData" :key="categoryName">
+                                                            <template x-for="(fieldData, fieldName) in categoryData" :key="fieldName">
+                                                                <li class="dark:text-white text-black">
+                                                                    <span class="font-medium"
+                                                                          x-text="`${phase.charAt(0).toUpperCase() + phase.slice(1)} - ${categoryName.charAt(0).toUpperCase() + categoryName.slice(1)} - ${fieldName.replace(/_/g, ' ').charAt(0).toUpperCase() + fieldName.replace(/_/g, ' ').slice(1)}`"></span>:
+                                                                    <span class="ml-2"
+                                                                          :class="{ 'text-green-500': categoryName === 'score', 'text-red-500': categoryName === 'miss', 'dark:text-white text-black': categoryName !== 'score' && categoryName !== 'miss' }"
+                                                                          x-text="`${fieldData.average?.toFixed(2) ?? 'N/A'}`"></span>
+                                                                </li>
+                                                            </template>
+                                                        </template>
+                                                    </template>
+                                                </template>
+                                            </template>
+                                        </ul>
+                                    </div>
+
+                                    <!-- Capability percentages -->
+                                    <div>
+                                        <p class="text-md dark:text-white text-black font-semibold mb-2">Capabilities</p>
+                                        <ul class="ml-4 list-disc list-inside">
+                                            <template x-for="(capabilityValue, capabilityName) in teamData.capabilities"
+                                                      :key="capabilityName">
+                                                <li class="dark:text-white text-black">
+                                                    <span class="font-medium"
+                                                          x-text="capabilityName.replace(/_/g, ' ').charAt(0).toUpperCase() + capabilityName.replace(/_/g, ' ').slice(1) + ':'"></span>
+                                                    <template x-for="(percentage, key) in capabilityValue" :key="key">
+                                                        <span class="ml-2"
+                                                              :class="{ 'dark:text-gray-400/80 text-gray-600/80': key === 'N/A', 'text-green-500': key.toLowerCase() === 'true', 'text-red-500': key.toLowerCase() === 'false', 'dark:text-white text-black': key.toLowerCase() !== 'true' && key.toLowerCase() !== 'false' && key !== 'N/A' }"
+                                                              x-text="`${key.charAt(0).toUpperCase() + key.slice(1)}: ${Math.round(percentage * 100) / 100}%`"></span>
+                                                    </template>
+                                                </li>
+                                            </template>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- Sections: Auton, Teleop, Capabilities, Other -->
                             <template x-for="(section, sectionName) in teamData" :key="sectionName">
                                 <div class="mt-4 px-4 py-2 border-l-2 dark:border-slate-600 border-slate-200"
-                                     x-data="{ open: true }">
+                                     x-data="{ open: false }">
                                     <div class="flex flex-row justify-between items-center cursor-pointer"
                                          @click="open = !open">
                                         <p class="dark:text-white text-black text-xl font-semibold"

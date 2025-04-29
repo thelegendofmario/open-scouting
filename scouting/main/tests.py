@@ -1,4 +1,5 @@
 from django.test import TestCase, Client
+from django.conf import settings
 from authentication.models import User, Profile
 from main.models import Data, Event, PitGroup
 
@@ -668,7 +669,7 @@ class GetPits(TestCase):
         self.assertEqual(response["Content-Type"], "application/json")
 
 
-class UpdatePits(TestCase):
+class UpdatePit(TestCase):
     def setUp(self):
         self.client = Client()
 
@@ -678,7 +679,7 @@ class UpdatePits(TestCase):
         pit_group = PitGroup(event=event, events_generated=True)
         pit_group.save()
 
-    def test_update_pits(self):
+    def test_update_pit(self):
         data = {
             "event_name": "test",
             "event_code": "test",
@@ -688,7 +689,7 @@ class UpdatePits(TestCase):
         }
 
         response = self.client.post(
-            "/update_pits", data, content_type="application/json"
+            "/update_pit", data, content_type="application/json"
         )
 
         self.assertEqual(response.status_code, 200)
@@ -823,3 +824,14 @@ class GetDataFromQuery(TestCase):
 
         response_json = json.loads(response.content)
         self.assertEqual(len(response_json), 1)
+
+
+class GetVersion(TestCase):
+    def test_get_version(self):
+        response = self.client.post("/get_version")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "application/json")
+
+        response_json = json.loads(response.content)
+        self.assertEqual(response_json["version"], settings.SERVER_VERSION)
