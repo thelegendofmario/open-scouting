@@ -15,8 +15,8 @@ python3 -m venv .venv
 Activate the virtual environment using the command for your system (Linux is used here) and install the required dependencies
 ```bash
 source ./.venv/bin/activate
-pip install -r scouting/requirements.txt
-pip install -r scouting/requirements-dev.txt
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
 ```
 
 Install the required `npm` libraries
