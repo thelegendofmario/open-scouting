@@ -28,7 +28,7 @@ Copy the `.env-template` file to a new file called `.env`.
 ```bash
 cp .env.development.template .env.development
 ```
-You should add your TBA API key here, and credentials for sending emails
+You should add your TBA Read API key here, and credentials for sending emails
 
 - Information for obtaining this key is available [here](https://www.thebluealliance.com/apidocs)
 - If you don't want your development server to send emails, simply set `EMAIL_ENABLED` to `False`
@@ -36,9 +36,9 @@ You should add your TBA API key here, and credentials for sending emails
 Next, create a django superuser and make and migrate the models
 ```bash
 cd scouting
-python manage.py createsuperuser # Follow the steps to create your superuser when running this command
 python manage.py makemigrations
 python manage.py migrate
+python manage.py createsuperuser # Follow the steps to create your superuser when running this command
 ```
 
 Now run the server using the following command, or run the `Start server` task in Visual Studio Code
@@ -52,6 +52,8 @@ Additionally, you should start the Tailwind CSS builder with the following comma
 ```bash
 npm run build:css
 ```
+
+Finally, navigate to the index page (usually `http://127.0.0.1`), open the menu in the bottom right corner, then select `Developer Settings > Network First Service Worker`. This ensures the client gets the most up to date changes while you're developing, instead of caching those pages for offline use.
 
 ## Development
 ### djlint
