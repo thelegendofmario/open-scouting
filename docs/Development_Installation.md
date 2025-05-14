@@ -1,22 +1,25 @@
 # Development Installation
 Follow these steps to get the server running locally for contributing or development
 
-First, clone this repository using the following command
+First, view this repo on GitHub and click "Fork". In the page that appears, uncheck "Copy the main branch only" to ensure you have access to the development branch for the most up to date changes
+
+Once you've made your fork, clone the repository to your local machine, and move to the development branch
 ```bash
-git clone https://github.com/FRC-Team3484/open-scouting
+git clone https://github.com/<your username>/open-scouting
+cd open-scouting
+git checkout development
 ```
 
-Then, navigate to that directory and create a new python virtual environment
+Then, create a new python virtual environment
 ```bash
-cd scouting
 python3 -m venv .venv
 ```
 
 Activate the virtual environment using the command for your system (Linux is used here) and install the required dependencies
 ```bash
 source ./.venv/bin/activate
-pip install -r requirements.txt
-pip install -r requirements-dev.txt
+pip install -r scouting/requirements.txt
+pip install -r scouting/requirements-dev.txt
 ```
 
 Install the required `npm` libraries
@@ -26,6 +29,7 @@ npm install
 
 Copy the `.env-template` file to a new file called `.env`.
 ```bash
+cd scouting
 cp .env.development.template .env.development
 ```
 You should add your TBA Read API key here, and credentials for sending emails
@@ -35,8 +39,6 @@ You should add your TBA Read API key here, and credentials for sending emails
 
 Next, create a django superuser and make and migrate the models
 ```bash
-cd scouting
-python manage.py makemigrations
 python manage.py migrate
 python manage.py createsuperuser # Follow the steps to create your superuser when running this command
 ```
