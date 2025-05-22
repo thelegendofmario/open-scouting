@@ -4,18 +4,21 @@ This document describes the roadmap for Open Scouting, and roughly when each fea
 ---
 
 ## To-Do
-### `v0.1.5-alpha`
+### `v0.1.6-alpha`
 - [ ] [#77](https://github.com/FRC-Team3484/open-scouting/issues/77) - Auto save match scouting progress
 - [ ] [#70](https://github.com/FRC-Team3484/open-scouting/issues/70) - Charts in the advanced data view don't update when the filters do
-- [ ] [#73](https://github.com/FRC-Team3484/open-scouting/issues/73) - Reimplement the ability to sort data in the advanced data view
 
-### `v0.1.6-alpha`
+### `v0.1.7-alpha`
 - [ ] [#47](https://github.com/FRC-Team3484/open-scouting/issues/47) - Be able to edit user profiles
-- [  ] [#48](https://github.com/FRC-Team3484/open-scouting/issues/48) - Forgot password in authentication
+- [ ] [#48](https://github.com/FRC-Team3484/open-scouting/issues/48) - Forgot password in authentication
 - [ ] [#86](https://github.com/FRC-Team3484/open-scouting/issues/86) - Scroll to the opened section when expanding sections in the menu
 
 ---
 ## Completed
+### `v0.1.5-alpha`
+- [x] [#73](https://github.com/FRC-Team3484/open-scouting/issues/73) - Reimplement the ability to sort data in the advanced data view
+- [x] Update documentation on installation and development
+
 ### `v0.1.4-alpha`
 - [x] [#18](https://github.com/FRC-Team3484/open-scouting/issues/18) - Export data
 - [x] [#22](https://github.com/FRC-Team3484/open-scouting/issues/22) - Add the ability to import data
