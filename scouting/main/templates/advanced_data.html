@@ -336,7 +336,9 @@
                                                                    x-text="categoryName.charAt(0).toUpperCase() + categoryName.slice(1)"></p>
 
                                                                 <div class="ml-4">
-                                                                    <template x-for="(fieldData, fieldName) in categoryData" :key="fieldName">
+                                                                    <!-- Fun hack to trick Alpine.js into re-rendering this whole block (to make sure the charts update) -->
+                                                                    <template x-for="(fieldData, fieldName) in categoryData"
+                                                                              :key="fieldName + JSON.stringify(fieldData.values)">
                                                                         <div class="p-2 border dark:border-slate-700 border-slate-300 rounded-lg mb-2">
                                                                             <p class="dark:text-white text-black text-md font-medium"
                                                                                x-text="fieldName.replace(/_/g, ' ').charAt(0).toUpperCase() + fieldName.replace(/_/g, ' ').slice(1)">
@@ -357,8 +359,9 @@
                                         <!-- Capabilities (Pie Chart Representation) -->
                                         <template x-if="sectionName === 'capabilities'">
                                             <div class="ml-4 mt-2">
+                                                <!-- Fun hack to trick Alpine.js into re-rendering this whole block (to make sure the charts update) -->
                                                 <template x-for="(capabilityValue, capabilityName) in section"
-                                                          :key="capabilityName">
+                                                          :key="capabilityName + JSON.stringify(capabilityValue)">
                                                     <div class="p-2 border dark:border-slate-700 border-slate-300 rounded-lg mb-2">
                                                         <p class="dark:text-white text-black text-lg font-semibold"
                                                            x-text="capabilityName.replace(/_/g, ' ').charAt(0).toUpperCase() + capabilityName.replace(/_/g, ' ').slice(1)"></p>
