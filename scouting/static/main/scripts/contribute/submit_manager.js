@@ -11,6 +11,8 @@ document.addEventListener("alpine:init", () => {
 	Alpine.data("submit_manager", () => ({
 		missing_required_fields: false,
 		menu_open: false,
+		save_field_last: [],
+		wakeLock: null,
 
 		/**
 		 * Check fields for any missing required fields
@@ -210,6 +212,7 @@ document.addEventListener("alpine:init", () => {
 							);
 							url.searchParams.set("match_type", encodeURIComponent(type));
 
+							this.clear_field_state();
 							window.location.href = url.toString();
 						});
 					} else {
@@ -239,6 +242,7 @@ document.addEventListener("alpine:init", () => {
 								);
 								url.searchParams.set("match_type", encodeURIComponent(type));
 
+								this.clear_field_state();
 								window.location.href = url.toString();
 							})
 							.catch((error) => {
@@ -260,6 +264,7 @@ document.addEventListener("alpine:init", () => {
 					Number.parseInt(match_number, 10) + 1,
 				);
 				url.searchParams.set("match_type", encodeURIComponent(type));
+				this.clear_field_state();
 
 				window.location.href = url.toString();
 			}
@@ -317,6 +322,7 @@ document.addEventListener("alpine:init", () => {
 				Number.parseInt(match_number, 10) + 1,
 			);
 			url.searchParams.set("match_type", encodeURIComponent(type));
+			this.clear_field_state();
 
 			window.location.href = url.toString();
 		},
@@ -353,6 +359,7 @@ document.addEventListener("alpine:init", () => {
 							Number.parseInt(match_number, 10) + 1,
 						);
 						url.searchParams.set("match_type", encodeURIComponent(type));
+						this.clear_field_state();
 
 						window.location.href = url.toString();
 					})
@@ -466,21 +473,78 @@ document.addEventListener("alpine:init", () => {
 		},
 
 		/**
+		 * Saves the state of the fields to localStorage
+		 */
+		save_field_state(data) {
+			for (const field in data) {
+				localStorage.setItem(data[field].name, data[field].value);
+			}
+		},
+
+		/**
+		 * Clears the state of the fields from localStorage
+		 */
+		clear_field_state() {
+			for (const field in this.save_field_last) {
+				localStorage.removeItem(this.save_field_last[field].name);
+			}
+		},
+
+		/**
+		 * Acquires a wake lock to prevent the device from sleeping
+		 */
+		async request_wake_lock() {
+			try {
+				this.wakeLock = await navigator.wakeLock.request("screen");
+				log("DEBUG", "Wake lock acquired");
+
+				// Optionally handle visibility changes (some platforms release the lock when page is hidden)
+				document.addEventListener("visibilitychange", async () => {
+					if (
+						this.wakeLock !== null &&
+						document.visibilityState === "visible"
+					) {
+						try {
+							this.wakeLock = await navigator.wakeLock.request("screen");
+							log("DEBUG", "Wake lock re-acquired");
+						} catch (err) {
+							log(
+								"WARNING",
+								`Failed to re-acquire wake lock: ${err.name}, ${err.message}`,
+							);
+						}
+					}
+				});
+			} catch (err) {
+				log(
+					"WARNING",
+					`Failed to acquire wake lock: ${err.name}, ${err.message}`,
+				);
+			}
+		},
+
+		/**
 		 * Initializes the submit manager component
 		 *
 		 * Prevents the device from sleeping while on this page
 		 */
 		async init() {
-			if ("wakeLock" in navigator) {
-				try {
-					this.wakeLock = await navigator.wakeLock.request("screen");
-					log("DEBUG", "Wake lock acquired");
-				} catch (err) {
-					log("WARNING", `${err.name}, ${err.message}`);
+			const handle_click_once = () => {
+				this.request_wake_lock();
+				document.removeEventListener("click", handle_click_once); // Only run once
+			};
+
+			document.addEventListener("click", handle_click_once, { once: true });
+
+			setInterval(() => {
+				const save_field_data = this.create_json_data();
+
+				if (save_field_data !== this.save_field_last) {
+					this.save_field_state(save_field_data);
+
+					this.save_field_last = save_field_data;
 				}
-			} else {
-				log("WARNING", "Wake lock not supported");
-			}
+			}, 5000);
 		},
 	}));
 });

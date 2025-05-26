@@ -126,7 +126,6 @@ self.addEventListener("install", (event) => {
 	event.waitUntil(
 		addResourcesToCache([
 			"/",
-			"/authentication",
 			"/contribute",
 			"/data",
 			"/pits",
