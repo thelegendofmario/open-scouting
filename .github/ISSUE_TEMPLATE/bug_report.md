@@ -7,25 +7,21 @@ assignees: ''
 
 ---
 
-**Describe the bug**
-<sup>A clear and concise description of what the bug is</sup>
+## Description
 
 
-**How to reproduce the bug**
-<sup>Directions or steps on how to reproduce the error for debugging</sup>
+## How to reproduce
 
 
-**Expected behavior**
-<sup>What was expected to happen?</sup>
+## Expected behavior
 
 
-**Screenshots**
-<sup>If applicable, add screenshots to demonstrate the issue</sup>
+## Screenshots
 
-**Device information:**
-- OS: [e.g. iOS, Windows, Linux]
-- OS Version: [e.g. iOS 17, Android 12]
-- Browser: [e.g. Chrome, Firefox for iOS]
 
-**Additional context**
-<sup>Any other information regarding the issue should go here</sup>
+## Device information
+- OS and version: [e.g. iOS 17, Windows 10, OpenSUSE Tumbleweed 20250515]
+- Browser and version: [e.g. Chrome 136.0, Firefox for iOS 138.3]
+
+## Additional context
+
