@@ -78,6 +78,10 @@ document.addEventListener("alpine:init", () => {
 					"x-data",
 					`{ value: ${field.default}, min: ${field.minimum}, max: ${field.maximum} }`,
 				);
+				field_element.setAttribute(
+					"x-init",
+					`if (localStorage.getItem('${field.simple_name}') !== null) value = parseInt(localStorage.getItem('${field.simple_name}'))`,
+				);
 				field_element.setAttribute("x-bind:value", "value");
 				field_element.setAttribute("name", field.simple_name);
 				field_element.setAttribute("x-ref", field.simple_name);
@@ -263,6 +267,40 @@ document.addEventListener("alpine:init", () => {
 		},
 
 		/**
+		 * Loads the field state from localStorage
+		 */
+		load_field_state() {
+			const inputs = document.querySelectorAll("input");
+			for (const input of inputs) {
+				const name = input.getAttribute("name");
+				const value = localStorage.getItem(name);
+				if (value) {
+					if (
+						input.getAttribute("scouting_type") === "large_integer" ||
+						input.getAttribute("scouting_type") === "text"
+					) {
+						input.value = value;
+					} else if (input.getAttribute("scouting_type") === "boolean") {
+						input.checked = JSON.parse(value);
+					}
+				}
+			}
+
+			const selects = document.querySelectorAll("select");
+			for (const select of selects) {
+				const name = select.getAttribute("name");
+				const value = localStorage.getItem(name);
+				if (value) {
+					select.value = value;
+				}
+			}
+
+			// NOTE: Integer values are loaded directly in the field component using x-init
+
+			log("INFO", "Field state loaded");
+		},
+
+		/**
 		 * Initialize the field manager component
 		 *
 		 * Parses the JSON data and builds the form,
@@ -272,6 +310,8 @@ document.addEventListener("alpine:init", () => {
 		 */
 		init() {
 			this.parse_json(JSON.parse(this.field_data));
+
+			this.load_field_state();
 
 			const urlParams = new URLSearchParams(window.location.search);
 

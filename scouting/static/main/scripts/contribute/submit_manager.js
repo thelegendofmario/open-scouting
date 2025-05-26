@@ -11,6 +11,7 @@ document.addEventListener("alpine:init", () => {
 	Alpine.data("submit_manager", () => ({
 		missing_required_fields: false,
 		menu_open: false,
+		save_field_last: [],
 
 		/**
 		 * Check fields for any missing required fields
@@ -210,6 +211,7 @@ document.addEventListener("alpine:init", () => {
 							);
 							url.searchParams.set("match_type", encodeURIComponent(type));
 
+							this.clear_field_state();
 							window.location.href = url.toString();
 						});
 					} else {
@@ -239,6 +241,7 @@ document.addEventListener("alpine:init", () => {
 								);
 								url.searchParams.set("match_type", encodeURIComponent(type));
 
+								this.clear_field_state();
 								window.location.href = url.toString();
 							})
 							.catch((error) => {
@@ -260,6 +263,7 @@ document.addEventListener("alpine:init", () => {
 					Number.parseInt(match_number, 10) + 1,
 				);
 				url.searchParams.set("match_type", encodeURIComponent(type));
+				this.clear_field_state();
 
 				window.location.href = url.toString();
 			}
@@ -317,6 +321,7 @@ document.addEventListener("alpine:init", () => {
 				Number.parseInt(match_number, 10) + 1,
 			);
 			url.searchParams.set("match_type", encodeURIComponent(type));
+			this.clear_field_state();
 
 			window.location.href = url.toString();
 		},
@@ -353,6 +358,7 @@ document.addEventListener("alpine:init", () => {
 							Number.parseInt(match_number, 10) + 1,
 						);
 						url.searchParams.set("match_type", encodeURIComponent(type));
+						this.clear_field_state();
 
 						window.location.href = url.toString();
 					})
@@ -466,6 +472,24 @@ document.addEventListener("alpine:init", () => {
 		},
 
 		/**
+		 * Saves the state of the fields to localStorage
+		 */
+		save_field_state(data) {
+			for (const field in data) {
+				localStorage.setItem(data[field].name, data[field].value);
+			}
+		},
+
+		/**
+		 * Clears the state of the fields from localStorage
+		 */
+		clear_field_state() {
+			for (const field in this.save_field_last) {
+				localStorage.removeItem(this.save_field_last[field].name);
+			}
+		},
+
+		/**
 		 * Initializes the submit manager component
 		 *
 		 * Prevents the device from sleeping while on this page
@@ -481,6 +505,16 @@ document.addEventListener("alpine:init", () => {
 			} else {
 				log("WARNING", "Wake lock not supported");
 			}
+
+			setInterval(() => {
+				const save_field_data = this.create_json_data();
+
+				if (save_field_data !== this.save_field_last) {
+					this.save_field_state(save_field_data);
+
+					this.save_field_last = save_field_data;
+				}
+			}, 5000);
 		},
 	}));
 });

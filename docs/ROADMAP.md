@@ -5,7 +5,7 @@ This document describes the roadmap for Open Scouting, and roughly when each fea
 
 ## To-Do
 ### `v0.1.6-alpha`
-- [ ] [#77](https://github.com/FRC-Team3484/open-scouting/issues/77) - Auto save match scouting progress
+- [x] [#77](https://github.com/FRC-Team3484/open-scouting/issues/77) - Auto save match scouting progress
 - [ ] [#70](https://github.com/FRC-Team3484/open-scouting/issues/70) - Charts in the advanced data view don't update when the filters do
 
 ### `v0.1.7-alpha`
