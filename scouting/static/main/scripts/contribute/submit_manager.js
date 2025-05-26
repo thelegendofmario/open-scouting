@@ -12,6 +12,7 @@ document.addEventListener("alpine:init", () => {
 		missing_required_fields: false,
 		menu_open: false,
 		save_field_last: [],
+		wakeLock: null,
 
 		/**
 		 * Check fields for any missing required fields
@@ -490,21 +491,50 @@ document.addEventListener("alpine:init", () => {
 		},
 
 		/**
+		 * Acquires a wake lock to prevent the device from sleeping
+		 */
+		async request_wake_lock() {
+			try {
+				this.wakeLock = await navigator.wakeLock.request("screen");
+				log("DEBUG", "Wake lock acquired");
+
+				// Optionally handle visibility changes (some platforms release the lock when page is hidden)
+				document.addEventListener("visibilitychange", async () => {
+					if (
+						this.wakeLock !== null &&
+						document.visibilityState === "visible"
+					) {
+						try {
+							this.wakeLock = await navigator.wakeLock.request("screen");
+							log("DEBUG", "Wake lock re-acquired");
+						} catch (err) {
+							log(
+								"WARNING",
+								`Failed to re-acquire wake lock: ${err.name}, ${err.message}`,
+							);
+						}
+					}
+				});
+			} catch (err) {
+				log(
+					"WARNING",
+					`Failed to acquire wake lock: ${err.name}, ${err.message}`,
+				);
+			}
+		},
+
+		/**
 		 * Initializes the submit manager component
 		 *
 		 * Prevents the device from sleeping while on this page
 		 */
 		async init() {
-			if ("wakeLock" in navigator) {
-				try {
-					this.wakeLock = await navigator.wakeLock.request("screen");
-					log("DEBUG", "Wake lock acquired");
-				} catch (err) {
-					log("WARNING", `${err.name}, ${err.message}`);
-				}
-			} else {
-				log("WARNING", "Wake lock not supported");
-			}
+			const handle_click_once = () => {
+				this.request_wake_lock();
+				document.removeEventListener("click", handle_click_once); // Only run once
+			};
+
+			document.addEventListener("click", handle_click_once, { once: true });
 
 			setInterval(() => {
 				const save_field_data = this.create_json_data();
