@@ -4,12 +4,6 @@ This document describes the roadmap for Open Scouting, and roughly when each fea
 ---
 
 ## To-Do
-### `v0.1.6-alpha`
-- [x] [#77](https://github.com/FRC-Team3484/open-scouting/issues/77) - Auto save match scouting progress
-- [x] [#70](https://github.com/FRC-Team3484/open-scouting/issues/70) - Charts in the advanced data view don't update when the filters do
-- [x] [#90](https://github.com/FRC-Team3484/open-scouting/issues/90) - Fix wakeLock on the contribute page
-- [x] [#89](https://github.com/FRC-Team3484/open-scouting/issues/89) - Issues with loading the authentication page
-
 ### `v0.1.7-alpha`
 - [ ] [#47](https://github.com/FRC-Team3484/open-scouting/issues/47) - Be able to edit user profiles
 - [ ] [#48](https://github.com/FRC-Team3484/open-scouting/issues/48) - Forgot password in authentication
@@ -17,6 +11,12 @@ This document describes the roadmap for Open Scouting, and roughly when each fea
 
 ---
 ## Completed
+### `v0.1.6-alpha`
+- [x] [#77](https://github.com/FRC-Team3484/open-scouting/issues/77) - Auto save match scouting progress
+- [x] [#70](https://github.com/FRC-Team3484/open-scouting/issues/70) - Charts in the advanced data view don't update when the filters do
+- [x] [#90](https://github.com/FRC-Team3484/open-scouting/issues/90) - Fix wakeLock on the contribute page
+- [x] [#89](https://github.com/FRC-Team3484/open-scouting/issues/89) - Issues with loading the authentication page
+
 ### `v0.1.5-alpha`
 - [x] [#73](https://github.com/FRC-Team3484/open-scouting/issues/73) - Reimplement the ability to sort data in the advanced data view
 - [x] Update documentation on installation and development
