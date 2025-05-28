@@ -7,7 +7,7 @@ This document describes the roadmap for Open Scouting, and roughly when each fea
 ### `v0.1.7-alpha`
 - [ ] [#47](https://github.com/FRC-Team3484/open-scouting/issues/47) - Be able to edit user profiles
 - [x] [#48](https://github.com/FRC-Team3484/open-scouting/issues/48) - Forgot password in authentication
-- [ ] [#86](https://github.com/FRC-Team3484/open-scouting/issues/86) - Scroll to the opened section when expanding sections in the menu
+- [x] [#86](https://github.com/FRC-Team3484/open-scouting/issues/86) - Scroll to the opened section when expanding sections in the menu
 
 ---
 ## Completed
