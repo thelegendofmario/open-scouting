@@ -116,7 +116,7 @@ def forgot_password(request):
             code=code,
             created=timezone.now(),
             expires=code_expires,
-            user_uuid=user.uuid,
+            user_uuid=user.id,
         )
         code_object.save()
 
@@ -125,7 +125,7 @@ def forgot_password(request):
         return JsonResponse(
             {
                 "expires": code_expires,
-                "user_uuid": user.uuid,
+                "user_uuid": user.id,
             },
             safe=False,
         )
@@ -140,8 +140,9 @@ def change_password(request):
 
     Body Parameters:
         code: The verification code provided from the client
-        user_uuid: The uuid of the user generated on the client
+        user_uuid: The uuid of the user from the client. If unsafe, this should be the user's email instead
         password: The password the user is setting
+        unsafe: Weather or not to check if the code is valid (used when emails are disabled on the server)
     """
 
     if request.method == "POST":
@@ -150,23 +151,24 @@ def change_password(request):
         except KeyError:
             return HttpResponse(request, "No body found in request", status=400)
 
+        if body["unsafe"]:
+            user = User.objects.filter(email=body["user_uuid"]).first()
+            user.set_password(body["password"])
+            user.save()
+            return HttpResponse("success", status=200)
+
         code_object = VerificationCode.objects.filter(
-            code=body["code"], user_uuid=body["user_uuid"]
+            code=body["code"], user_uuid=body["user_uuid"], verified=True
         ).first()
 
         if code_object:
-            if timezone.now() < code_object.expires:
-                code_object.verified = True
-                code_object.save()
+            user = User.objects.filter(id=code_object.user_uuid).first()
+            user.set_password(body["password"])
+            user.save()
+            return HttpResponse("success", status=200)
 
-                user = User.objects.filter(uuid=code_object.user_uuid).first()
-                user.set_password(body["password"])
-                user.save()
-                return HttpResponse("success", status=200)
-            else:
-                return HttpResponse("code_expired", status=401)
         else:
-            return HttpResponse("invalid_code", status=401)
+            return HttpResponse("does_not_exist", status=401)
 
     else:
         return HttpResponse("Request is not a POST request!", status=501)
