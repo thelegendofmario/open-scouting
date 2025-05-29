@@ -288,16 +288,6 @@ def advanced_data(request):
     return render(request, "advanced_data.html", context)
 
 
-def profile(request):
-    """
-    Returns the profile page
-    """
-    if request.user.is_authenticated:
-        return render(request, "profile.html")
-    else:
-        return redirect("auth")
-
-
 def service_worker(request):
     """
     Returns the service worker file to the client for installation

@@ -40,6 +40,16 @@ def auth(request):
         return render(request, "authentication.html", context)
 
 
+def profile(request):
+    """
+    Returns the profile page
+    """
+    if request.user.is_authenticated:
+        return render(request, "profile.html")
+    else:
+        return redirect("auth")
+
+
 def sign_in(request):
     """
     Signs the user in using the provided email and password and authenticates the session

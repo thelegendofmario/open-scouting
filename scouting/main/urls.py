@@ -8,7 +8,6 @@ urlpatterns = [
     path("data", views.data, name="data"),
     path("pits", views.pits, name="pits"),
     path("advanced_data", views.advanced_data, name="advanced_data"),
-    path("profile", views.profile, name="profile"),
     path("sw.js", views.service_worker),
     path("submit", views.submit, name="submit"),
     path("get_data", views.get_data, name="get_data"),
