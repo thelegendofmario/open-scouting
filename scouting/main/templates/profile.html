@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load static %}
+{% block head_title %}
+    Open Scouting
+{% endblock head_title %}
+
+{% block head_scripts %}
+{% endblock head_scripts %}
+
+{% block stylesheets %}
+{% endblock stylesheets %}
+
+{% block body %}
+    <script>
+        const SERVER_IP = `{{ SERVER_IP }}`;
+        const CSRF_TOKEN = `{{ csrf_token }}`;
+    </script>
+
+    <div class="flex flex-row min-h-screen w-screen items-center justify-center">
+        <h1>Profile</h1>
+    </div>
+{% endblock body %}
+
+{% block scripts %}
+{% endblock scripts %}
