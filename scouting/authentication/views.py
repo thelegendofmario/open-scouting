@@ -45,7 +45,15 @@ def profile(request):
     Returns the profile page
     """
     if request.user.is_authenticated:
-        return render(request, "profile.html")
+        context = {
+            "SERVER_IP": settings.SERVER_IP,
+            "TBA_API_KEY": settings.TBA_API_KEY,
+            "SERVER_MESSAGE": settings.SERVER_MESSAGE,
+            "EMAIL_ENABLED": settings.EMAIL_ENABLED,
+            "user": request.user,
+        }
+
+        return render(request, "profile.html", context)
     else:
         return redirect("auth")
 
