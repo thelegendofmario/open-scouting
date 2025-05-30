@@ -379,3 +379,31 @@ def get_authentication_status(request):
             )
     else:
         return HttpResponse("Request is not a POST request!", status=501)
+
+
+def save_profile(request):
+    """
+    Saves the profile of the user
+
+    Body Parameters:
+        user_id: The id of the user
+        display_name: The display name of the user
+        team_number: The team number of the user
+    """
+
+    if request.method == "POST":
+        try:
+            body = json.loads(request.body)
+        except KeyError:
+            return HttpResponse(request, "No body found in request", status=400)
+
+        user = User.objects.filter(id=body["user_id"]).first()
+
+        profile = Profile.objects.filter(user=user).first()
+        profile.display_name = body["display_name"]
+        profile.team_number = body["team_number"]
+        profile.save()
+
+        return HttpResponse("success", status=200)
+    else:
+        return HttpResponse("Request is not a POST request!", status=501)

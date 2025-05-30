@@ -1,6 +1,7 @@
 document.addEventListener("alpine:init", () => {
 	Alpine.data("profile", () => ({
 		editing: false,
+		user_id: "",
 		display_name: "",
 		team_number: "",
 
@@ -56,6 +57,39 @@ document.addEventListener("alpine:init", () => {
 				});
 			} else {
 				log("ERROR", "Error signing out");
+			}
+		},
+
+		async save_profile() {
+			const response = await fetch(`${SERVER_IP}/authentication/save_profile`, {
+				method: "POST",
+				headers: {
+					"X-CSRFToken": CSRF_TOKEN,
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					user_id: this.user_id,
+					display_name: this.display_name,
+					team_number: this.team_number,
+				}),
+			});
+
+			if (response.ok) {
+				response.text().then((text) => {
+					if (text === "success") {
+						this.editing = false;
+
+						window.dispatchEvent(
+							new CustomEvent("scouting_notification", {
+								detail: {
+									title: "Profile saved",
+									body: "Your profile details have been successfully saved",
+									icon: "check-circle",
+								},
+							}),
+						);
+					}
+				});
 			}
 		},
 

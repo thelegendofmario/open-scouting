@@ -18,6 +18,7 @@
         const EMAIL_ENABLED = `{{ EMAIL_ENABLED }}`;
         const USER = `{{ user }}`;
 
+        const USER_ID = `{{ user.id }}`;
         const DISPLAY_NAME = `{{ user.profile.display_name }}`;
         const TEAM_NUMBER = `{{ user.profile.team_number }}`;
     </script>
@@ -26,7 +27,7 @@
 
     <div class="flex flex-row min-h-screen w-screen items-center justify-center gap-4"
          x-data="profile"
-         x-init="display_name = DISPLAY_NAME; team_number = TEAM_NUMBER; init();">
+         x-init="user_id = USER_ID; display_name = DISPLAY_NAME; team_number = TEAM_NUMBER; init();">
         <div class="flex flex-col gap-2">
             <div class="border-2 border-slate-600/80 rounded-full w-32 h-32 aspect-square"></div>
 
@@ -53,11 +54,11 @@
                 </p>
 
                 <p class="dark:text-white text-black font-sans text-md text-left">
-                    <span class="opacity-50 mr-2">Display Name:</span><span class="opacity-100">{{ user.profile.display_name }}</span>
+                    <span class="opacity-50 mr-2">Display Name:</span><span class="opacity-100" x-text="display_name"></span>
                 </p>
 
                 <p class="dark:text-white text-black font-sans text-md text-left">
-                    <span class="opacity-50 mr-2">Team Number:</span><span class="opacity-100">{{ user.profile.team_number }}</span>
+                    <span class="opacity-50 mr-2">Team Number:</span><span class="opacity-100" x-text="team_number"></span>
                 </p>
 
                 <div class="flex flex-row gap-2">
@@ -87,7 +88,7 @@
                        x-model="team_number">
 
                 <div class="flex flex-row gap-2">
-                    <button class="ui_button_small">
+                    <button class="ui_button_small" @click="save_profile()">
                         <i class="ph-bold ph-check-circle"></i> Save Changes
                     </button>
 
