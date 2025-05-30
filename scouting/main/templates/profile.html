@@ -25,11 +25,11 @@
 
     <script src="{% static 'main/scripts/profile/profile.js' %}"></script>
 
-    <div class="flex flex-row min-h-screen w-screen items-center justify-center gap-4"
+    <div class="flex flex-col md:flex-row min-h-screen w-screen items-center justify-center gap-4"
          x-data="profile"
          x-init="user_id = USER_ID; display_name = DISPLAY_NAME; team_number = TEAM_NUMBER; init();">
         <div class="flex flex-col gap-2">
-            <div class="border-2 border-slate-600/80 rounded-full w-32 h-32 aspect-square"></div>
+            <!-- <div class="border-2 border-slate-600/80 rounded-full w-32 h-32 aspect-square"></div> -->
 
             <button class="ui_button_small !w-full" @click="window.location.href = '/'">
                 <i class="ph-bold ph-arrow-left"></i> Back to home
@@ -39,7 +39,7 @@
             </button>
         </div>
 
-        <div class="border-2 border-slate-600/80 rounded-full w-2 h-64"></div>
+        <div class="border-2 border-slate-600/80 rounded-full md:w-2 md:h-64 w-64 h-2"></div>
 
         <div class="flex flex-col gap-2">
             <div class="flex flex-col gap-2"
