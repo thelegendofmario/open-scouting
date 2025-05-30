@@ -18,7 +18,6 @@
         const EMAIL_ENABLED = `{{ EMAIL_ENABLED }}`;
         const USER = `{{ user }}`;
 
-        const EMAIL = `{{ user.email }}`;
         const DISPLAY_NAME = `{{ user.profile.display_name }}`;
         const TEAM_NUMBER = `{{ user.profile.team_number }}`;
     </script>
@@ -27,7 +26,7 @@
 
     <div class="flex flex-row min-h-screen w-screen items-center justify-center gap-4"
          x-data="profile"
-         x-init="email = EMAIL; display_name = DISPLAY_NAME; team_number = TEAM_NUMBER; init();">
+         x-init="display_name = DISPLAY_NAME; team_number = TEAM_NUMBER; init();">
         <div class="flex flex-col gap-2">
             <div class="border-2 border-slate-600/80 rounded-full w-32 h-32 aspect-square"></div>
 
@@ -75,21 +74,17 @@
                     <i class="ph-bold ph-pencil"></i> Edit Profile
                 </p>
 
-                <input class="ui_input"
-                       placeholder="Email"
-                       type="email"
-                       x-model="email"
-                       :value="EMAIL">
+                <p class="dark:text-white text-black font-sans text-sm text-left opacity-80">Display name</p>
                 <input class="ui_input"
                        placeholder="Display name"
                        type="text"
-                       x-model="display_name"
-                       :value="DISPLAY_NAME">
+                       x-model="display_name">
+
+                <p class="dark:text-white text-black font-sans text-sm text-left opacity-80">Team number</p>
                 <input class="ui_input"
                        placeholder="Team number"
                        type="text"
-                       x-model="team_number"
-                       :value="TEAM_NUMBER">
+                       x-model="team_number">
 
                 <div class="flex flex-row gap-2">
                     <button class="ui_button_small">
