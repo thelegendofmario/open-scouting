@@ -4,18 +4,19 @@ This document describes the roadmap for Open Scouting, and roughly when each fea
 ---
 
 ## To-Do
+### `v0.1.8-alpha`
+- [ ] [#67](https://github.com/FRC-Team3484/open-scouting/issues/67) - Change the colors of true and false values in the charts in the advanced data view
+- [ ] [#84](https://github.com/FRC-Team3484/open-scouting/issues/84) - Warn the user if their device may clear any local offline data
+- [ ] [#68](https://github.com/FRC-Team3484/open-scouting/issues/68) - Be able to favorite events to pin them to the top of the event list
+- [ ] [#28](https://github.com/FRC-Team3484/open-scouting/issues/28) - Add loading animation to the event selector
+
+---
+## Completed
 ### `v0.1.7-alpha`
 - [x] [#47](https://github.com/FRC-Team3484/open-scouting/issues/47) - Be able to edit user profiles
 - [x] [#48](https://github.com/FRC-Team3484/open-scouting/issues/48) - Forgot password in authentication
 - [x] [#86](https://github.com/FRC-Team3484/open-scouting/issues/86) - Scroll to the opened section when expanding sections in the menu
 
-### `v0.1.8-alpha`
-- [ ] [#67](https://github.com/FRC-Team3484/open-scouting/issues/67) - Change the colors of true and false values in the charts in the advanced data view
-- [ ] [#84](https://github.com/FRC-Team3484/open-scouting/issues/84) - Warn the user if their device may clear any local offline data
-- [ ] [#68](https://github.com/FRC-Team3484/open-scouting/issues/68) - Be able to favorite events to pin them to the top of the event list
-
----
-## Completed
 ### `v0.1.6-alpha`
 - [x] [#77](https://github.com/FRC-Team3484/open-scouting/issues/77) - Auto save match scouting progress
 - [x] [#70](https://github.com/FRC-Team3484/open-scouting/issues/70) - Charts in the advanced data view don't update when the filters do
